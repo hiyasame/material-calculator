@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开拓生存 · 材料计算器</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper: #f5f2ec;
+            --paper-raised: #fdfcfa;
+            --ink: #2a2723;
+            --ink-soft: #6b655c;
+            --ink-faint: #9b948a;
+            --line: #e2ddd3;
+            --line-strong: #cfc8ba;
+            --accent: #3d5a4c;          /* 深墨绿 */
+            --accent-soft: #eef2ee;
+            --accent-line: #c3d1c6;
+            --amber: #b4762a;           /* 暖琥珀，用于关键数字 */
+            --amber-soft: #faf3e6;
+            --red: #a8453a;
+            --red-soft: #f9eeec;
+            --radius: 6px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html { font-size: 15px; }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 48px 24px 80px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1160px;
+            margin: 0 auto;
+        }
+
+        /* ===== 页眉 ===== */
+        header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--line-strong);
+            margin-bottom: 0;
+        }
+
+        h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--ink);
+        }
+
+        h1 .sub {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--ink-faint);
+            margin-left: 14px;
+            letter-spacing: 0.06em;
+        }
+
+        .data-status {
+            font-size: 12px;
+            color: var(--ink-faint);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .data-status.warn { color: var(--amber); }
+
+        .data-status::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .data-status.warn::before { background: var(--amber); }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: var(--ink-soft);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 2px 0;
+            border-bottom: 1px solid var(--line-strong);
+            transition: color 0.15s, border-color 0.15s;
+            font-family: inherit;
+        }
+
+        .refresh-btn:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ===== 页签 ===== */
+        .tabs {
+            display: flex;
+            gap: 32px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 28px;
+        }
+
+        .tab-btn {
+            padding: 14px 2px 12px;
+            border: none;
+            background: none;
+            color: var(--ink-faint);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+            transition: color 0.15s;
+        }
+
+        .tab-btn:hover { color: var(--ink); }
+
+        .tab-btn.active {
+            color: var(--ink);
+            font-weight: 700;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .tab-page { display: none; }
+        .tab-page.active { display: block; animation: fadeUp 0.25s ease; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== 控制区 ===== */
+        .controls {
+            background: var(--paper-raised);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            margin-bottom: 24px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 7px 0;
+        }
+
+        .control-row + .control-row { border-top: 1px dashed var(--line); }
+
+        .control-row.actions { border-top: none; padding-top: 12px; margin-top: 4px; }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label {
+            color: var(--ink-soft);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius);
+            background: #fff;
+            color: var(--ink);
+            font-size: 14px;
+            font-family: inherit;
+            min-width: 200px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        select:hover, input:hover { border-color: var(--ink-faint); }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(61, 90, 76, 0.12);
+        }
+
+        input[type="number"] {
+            width: 90px;
+            min-width: auto;
+        }
+
+        input[type="number"].small { width: 72px; }
+
+        /* ===== 按钮 ===== */
+        .btn {
+            padding: 9px 22px;
+            border: 1px solid var(--accent);
+            border-radius: var(--radius);
+            background: var(--accent);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+            transition: background 0.15s, border-color 0.15s;
+        }
+
+        .btn:hover {
+            background: #2f4a3d;
+            border-color: #2f4a3d;
+        }
+
+        .btn.ghost {
+            background: transparent;
+            border: 1px solid var(--line-strong);
+            color: var(--ink-soft);
+        }
+
+        .btn.ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .row-remove {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--line);
+            border-radius: 50%;
+            background: transparent;
+            color: var(--ink-faint);
+            font-size: 15px;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex-shrink: 0;
+            font-family: inherit;
+        }
+
+        .row-remove:hover {
+            border-color: var(--red);
+            color: var(--red);
+            background: var(--red-soft);
+        }
+
+        /* ===== 结果面板 ===== */
+        .result-panel {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 968px) {
+            .result-panel { grid-template-columns: 1fr; }
+        }
+
+        .tree-panel, .summary-panel {
+            background: var(--paper-raised);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            max-height: 72vh;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-family: 'Noto Serif SC', serif;
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
+            letter-spacing: 0.02em;
+        }
+
+        .panel-title .hint {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-size: 12px;
+            color: var(--ink-faint);
+            font-weight: 400;
+            display: block;
+            margin-top: 5px;
+            letter-spacing: 0;
+        }
+
+        .tree-target-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 16px 0 8px;
+            padding: 7px 12px;
+            background: var(--amber-soft);
+            border-left: 3px solid var(--amber);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            color: var(--ink);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .tree-target-header:first-child { margin-top: 0; }
+
+        /* ===== 材料树 ===== */
+        .tree-node {
+            margin: 4px 0;
+            position: relative;
+        }
+
+        .tree-node-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 10px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background 0.12s;
+            border-left: 3px solid transparent;
+        }
+
+        .tree-node-content:hover { background: #f4f1ea; }
+
+        .tree-node-content.atomic {
+            background: var(--accent-soft);
+            border-left-color: var(--accent);
+        }
+
+        .tree-node-content.craftable {
+            background: transparent;
+            border-left-color: var(--line-strong);
+        }
+
+        .tree-node-icon {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+        }
+
+        .tree-node-info {
+            flex: 1;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .tree-node-name {
+            font-weight: 500;
+            color: var(--ink);
+            font-size: 14px;
+        }
+
+        .tree-node-count {
+            color: var(--amber);
+            font-size: 13px;
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .tree-node-badge {
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            flex-shrink: 0;
+        }
+
+        .badge-atomic {
+            background: var(--accent-soft);
+            color: var(--accent);
+            border: 1px solid var(--accent-line);
+        }
+
+        .badge-craftable {
+            background: #f0ede6;
+            color: var(--ink-soft);
+            border: 1px solid var(--line);
+        }
+
+        .badge-rate {
+            background: var(--amber-soft);
+            color: var(--amber);
+            border: 1px solid #e8d5b5;
+        }
+
+        .tree-children {
+            margin-left: 26px;
+            padding-left: 14px;
+            border-left: 1px solid var(--line);
+        }
+
+        .tree-toggle {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ink-faint);
+            font-size: 10px;
+            transition: transform 0.15s;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .tree-toggle.expanded { transform: rotate(90deg); }
+
+        /* ===== 统计面板 ===== */
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 10px;
+            border-radius: var(--radius);
+            margin-bottom: 2px;
+            transition: background 0.12s;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .summary-item:last-child { border-bottom: none; }
+
+        .summary-item.clickable { cursor: pointer; }
+
+        .summary-item.clickable:hover { background: var(--amber-soft); }
+
+        .summary-icon {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+        }
+
+        .summary-info { flex: 1; min-width: 0; }
+
+        .summary-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .summary-meta {
+            font-size: 12px;
+            color: var(--ink-faint);
+            margin-top: 2px;
+        }
+
+        .summary-count {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--amber);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .farm-tag {
+            font-size: 11px;
+            color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid var(--accent-line);
+            padding: 2px 9px;
+            border-radius: 999px;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* ===== 空状态 ===== */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--ink-faint);
+            font-size: 14px;
+        }
+
+        .empty-state-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        /* ===== 滚动条 ===== */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb {
+            background: var(--line-strong);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+
+        /* ===== 挂机时间计算 ===== */
+        .farm-results {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 968px) {
+            .farm-results { grid-template-columns: 1fr; }
+        }
+
+        .farm-card {
+            background: var(--paper-raised);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-bottom: 14px;
+        }
+
+        .farm-card.highlight { animation: cardFlash 1.2s ease; }
+
+        @keyframes cardFlash {
+            0% { background: var(--amber-soft); border-color: var(--amber); }
+            100% { background: var(--paper-raised); }
+        }
+
+        .farm-card-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .farm-card-head img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+        }
+
+        .farm-card-title { flex: 1; }
+
+        .farm-card-title .name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .farm-card-title .qty {
+            color: var(--amber);
+            font-size: 14px;
+            font-weight: 700;
+            margin-left: 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .farm-line {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 4px 0;
+            font-size: 13px;
+            color: var(--ink-soft);
+        }
+
+        .farm-line .k {
+            color: var(--ink-faint);
+            min-width: 72px;
+            font-size: 12px;
+        }
+
+        .farm-line .v {
+            color: var(--ink);
+            font-weight: 600;
+        }
+
+        .farm-line .v.gold { color: var(--amber); }
+
+        .farm-line .note {
+            font-size: 12px;
+            color: var(--amber);
+        }
+
+        .farm-total {
+            background: var(--paper-raised);
+            border: 1px solid var(--accent-line);
+            border-top: 3px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            position: sticky;
+            top: 0;
+        }
+
+        .farm-total-title {
+            font-family: 'Noto Serif SC', serif;
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .farm-total .big-time {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 10px 0 14px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .farm-total-line {
+            display: flex;
+            gap: 10px;
+            padding: 7px 0;
+            font-size: 13px;
+            border-bottom: 1px dashed var(--line);
+            align-items: baseline;
+        }
+
+        .farm-total-line:last-child { border-bottom: none; }
+
+        .farm-total-line .k {
+            color: var(--ink-faint);
+            min-width: 104px;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .farm-total-line .v { color: var(--ink); }
+
+        .farm-mat-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .farm-mat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px 11px 3px 5px;
+            font-size: 12px;
+            color: var(--ink-soft);
+        }
+
+        .farm-mat-chip img {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+
+        .farm-mat-chip .n {
+            color: var(--amber);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .monster-info {
+            font-size: 12px;
+            color: var(--ink-faint);
+        }
+
+        .invalid-row {
+            color: var(--red);
+            font-size: 13px;
+            padding: 6px 0;
+        }
+
+        .hint-inline {
+            font-size: 12px;
+            color: var(--ink-faint);
+        }
+
+        /* ===== 装备属性悬浮提示 ===== */
+        .has-equip-tip { cursor: help; }
+
+        .equip-tooltip {
+            position: absolute;
+            z-index: 1000;
+            width: 264px;
+            background: var(--paper-raised);
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 28px rgba(42, 39, 35, 0.16);
+            padding: 14px 16px;
+            pointer-events: none;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .eq-head { margin-bottom: 6px; }
+
+        .eq-name {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .eq-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .eq-quality {
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid;
+            border-radius: 999px;
+            padding: 1px 9px;
+            letter-spacing: 0.03em;
+        }
+
+        .eq-slot, .eq-unique {
+            font-size: 11px;
+            color: var(--ink-soft);
+            background: #f0ede6;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 1px 9px;
+        }
+
+        .eq-unique {
+            color: var(--amber);
+            background: var(--amber-soft);
+            border-color: #e8d5b5;
+        }
+
+        .eq-desc {
+            color: var(--ink-faint);
+            font-size: 12px;
+            font-style: italic;
+            padding: 8px 0;
+            border-top: 1px solid var(--line);
+            margin-top: 8px;
+        }
+
+        .eq-stats {
+            border-top: 1px solid var(--line);
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .eq-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+
+        .eq-stat-name { color: var(--ink-soft); }
+
+        .eq-stat-val {
+            color: var(--accent);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .eq-extras {
+            border-top: 1px dashed var(--line);
+            margin-top: 8px;
+            padding-top: 8px;
+            color: var(--amber);
+            font-size: 12px;
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 28px 14px 60px; }
+            h1 { font-size: 21px; }
+            h1 .sub { display: block; margin-left: 0; margin-top: 4px; }
+            select, input { min-width: 150px; flex: 1; }
+            .tabs { gap: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>开拓生存 · 材料计算器<span class="sub">材料合成 与 挂机时长估算</span></h1>
+            <span class="data-status" id="dataStatusWrap">
+                <span id="dataStatus">正在从 kt.ikui.vip 拉取数据…</span>
+                <button class="refresh-btn" id="refreshBtn" type="button">刷新数据</button>
+            </span>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="calc" type="button">材料合成计算</button>
+            <button class="tab-btn" data-tab="farm" type="button">挂机时间计算</button>
+        </div>
+
+        <!-- ==================== 页签一：材料合成计算 ==================== -->
+        <div class="tab-page active" id="tab-calc">
+            <div class="controls">
+                <div id="targetRows"></div>
+                <div class="control-row actions">
+                    <button class="btn ghost" type="button" onclick="addTargetRow()">＋ 添加合成目标</button>
+                    <button class="btn" onclick="calculate()">计算材料</button>
+                    <button class="btn ghost" type="button" id="importAllBtn" onclick="importAllToFarm()" style="display:none" title="把统计中所有可刷材料带入挂机时间计算">全部带入挂机计算 →</button>
+                </div>
+            </div>
+
+            <div class="result-panel">
+                <div class="tree-panel">
+                    <div class="panel-title">材料树</div>
+                    <div id="materialTree">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚒</div>
+                            <div>请选择合成目标并点击「计算材料」</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-panel">
+                    <div class="panel-title">原子材料统计
+                        <span class="hint">点击带「挂机」标记的材料，可直接带入挂机时间计算估算刷取时长</span>
+                    </div>
+                    <div id="materialSummary">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">☰</div>
+                            <div>统计结果将显示在这里</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 页签二：挂机时间计算 ==================== -->
+        <div class="tab-page" id="tab-farm">
+            <div class="controls">
+                <div id="farmRows"></div>
+                <div class="control-row actions">
+                    <button class="btn ghost" type="button" onclick="addFarmRow()">＋ 添加材料</button>
+                    <button class="btn" onclick="calcFarm()">计算挂机时间</button>
+                </div>
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>每只怪物击杀秒数</label>
+                        <input type="number" id="farmDefaultSec" value="5" min="0.1" max="600" step="0.5" onchange="calcFarm()">
+                        <span class="hint-inline">每行可单独覆盖；召唤 / 副本 Boss 请自行估计含召唤等待的总耗时</span>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <span class="hint-inline">预期掉率按每次击杀的期望掉落计算（rate × 掉落区间均值，含宝袋分解）</span>
+                </div>
+            </div>
+
+            <div class="farm-results">
+                <div id="farmCards">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⏳</div>
+                        <div>添加材料并选择刷取怪物，估算挂机时长</div>
+                    </div>
+                </div>
+                <div id="farmTotal"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // 数据层：物品与配方不再硬编码，改为每次访问从 /api/data/defs 拉取
+        //（该路径由 Cloudflare Pages Function 代理 kt.ikui.vip 并在边缘缓存 5 分钟，
+        //  上游图片地址也改写为同源 /source/ 代理，避免 HTTPS 页面加载 HTTP 资源被拦截）
+        // 拉取失败时回退到 localStorage 的最近一次成功数据。
+        // 怪物掉落/召唤成本也来自同一接口，用于挂机时间计算。
+        // ====================================================================
+        const API_PATH = '/api/data/defs';
+        const CACHE_KEY = 'mc_defs_cache_v1';
+        const REFRESH_INTERVAL = 30 * 60 * 1000; // 页面驻留时每 30 分钟自动刷新
+
+        let ITEM_DEFS = {};   // id -> { name, img, cat }
+        let RECIPES = {};     // key -> { result, resultCount, cost, rate, cat, source }
+        let SHOP_PRICES = {}; // id -> { buy, sell }
+        let QUALITY_DEFS = {}; // 品质 -> { name, color, mult }
+        let SLOT_NAMES = {};   // 槽位 key -> 中文名
+        let MONSTERS = [];    // 怪物注册表
+        let MONSTER_BY_ID = {};
+        let DROPPABLE = {};   // itemId -> [monsterId...]（按期望掉落降序）
+        let dataReady = false;
+        let lastFetchAt = null;
+        let currentTrees = []; // 页签一的当前计算结果
+        let currentSummary = null;
+        let loadSeq = 0;      // 防止并发刷新产生竞态
+
+        let targetRows = [];  // 页签一：[{ uid, itemId, count }]
+        let farmRows = [];    // 页签二：[{ uid, itemId, count, monsterId, sec }]
+        let uidSeed = 1;
+
+        // 上游绝对图片地址( http://203.135.99.28:32001/source/... )改写为同源代理路径
+        function normalizeImgUrl(url) {
+            if (!url) return null;
+            if (/^https?:\/\//i.test(url)) {
+                try {
+                    const u = new URL(url);
+                    return u.pathname + u.search;
+                } catch (e) {
+                    return null;
+                }
+            }
+            return url;
+        }
+
+        // 由上游 defs 构建物品表与配方表（结构与旧版硬编码一致）
+        function buildData(defs) {
+            const items = {};
+            const addDef = (id, def) => {
+                if (!def || items[id]) return;
+                items[id] = {
+                    name: def.name || id,
+                    img: normalizeImgUrl(def.img),
+                    cat: def.cat || 'other',
+                    // 宝袋信息：挂机计算需要展开宝袋掉落
+                    isLootBag: !!def.isLootBag,
+                    lootTable: Array.isArray(def.lootTable) ? def.lootTable : null
+                };
+            };
+            Object.entries(defs.ITEM_DEFS || {}).forEach(([id, def]) => addDef(id, def));
+            // 装备：额外保留属性/品质/槽位/描述，用于 hover 查看
+            Object.entries(defs.EQUIP_DEFS || {}).forEach(([id, def]) => {
+                if (!def || items[id]) return;
+                addDef(id, def);
+                items[id].equip = {
+                    desc: def.desc || '',
+                    quality: def.quality || null,
+                    slot: def.slot || null,
+                    stats: def.stats || null,
+                    special: def.special || null,
+                    equipBuffs: def.equipBuffs || null,
+                    durability: def.durability || null,
+                    unique: !!def.unique
+                };
+            });
+            // 神域币只作为配方消耗出现，defs 中没有定义
+            if (!items.currency) {
+                items.currency = { name: '神域币', img: null, cat: 'currency' };
+            }
+
+            // 品质与槽位的官方中文名/配色
+            QUALITY_DEFS = defs.EQUIP_QUALITIES || {};
+            SLOT_NAMES = {};
+            (defs.EQUIP_SLOTS || []).forEach(s => {
+                if (s && s.key && !SLOT_NAMES[s.key]) SLOT_NAMES[s.key] = s.name;
+            });
+
+            const recipes = {};
+            const addRecipe = (r, source) => {
+                if (!r || !r.cost) return;
+                let result, resultCount;
+                if (typeof r.result === 'string') {
+                    // 锻造配方：result 为物品 id 字符串
+                    result = r.result;
+                    resultCount = r.resultCount || 1;
+                } else {
+                    // 兑换配方：result 为 { 物品id: 数量 }
+                    const first = Object.entries(r.result || {})[0];
+                    if (!first) return;
+                    result = first[0];
+                    resultCount = first[1] || 1;
+                }
+                // 同一物品存在多条配方时（如 嗜血因子/铸模 两条线），首条为主配方
+                let key = result, n = 2;
+                while (Object.prototype.hasOwnProperty.call(recipes, key)) {
+                    key = result + '_' + (n++);
+                }
+                recipes[key] = {
+                    result: result,
+                    resultCount: resultCount,
+                    cost: r.cost,
+                    rate: r.rate || null,
+                    cat: r.cat || null,
+                    source: source
+                };
+            };
+
+            (defs.FORGE_RECIPES || []).forEach(r => addRecipe(r, 'forge'));
+            (defs.VOID_CARAVAN_RECIPES || []).forEach(r => addRecipe(r, 'voidCaravan'));
+
+            // 递归收集各区域配方（NPC兑换 / 琉璃营地 / 暗黑工程 / 未来新增区域）
+            const collect = (node) => {
+                if (Array.isArray(node)) {
+                    node.forEach(collect);
+                    return;
+                }
+                if (!node || typeof node !== 'object') return;
+                if (Array.isArray(node.recipes)) {
+                    node.recipes.forEach(r => addRecipe(r, 'exchange'));
+                }
+                if (Array.isArray(node.exchangeRecipes)) {
+                    node.exchangeRecipes.forEach(r => addRecipe(r, 'exchange'));
+                }
+                if (Array.isArray(node.forgeRecipes)) {
+                    node.forgeRecipes.forEach(r => addRecipe(r, 'forge'));
+                }
+                Object.values(node).forEach(collect);
+            };
+            collect(defs.AREA_DEFS);
+
+            return { items: items, recipes: recipes };
+        }
+
+        // ------------------------------------------------------------------
+        // 怪物注册表：从 AREA_DEFS 提取所有可刷怪物的掉落/召唤成本
+        // ------------------------------------------------------------------
+        function buildMonsters(defs) {
+            const tiers = defs.MONSTER_TIERS || {};
+            const monsters = [];
+
+            const tierCoin = (t) => (tiers[t] && tiers[t].coin) || 0;
+            const tierName = (t) => (tiers[t] && tiers[t].name) || t || '';
+
+            // 宝袋展开：直接掉落 + 宝袋内容物（via 标注来源）
+            const expandDrops = (rawDrops) => {
+                const out = [];
+                for (const dr of (rawDrops || [])) {
+                    out.push({ item: dr.item, min: dr.min, max: dr.max, rate: dr.rate, via: null });
+                    const def = ITEM_DEFS[dr.item];
+                    if (def && def.isLootBag && Array.isArray(def.lootTable)) {
+                        const expBags = dr.rate * (dr.min + dr.max) / 2; // 每杀期望宝袋数
+                        for (const lt of def.lootTable) {
+                            out.push({
+                                item: lt.item,
+                                min: lt.min,
+                                max: lt.max,
+                                rate: expBags * lt.rate,
+                                via: def.name
+                            });
+                        }
+                    }
+                }
+                return out;
+            };
+
+            const pushMonster = (m) => {
+                if (!m.drops.length && !m.summonCoin && !(m.summonItems || []).length) return;
+                m.expDrops = {};
+                for (const dr of m.drops) {
+                    m.expDrops[dr.item] = (m.expDrops[dr.item] || 0) + dr.rate * (dr.min + dr.max) / 2;
+                }
+                // 神域币按怪物品阶掉落
+                const coin = tierCoin(m.tier);
+                if (coin > 0) {
+                    m.expDrops.currency = coin;
+                }
+                monsters.push(m);
+            };
+
+            const addSummon = (s, location, extraFeeNote) => {
+                pushMonster({
+                    id: 'm_' + monsters.length,
+                    name: (s.name || '').trim() || '未知怪物',
+                    location: location + '（召唤）',
+                    tier: s.tier,
+                    tierName: tierName(s.tier),
+                    img: normalizeImgUrl(s.monsterImg),
+                    summonCoin: typeof s.cost === 'number' ? s.cost : 0,
+                    summonItems: (s.costItems || []).map(c => ({ item: c.item, count: c.count })),
+                    feeNote: extraFeeNote || null,
+                    drops: expandDrops(s.drops)
+                });
+            };
+
+            for (const [areaId, area] of Object.entries(defs.AREA_DEFS || {})) {
+                const areaName = area.name || areaId;
+                const feeNote = typeof area.floorFee === 'number' && area.floorFee > 0
+                    ? `进入每层消耗 ${fmtInt(area.floorFee)} 神域币` : null;
+
+                // 区域直属普通怪（玄铁作坊等）
+                if (Array.isArray(area.normalDrops) && area.normalDrops.length) {
+                    pushMonster({
+                        id: 'm_' + monsters.length,
+                        name: areaName,
+                        location: areaName,
+                        tier: area.tier,
+                        tierName: tierName(area.tier),
+                        img: null,
+                        summonCoin: null,
+                        summonItems: [],
+                        feeNote: null,
+                        drops: expandDrops(area.normalDrops)
+                    });
+                }
+
+                // 区域直属召唤（玄铁作坊的铁魔像等）
+                for (const s of (area.summons || [])) {
+                    if (s && Array.isArray(s.drops)) {
+                        addSummon(s, areaName, feeNote);
+                    }
+                }
+
+                // 子地牢
+                for (const sd of (area.subDungeons || [])) {
+                    const sdName = sd.name || '';
+                    const loc = areaName + (sdName ? ' · ' + sdName : '');
+                    if (Array.isArray(sd.normalDrops) && sd.normalDrops.length) {
+                        pushMonster({
+                            id: 'm_' + monsters.length,
+                            name: sd.monsterName || sdName || areaName,
+                            location: loc,
+                            tier: sd.tier,
+                            tierName: tierName(sd.tier),
+                            img: normalizeImgUrl(sd.monsterImg),
+                            summonCoin: null,
+                            summonItems: [],
+                            feeNote: null,
+                            drops: expandDrops(sd.normalDrops)
+                        });
+                    }
+                    for (const s of (sd.summons || [])) {
+                        if (s && Array.isArray(s.drops)) {
+                            addSummon(s, loc, feeNote);
+                        }
+                    }
+                    // Boss（尸王：summonCost 为 {coin, item: count}）
+                    if (sd.boss && Array.isArray(sd.boss.drops)) {
+                        const sc = sd.boss.summonCost || {};
+                        const summonItems = Object.entries(sc)
+                            .filter(([k]) => k !== 'coin')
+                            .map(([k, v]) => ({ item: k, count: v }));
+                        pushMonster({
+                            id: 'm_' + monsters.length,
+                            name: sd.boss.name || sdName,
+                            location: loc + '（团队Boss·召唤）',
+                            tier: sd.boss.tier || sd.tier,
+                            tierName: tierName(sd.boss.tier || sd.tier),
+                            img: normalizeImgUrl(sd.boss.img),
+                            summonCoin: typeof sc.coin === 'number' ? sc.coin : 0,
+                            summonItems: summonItems,
+                            feeNote: null,
+                            drops: expandDrops(sd.boss.drops)
+                        });
+                    }
+                }
+
+                // 琉璃森林分区
+                for (const z of (area.zones || [])) {
+                    if (Array.isArray(z.drops) && z.drops.length) {
+                        pushMonster({
+                            id: 'm_' + monsters.length,
+                            name: z.monsterName || z.name,
+                            location: areaName + ' · ' + z.name,
+                            tier: z.tier,
+                            tierName: tierName(z.tier),
+                            img: normalizeImgUrl(z.monsterImg),
+                            summonCoin: null,
+                            summonItems: [],
+                            feeNote: null,
+                            drops: expandDrops(z.drops)
+                        });
+                    }
+                }
+
+                // 开拓塔 / 镜像-开拓塔 每层
+                for (const layer of (area.layers || [])) {
+                    if (Array.isArray(layer.drops) && layer.drops.length) {
+                        pushMonster({
+                            id: 'm_' + monsters.length,
+                            name: layer.name,
+                            location: areaName + ' 第' + layer.id + '层',
+                            tier: layer.tier,
+                            tierName: tierName(layer.tier),
+                            img: normalizeImgUrl(layer.monsterImg),
+                            summonCoin: null,
+                            summonItems: [],
+                            feeNote: feeNote,
+                            drops: expandDrops(layer.drops)
+                        });
+                    }
+                }
+            }
+
+            // 建索引：item -> 怪物列表（排序在 applyDefs 中按期望掉落进行）
+            const idx = {};
+            for (const m of monsters) {
+                for (const [item, e] of Object.entries(m.expDrops)) {
+                    if (e <= 0) continue;
+                    (idx[item] = idx[item] || []).push(m.id);
+                }
+            }
+            return { monsters: monsters, index: idx };
+        }
+
+        // 本地缓存（离线兜底）
+        function saveCache(defs) {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), defs: defs }));
+            } catch (e) { /* 存储满了就放弃 */ }
+        }
+        function readCache() {
+            try {
+                const raw = localStorage.getItem(CACHE_KEY);
+                if (!raw) return null;
+                const obj = JSON.parse(raw);
+                return obj && obj.defs ? obj : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // 获取物品信息
+        function getItemInfo(itemId) {
+            return ITEM_DEFS[itemId] || { name: itemId, img: null };
+        }
+
+        // 查找配方
+        function findRecipe(itemId) {
+            if (RECIPES[itemId]) {
+                return RECIPES[itemId];
+            }
+            for (const recipe of Object.values(RECIPES)) {
+                if (recipe.result === itemId) {
+                    return recipe;
+                }
+            }
+            return null;
+        }
+
+        // 构建材料树
+        function buildMaterialTree(itemId, count, depth = 0, maxDepth = 10) {
+            if (depth > maxDepth) return null;
+
+            const itemInfo = getItemInfo(itemId);
+            const recipe = findRecipe(itemId);
+
+            const node = {
+                id: itemId,
+                name: itemInfo.name,
+                img: itemInfo.img,
+                count: count,
+                depth: depth,
+                recipe: recipe,
+                children: [],
+                isAtomic: !recipe
+            };
+
+            if (recipe && recipe.cost) {
+                const multiplier = Math.ceil(count / recipe.resultCount);
+
+                for (const [matId, matCount] of Object.entries(recipe.cost)) {
+                    const childNode = buildMaterialTree(matId, matCount * multiplier, depth + 1, maxDepth);
+                    if (childNode) {
+                        node.children.push(childNode);
+                    }
+                }
+            }
+
+            return node;
+        }
+
+        // 渲染材料树
+        function renderMaterialTree(node, container) {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'tree-node';
+
+            const hasChildren = node.children && node.children.length > 0;
+            const isAtomic = node.isAtomic;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `tree-node-content ${isAtomic ? 'atomic' : 'craftable'}`;
+
+            // 展开/折叠按钮
+            if (hasChildren && !isAtomic) {
+                const toggle = document.createElement('span');
+                toggle.className = 'tree-toggle expanded';
+                toggle.innerHTML = '▶';
+                toggle.onclick = (e) => {
+                    e.stopPropagation();
+                    const children = nodeDiv.querySelector('.tree-children');
+                    if (children) {
+                        children.style.display = children.style.display === 'none' ? 'block' : 'none';
+                        toggle.classList.toggle('expanded');
+                    }
+                };
+                contentDiv.appendChild(toggle);
+            } else {
+                const spacer = document.createElement('span');
+                spacer.style.width = '18px';
+                spacer.style.display = 'inline-block';
+                contentDiv.appendChild(spacer);
+            }
+
+            // 图标（代理地址加载失败时回退到本地 icons，再失败则隐藏）
+            const icon = createItemImg(node.img, 'tree-node-icon');
+            if (icon) {
+                attachEquipTooltip(icon, node.id);
+                contentDiv.appendChild(icon);
+            }
+
+            // 信息
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'tree-node-info';
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'tree-node-name';
+            nameDiv.textContent = node.name;
+            attachEquipTooltip(nameDiv, node.id);
+            infoDiv.appendChild(nameDiv);
+
+            const countDiv = document.createElement('div');
+            countDiv.className = 'tree-node-count';
+            countDiv.textContent = `×${node.count}`;
+            infoDiv.appendChild(countDiv);
+
+            contentDiv.appendChild(infoDiv);
+
+            // 徽章
+            const badge = document.createElement('span');
+            if (isAtomic) {
+                badge.className = 'tree-node-badge badge-atomic';
+                badge.textContent = '原子材料';
+            } else if (node.recipe && node.recipe.rate) {
+                badge.className = 'tree-node-badge badge-rate';
+                badge.textContent = `${(node.recipe.rate * 100).toFixed(0)}%`;
+            } else {
+                badge.className = 'tree-node-badge badge-craftable';
+                badge.textContent = '可合成';
+            }
+            contentDiv.appendChild(badge);
+
+            nodeDiv.appendChild(contentDiv);
+
+            // 子节点
+            if (hasChildren && !isAtomic) {
+                const childrenDiv = document.createElement('div');
+                childrenDiv.className = 'tree-children';
+
+                for (const child of node.children) {
+                    renderMaterialTree(child, childrenDiv);
+                }
+
+                nodeDiv.appendChild(childrenDiv);
+            }
+
+            container.appendChild(nodeDiv);
+        }
+
+        // 收集原子材料（全部层级展开，叶子即原子）
+        function collectAtomicMaterials(node, result = {}) {
+            if (node.isAtomic) {
+                if (!result[node.id]) {
+                    result[node.id] = {
+                        id: node.id,
+                        name: node.name,
+                        img: node.img,
+                        count: 0
+                    };
+                }
+                result[node.id].count += node.count;
+            } else if (node.children) {
+                for (const child of node.children) {
+                    collectAtomicMaterials(child, result);
+                }
+            }
+
+            return result;
+        }
+
+        // 渲染统计（原子材料可点击带入挂机计算）
+        function renderSummary(materials, container) {
+            container.innerHTML = '';
+
+            const sorted = Object.values(materials).sort((a, b) => b.count - a.count);
+
+            for (const mat of sorted) {
+                const farmable = isFarmable(mat.id);
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'summary-item' + (farmable ? ' clickable' : '');
+                if (farmable) {
+                    itemDiv.title = '点击带入「挂机时间计算」';
+                    itemDiv.onclick = () => importToFarm(mat.id, mat.count, true);
+                }
+
+                const icon = createItemImg(mat.img, 'summary-icon');
+                if (icon) {
+                    attachEquipTooltip(icon, mat.id);
+                    itemDiv.appendChild(icon);
+                }
+
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'summary-info';
+
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'summary-name';
+                nameDiv.textContent = mat.name;
+                attachEquipTooltip(nameDiv, mat.id);
+                infoDiv.appendChild(nameDiv);
+
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'summary-meta';
+                metaDiv.textContent = farmable ? '可刷取' : noFarmReason(mat.id);
+                infoDiv.appendChild(metaDiv);
+
+                itemDiv.appendChild(infoDiv);
+
+                const countDiv = document.createElement('div');
+                countDiv.className = 'summary-count';
+                countDiv.textContent = `×${fmtInt(mat.count)}`;
+                itemDiv.appendChild(countDiv);
+
+                if (farmable) {
+                    const tag = document.createElement('span');
+                    tag.className = 'farm-tag';
+                    tag.textContent = '挂机';
+                    itemDiv.appendChild(tag);
+                }
+
+                container.appendChild(itemDiv);
+            }
+        }
+
+        // 创建物品图标
+        // 优先走 /source/ 代理（经 lanxi 反代到上游图片服务器，新增图标自动生效），
+        // 代理失败时回退本地 icons/（静态托管在 Pages，作为兜底）。
+        function createItemImg(path, className) {
+            if (!path) return null;
+            const img = document.createElement('img');
+            img.className = className;
+            img.loading = 'lazy';
+            img.src = path;
+            img.onerror = () => {
+                if (img.dataset.fb === '1') {
+                    img.style.display = 'none';
+                    return;
+                }
+                img.dataset.fb = '1';
+                // 代理失败，回退本地 icons/（去查询串匹配文件名）
+                const seg = path.split('/').pop().split('?')[0];
+                if (!seg) {
+                    img.style.display = 'none';
+                    return;
+                }
+                img.onerror = () => { img.style.display = 'none'; };
+                img.src = 'icons/' + seg;
+            };
+            return img;
+        }
+
+        // ------------------------------------------------------------------
+        // 装备属性悬浮提示（hover 武器/装备图标或名称时显示）
+        // ------------------------------------------------------------------
+        // 属性 key -> 中文名（数值形态在格式化时区分 flat/pct/区间）
+        const STAT_DEFS = {
+            physDmg:          { name: '物理伤害' },
+            magicDmg:         { name: '魔法伤害' },
+            trueDmg:          { name: '真实伤害' },
+            attackSpeed:      { name: '攻击速度' },
+            critChance:       { name: '暴击率' },
+            critChanceResist: { name: '暴击抗性' },
+            critDmgFlat:      { name: '暴击伤害' },
+            critDmgPct:       { name: '暴击伤害' },
+            lifestealFlat:    { name: '生命偷取' },
+            lifestealPct:     { name: '生命偷取' },
+            maxHp:            { name: '最大生命' },
+            physRes:          { name: '物理抗性' },
+            magicRes:         { name: '魔法抗性' },
+            armorPen:         { name: '护甲穿透' },
+            finalDmgPct:      { name: '最终伤害' },
+            dodge:            { name: '闪避' },
+            satRegen:         { name: '饱食回复' },
+        };
+
+        const SPECIAL_NAMES = {
+            applyHealBlockOnHit: '命中时施加治疗阻断',
+        };
+
+        const BUFF_NAMES = {
+            hunger: '饥饿',
+        };
+
+        let tooltipEl = null;
+
+        function getTooltip() {
+            if (!tooltipEl) {
+                tooltipEl = document.createElement('div');
+                tooltipEl.className = 'equip-tooltip';
+                tooltipEl.style.display = 'none';
+                document.body.appendChild(tooltipEl);
+            }
+            return tooltipEl;
+        }
+
+        // 把一个属性值格式化为可读文本，支持四种形态：
+        // {flat:2} → "+2" | {flatMin:70,flatMax:75} → "+70~75"
+        // {pct:2} → "+2%" | {flat:80,pct:20} → "+80 / +20%"
+        function formatStatValue(v) {
+            if (v == null || typeof v !== 'object') return null;
+            const parts = [];
+            if (v.flatMin != null && v.flatMax != null) {
+                parts.push('+' + v.flatMin + '~' + v.flatMax);
+            } else if (v.flat != null) {
+                parts.push('+' + v.flat);
+            }
+            if (v.pct != null) {
+                parts.push('+' + v.pct + '%');
+            }
+            return parts.length ? parts.join(' / ') : null;
+        }
+
+        function buildEquipTooltipHTML(itemId) {
+            const info = ITEM_DEFS[itemId];
+            if (!info || !info.equip) return null;
+            const eq = info.equip;
+            const q = QUALITY_DEFS[eq.quality] || {};
+            const qColor = q.color || 'var(--ink)';
+            const qName = q.name || '';
+            const slotName = SLOT_NAMES[eq.slot] || eq.slot || '';
+
+            let html = '<div class="eq-head">';
+            html += `<div class="eq-name" style="color:${qColor}">${escapeHtml(info.name)}</div>`;
+            const tags = [];
+            if (qName) tags.push(`<span class="eq-quality" style="color:${qColor};border-color:${qColor}">${qName}</span>`);
+            if (slotName) tags.push(`<span class="eq-slot">${slotName}</span>`);
+            if (eq.unique) tags.push('<span class="eq-unique">唯一</span>');
+            if (tags.length) html += `<div class="eq-tags">${tags.join('')}</div>`;
+            html += '</div>';
+
+            if (eq.desc) {
+                html += `<div class="eq-desc">${escapeHtml(eq.desc)}</div>`;
+            }
+
+            const statRows = [];
+            for (const [key, rawVal] of Object.entries(eq.stats || {})) {
+                const def = STAT_DEFS[key];
+                if (!def) continue;
+                const valText = formatStatValue(rawVal);
+                if (!valText) continue;
+                statRows.push(`<div class="eq-stat"><span class="eq-stat-name">${def.name}</span><span class="eq-stat-val">${valText}</span></div>`);
+            }
+            if (statRows.length) {
+                html += `<div class="eq-stats">${statRows.join('')}</div>`;
+            }
+
+            const extras = [];
+            if (eq.special) {
+                for (const key of Object.keys(eq.special)) {
+                    extras.push(SPECIAL_NAMES[key] || key);
+                }
+            }
+            if (eq.equipBuffs) {
+                for (const [k, v] of Object.entries(eq.equipBuffs)) {
+                    extras.push(`装备效果：${BUFF_NAMES[k] || k} ${v > 0 ? '+' : ''}${v}`);
+                }
+            }
+            if (eq.durability) {
+                extras.push(`耐久 ${eq.durability}`);
+            }
+            if (extras.length) {
+                html += `<div class="eq-extras">${extras.map(e => `<div>${escapeHtml(e)}</div>`).join('')}</div>`;
+            }
+
+            return html;
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function showEquipTooltip(itemId, x, y) {
+            const html = buildEquipTooltipHTML(itemId);
+            if (!html) return;
+            const tip = getTooltip();
+            tip.innerHTML = html;
+            tip.style.display = 'block';
+            // 先放到视口内测量，再定位（避免右侧/底部溢出）
+            tip.style.left = '0px';
+            tip.style.top = '0px';
+            const rect = tip.getBoundingClientRect();
+            const pad = 14;
+            let left = x + pad;
+            let top = y + pad;
+            if (left + rect.width > window.innerWidth - 8) {
+                left = x - rect.width - pad;
+            }
+            if (top + rect.height > window.innerHeight - 8) {
+                top = window.innerHeight - rect.height - 8;
+            }
+            if (top < 8) top = 8;
+            tip.style.left = (left + window.scrollX) + 'px';
+            tip.style.top = (top + window.scrollY) + 'px';
+        }
+
+        function hideEquipTooltip() {
+            if (tooltipEl) tooltipEl.style.display = 'none';
+        }
+
+        // 给元素绑定装备悬浮提示（无装备数据时静默跳过）
+        function attachEquipTooltip(el, itemId) {
+            if (!el || !itemId) return;
+            const info = ITEM_DEFS[itemId];
+            if (!info || !info.equip) return;
+            el.classList.add('has-equip-tip');
+            el.addEventListener('mouseenter', (e) => {
+                showEquipTooltip(itemId, e.clientX, e.clientY);
+            });
+            el.addEventListener('mousemove', (e) => {
+                if (tooltipEl && tooltipEl.style.display !== 'none') {
+                    showEquipTooltip(itemId, e.clientX, e.clientY);
+                }
+            });
+            el.addEventListener('mouseleave', hideEquipTooltip);
+        }
+
+        // ------------------------------------------------------------------
+        // 页签一：多目标合成计算
+        // ------------------------------------------------------------------
+        function addTargetRow() {
+            targetRows.push({ uid: uidSeed++, itemId: '', count: 1 });
+            renderTargetRows();
+        }
+
+        function removeTargetRow(uid) {
+            targetRows = targetRows.filter(r => r.uid !== uid);
+            if (!targetRows.length) {
+                targetRows.push({ uid: uidSeed++, itemId: '', count: 1 });
+            }
+            renderTargetRows();
+        }
+
+        function renderTargetRows() {
+            const wrap = document.getElementById('targetRows');
+            wrap.innerHTML = '';
+            for (const row of targetRows) {
+                const div = document.createElement('div');
+                div.className = 'control-row';
+
+                const sel = document.createElement('select');
+                sel.className = 'target-select';
+                fillTargetSelect(sel, row.itemId);
+                sel.onchange = () => { row.itemId = sel.value; };
+                div.appendChild(sel);
+
+                const cntGroup = document.createElement('div');
+                cntGroup.className = 'control-group';
+                const cntLabel = document.createElement('label');
+                cntLabel.textContent = '数量';
+                const cnt = document.createElement('input');
+                cnt.type = 'number';
+                cnt.value = row.count;
+                cnt.min = 1;
+                cnt.max = 999;
+                cnt.oninput = () => { row.count = parseInt(cnt.value) || 1; };
+                cntGroup.appendChild(cntLabel);
+                cntGroup.appendChild(cnt);
+                div.appendChild(cntGroup);
+
+                if (targetRows.length > 1) {
+                    const rm = document.createElement('button');
+                    rm.className = 'row-remove';
+                    rm.type = 'button';
+                    rm.textContent = '×';
+                    rm.title = '移除该目标';
+                    rm.onclick = () => removeTargetRow(row.uid);
+                    div.appendChild(rm);
+                }
+
+                wrap.appendChild(div);
+            }
+        }
+
+        function fillTargetSelect(sel, selectedId) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '-- 选择物品 --';
+            sel.appendChild(option);
+
+            const categories = {
+                'weapon': '武器',
+                'armor': '防具',
+                'accessory': '饰品',
+                'material': '材料',
+                'totem': '图腾',
+                'blueprint': '图纸',
+                'food': '食物',
+                'tool': '工具',
+                'lootBag': '战利品袋',
+                'currency': '货币',
+                'other': '其他'
+            };
+
+            const grouped = {};
+            for (const [itemId, itemInfo] of Object.entries(ITEM_DEFS)) {
+                const recipe = findRecipe(itemId);
+                if (recipe) {
+                    const cat = recipe.cat || 'other';
+                    if (!grouped[cat]) grouped[cat] = [];
+                    grouped[cat].push({ id: itemId, name: itemInfo.name });
+                }
+            }
+
+            for (const [cat, items] of Object.entries(grouped)) {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = categories[cat] || cat;
+
+                items.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+
+                for (const item of items) {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    if (item.id === selectedId) option.selected = true;
+                    optgroup.appendChild(option);
+                }
+
+                sel.appendChild(optgroup);
+            }
+        }
+
+        // 计算（多目标合并）
+        function calculate() {
+            if (!dataReady) {
+                alert('数据尚未加载完成，请稍候再试');
+                return;
+            }
+            const targets = targetRows.filter(r => r.itemId);
+            if (!targets.length) {
+                alert('请至少选择一个合成目标');
+                return;
+            }
+
+            currentTrees = targets.map(t => ({
+                tree: buildMaterialTree(t.itemId, t.count || 1),
+                label: getItemInfo(t.itemId).name + ' ×' + (t.count || 1)
+            }));
+
+            const merged = {};
+            for (const t of currentTrees) {
+                collectAtomicMaterials(t.tree, merged);
+            }
+            currentSummary = merged;
+
+            updateDisplay();
+            document.getElementById('importAllBtn').style.display = '';
+        }
+
+        function updateDisplay() {
+            if (!currentTrees.length) return;
+
+            const treeContainer = document.getElementById('materialTree');
+            const summaryContainer = document.getElementById('materialSummary');
+
+            treeContainer.innerHTML = '';
+            for (const t of currentTrees) {
+                const header = document.createElement('div');
+                header.className = 'tree-target-header';
+                header.textContent = t.label;
+                treeContainer.appendChild(header);
+                const wrap = document.createElement('div');
+                renderMaterialTree(t.tree, wrap);
+                treeContainer.appendChild(wrap);
+            }
+
+            renderSummary(currentSummary, summaryContainer);
+        }
+
+        function resetPanels() {
+            currentTrees = [];
+            currentSummary = null;
+            document.getElementById('importAllBtn').style.display = 'none';
+            document.getElementById('materialTree').innerHTML =
+                '<div class="empty-state"><div class="empty-state-icon">⚒</div><div>请选择合成目标并点击「计算材料」</div></div>';
+            document.getElementById('materialSummary').innerHTML =
+                '<div class="empty-state"><div class="empty-state-icon">☰</div><div>统计结果将显示在这里</div></div>';
+        }
+
+        // ------------------------------------------------------------------
+        // 页签二：挂机时间计算
+        // ------------------------------------------------------------------
+        function isFarmable(itemId) {
+            return Array.isArray(DROPPABLE[itemId]) && DROPPABLE[itemId].length > 0;
+        }
+
+        function noFarmReason(itemId) {
+            const info = getItemInfo(itemId);
+            if (itemId === 'currency') return '击杀怪物按品阶获得，见挂机页神域币';
+            if (SHOP_PRICES[itemId]) {
+                return `商店有售（${fmtInt(SHOP_PRICES[itemId].buy)} 神域币/个）`;
+            }
+            if (itemId === 'bread') return '主城每5秒自动产出';
+            return '无怪物掉落来源';
+        }
+
+        function bestMonsterFor(itemId) {
+            const ids = DROPPABLE[itemId] || [];
+            return ids.length ? ids[0] : '';
+        }
+
+        // 掉落该材料的怪物列表（按期望降序）
+        function monstersForItem(itemId) {
+            const ids = DROPPABLE[itemId] || [];
+            return ids.map(id => MONSTER_BY_ID[id]).filter(Boolean);
+        }
+
+        function addFarmRow(itemId, count, monsterId, flash) {
+            const itemId_ = itemId || '';
+            farmRows.push({
+                uid: uidSeed++,
+                itemId: itemId_,
+                count: count || 1,
+                monsterId: monsterId || bestMonsterFor(itemId_),
+                sec: ''
+            });
+            renderFarmRows();
+            if (flash) {
+                calcFarm();
+                const cards = document.querySelectorAll('#farmCards .farm-card');
+                if (cards.length) cards[cards.length - 1].classList.add('highlight');
+            }
+        }
+
+        function removeFarmRow(uid) {
+            farmRows = farmRows.filter(r => r.uid !== uid);
+            if (!farmRows.length) {
+                farmRows.push({ uid: uidSeed++, itemId: '', count: 1, monsterId: '', sec: '' });
+            }
+            renderFarmRows();
+            calcFarm();
+        }
+
+        function renderFarmRows() {
+            const wrap = document.getElementById('farmRows');
+            wrap.innerHTML = '';
+            for (const row of farmRows) {
+                const div = document.createElement('div');
+                div.className = 'control-row';
+
+                // 材料选择
+                const matSel = document.createElement('select');
+                const opt0 = document.createElement('option');
+                opt0.value = '';
+                opt0.textContent = '-- 选择材料 --';
+                matSel.appendChild(opt0);
+                const droppableIds = Object.keys(DROPPABLE).sort((a, b) =>
+                    getItemInfo(a).name.localeCompare(getItemInfo(b).name, 'zh-CN'));
+                for (const id of droppableIds) {
+                    const o = document.createElement('option');
+                    o.value = id;
+                    o.textContent = getItemInfo(id).name;
+                    if (id === row.itemId) o.selected = true;
+                    matSel.appendChild(o);
+                }
+                matSel.onchange = () => {
+                    row.itemId = matSel.value;
+                    row.monsterId = bestMonsterFor(row.itemId);
+                    renderFarmRows();
+                    calcFarm();
+                };
+                div.appendChild(matSel);
+
+                // 数量
+                const cntGroup = document.createElement('div');
+                cntGroup.className = 'control-group';
+                const cntLabel = document.createElement('label');
+                cntLabel.textContent = '数量';
+                const cnt = document.createElement('input');
+                cnt.type = 'number';
+                cnt.value = row.count;
+                cnt.min = 1;
+                cnt.oninput = () => {
+                    row.count = parseInt(cnt.value) || 1;
+                    calcFarm();
+                };
+                cntGroup.appendChild(cntLabel);
+                cntGroup.appendChild(cnt);
+                div.appendChild(cntGroup);
+
+                // 怪物选择（数据刷新后 id 失效时自动回落到最优怪物）
+                if (row.itemId && row.monsterId && !MONSTER_BY_ID[row.monsterId]) {
+                    row.monsterId = bestMonsterFor(row.itemId);
+                }
+                const monSel = document.createElement('select');
+                fillMonsterSelect(monSel, row.itemId, row.monsterId);
+                monSel.onchange = () => {
+                    row.monsterId = monSel.value;
+                    calcFarm();
+                };
+                div.appendChild(monSel);
+
+                // 秒/只覆盖
+                const secGroup = document.createElement('div');
+                secGroup.className = 'control-group';
+                const secLabel = document.createElement('label');
+                secLabel.textContent = '秒/只';
+                const sec = document.createElement('input');
+                sec.type = 'number';
+                sec.className = 'small';
+                sec.value = row.sec;
+                sec.placeholder = '默认';
+                sec.min = 0.1;
+                sec.step = 0.5;
+                sec.oninput = () => {
+                    row.sec = sec.value;
+                    calcFarm();
+                };
+                secGroup.appendChild(secLabel);
+                secGroup.appendChild(sec);
+                div.appendChild(secGroup);
+
+                // 移除
+                const rm = document.createElement('button');
+                rm.className = 'row-remove';
+                rm.type = 'button';
+                rm.textContent = '×';
+                rm.title = '移除该材料';
+                rm.onclick = () => removeFarmRow(row.uid);
+                div.appendChild(rm);
+
+                wrap.appendChild(div);
+            }
+        }
+
+        function fillMonsterSelect(sel, itemId, selectedId) {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '-- 怪物 --';
+            sel.appendChild(option);
+
+            for (const m of monstersForItem(itemId)) {
+                const e = m.expDrops[itemId] || 0;
+                const o = document.createElement('option');
+                o.value = m.id;
+                o.textContent = `${m.name} · ${m.location}（${fmtNum(e)}/只）`;
+                if (m.id === selectedId) o.selected = true;
+                sel.appendChild(o);
+            }
+        }
+
+        // 挂机时间计算
+        function calcFarm() {
+            const cardsContainer = document.getElementById('farmCards');
+            const totalContainer = document.getElementById('farmTotal');
+
+            const rows = farmRows.filter(r => r.itemId);
+            if (!rows.length) {
+                cardsContainer.innerHTML =
+                    '<div class="empty-state"><div class="empty-state-icon">⏳</div><div>添加材料并选择刷取怪物，估算挂机时长</div></div>';
+                totalContainer.innerHTML = '';
+                return;
+            }
+
+            const defaultSec = parseFloat(document.getElementById('farmDefaultSec').value) || 5;
+
+            cardsContainer.innerHTML = '';
+            const results = [];
+
+            for (const row of rows) {
+                const card = document.createElement('div');
+                card.className = 'farm-card';
+
+                const info = getItemInfo(row.itemId);
+                const head = document.createElement('div');
+                head.className = 'farm-card-head';
+                const icon = createItemImg(info.img, '');
+                if (icon) {
+                    attachEquipTooltip(icon, row.itemId);
+                    head.appendChild(icon);
+                }
+                const title = document.createElement('div');
+                title.className = 'farm-card-title';
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'name';
+                nameSpan.textContent = info.name;
+                attachEquipTooltip(nameSpan, row.itemId);
+                const qtySpan = document.createElement('span');
+                qtySpan.className = 'qty';
+                qtySpan.textContent = '×' + fmtInt(row.count);
+                title.appendChild(nameSpan);
+                title.appendChild(qtySpan);
+                head.appendChild(title);
+                card.appendChild(head);
+
+                if (!isFarmable(row.itemId)) {
+                    const invalid = document.createElement('div');
+                    invalid.className = 'invalid-row';
+                    invalid.textContent = '该材料没有怪物掉落来源' + (noFarmReason(row.itemId) !== '无怪物掉落来源' ? '（' + noFarmReason(row.itemId) + '）' : '');
+                    card.appendChild(invalid);
+                    cardsContainer.appendChild(card);
+                    continue;
+                }
+
+                const monster = MONSTER_BY_ID[row.monsterId] || MONSTER_BY_ID[bestMonsterFor(row.itemId)];
+                if (!monster) continue;
+                const exp = monster.expDrops[row.itemId] || 0;
+                if (exp <= 0) continue;
+
+                const kills = row.count / exp;
+                const secPerKill = parseFloat(row.sec) || defaultSec;
+                const seconds = kills * secPerKill;
+                const killsCeil = Math.ceil(kills);
+                const summonCoin = typeof monster.summonCoin === 'number' ? monster.summonCoin * kills : null;
+                const summonItems = (monster.summonItems || []).map(si => ({
+                    item: si.item,
+                    count: si.count * kills
+                }));
+
+                results.push({ row, monster, exp, kills, seconds, killsCeil, summonCoin, summonItems });
+
+                // 怪物行
+                card.appendChild(farmLine('刷取怪物', `${monster.name}`, `<span class="monster-info">${monster.location} · ${monster.tierName ? monster.tierName + ' · ' : ''}预期 ${fmtNum(exp)}/只</span>`));
+                card.appendChild(farmLine('预计击杀', `≈ ${fmtInt(killsCeil)} 只`));
+                card.appendChild(farmLine('挂机时长', fmtTime(seconds), null, true));
+
+                if (typeof monster.summonCoin === 'number' && monster.summonCoin > 0) {
+                    card.appendChild(farmLine('召唤神域币', fmtInt(Math.ceil(summonCoin))));
+                }
+                if (summonItems.length) {
+                    const line = farmLine('召唤材料', '');
+                    const chips = document.createElement('div');
+                    chips.className = 'farm-mat-list';
+                    for (const si of summonItems) {
+                        chips.appendChild(matChip(si.item, '×' + fmtInt(Math.ceil(si.count))));
+                    }
+                    line.appendChild(chips);
+                    card.appendChild(line);
+                }
+                if (monster.feeNote) {
+                    const note = document.createElement('div');
+                    note.className = 'farm-line';
+                    note.innerHTML = `<span class="k">进入消耗</span><span class="note">${monster.feeNote}（每次进入可连续刷怪，费用未计入汇总）</span>`;
+                    card.appendChild(note);
+                }
+
+                cardsContainer.appendChild(card);
+            }
+
+            // ===== 汇总 =====
+            if (!results.length) {
+                totalContainer.innerHTML = '';
+                return;
+            }
+
+            const totalSec = results.reduce((s, r) => s + r.seconds, 0);
+            const byMonster = {};
+            for (const r of results) {
+                byMonster[r.monster.id] = (byMonster[r.monster.id] || 0) + r.kills;
+            }
+            const summonAgg = {};
+            let coinAgg = 0;
+            let hasSummon = false;
+            for (const r of results) {
+                if (typeof r.monster.summonCoin === 'number' && r.monster.summonCoin > 0) {
+                    coinAgg += r.monster.summonCoin * r.kills;
+                    hasSummon = true;
+                }
+                for (const si of r.summonItems) {
+                    summonAgg[si.item] = (summonAgg[si.item] || 0) + si.count;
+                    hasSummon = true;
+                }
+            }
+
+            const total = document.createElement('div');
+            total.className = 'farm-total';
+
+            const title = document.createElement('div');
+            title.className = 'farm-total-title';
+            title.textContent = '汇总';
+            total.appendChild(title);
+
+            const bigTime = document.createElement('div');
+            bigTime.className = 'big-time';
+            bigTime.textContent = fmtTime(totalSec);
+            total.appendChild(bigTime);
+
+            total.appendChild(totalLine('合计时长', fmtTime(totalSec) + `（${fmtNum(totalSec / 3600, 2)} 小时）`));
+
+            const killLines = Object.entries(byMonster).map(([mid, k]) => {
+                const m = MONSTER_BY_ID[mid];
+                return `${m.name} ×${fmtInt(Math.ceil(k))}`;
+            });
+            total.appendChild(totalLine('怪物击杀数', killLines.join('、')));
+
+            if (hasSummon) {
+                if (coinAgg > 0) {
+                    total.appendChild(totalLine('召唤神域币合计', '×' + fmtInt(Math.ceil(coinAgg))));
+                }
+                const chips = document.createElement('div');
+                chips.className = 'farm-mat-list';
+                const keys = Object.keys(summonAgg);
+                if (keys.length) {
+                    total.appendChild(totalLine('召唤材料合计', ''));
+                    for (const k of keys) {
+                        chips.appendChild(matChip(k, '×' + fmtInt(Math.ceil(summonAgg[k]))));
+                    }
+                    total.lastChild.appendChild(chips);
+                }
+            }
+
+            totalContainer.innerHTML = '';
+            totalContainer.appendChild(total);
+        }
+
+        function farmLine(label, valueHtml, extraHtml, gold) {
+            const div = document.createElement('div');
+            div.className = 'farm-line';
+            const k = document.createElement('span');
+            k.className = 'k';
+            k.textContent = label;
+            div.appendChild(k);
+            const v = document.createElement('span');
+            v.className = 'v' + (gold ? ' gold' : '');
+            if (valueHtml) v.textContent = valueHtml;
+            div.appendChild(v);
+            if (extraHtml) {
+                const span = document.createElement('span');
+                span.innerHTML = extraHtml;
+                div.appendChild(span);
+            }
+            return div;
+        }
+
+        function totalLine(label, valueText) {
+            const div = document.createElement('div');
+            div.className = 'farm-total-line';
+            const k = document.createElement('span');
+            k.className = 'k';
+            k.textContent = label;
+            const v = document.createElement('span');
+            v.className = 'v';
+            v.textContent = valueText;
+            div.appendChild(k);
+            div.appendChild(v);
+            return div;
+        }
+
+        function matChip(itemId, countText) {
+            const chip = document.createElement('span');
+            chip.className = 'farm-mat-chip';
+            const icon = createItemImg(getItemInfo(itemId).img, '');
+            if (icon) {
+                attachEquipTooltip(icon, itemId);
+                chip.appendChild(icon);
+            }
+            const name = document.createElement('span');
+            name.textContent = getItemInfo(itemId).name;
+            attachEquipTooltip(name, itemId);
+            const n = document.createElement('span');
+            n.className = 'n';
+            n.textContent = countText;
+            chip.appendChild(name);
+            chip.appendChild(n);
+            return chip;
+        }
+
+        // 从材料统计带入挂机计算
+        function importToFarm(itemId, count, switchTab) {
+            if (!isFarmable(itemId)) {
+                alert(`「${getItemInfo(itemId).name}」没有怪物掉落来源\n${noFarmReason(itemId)}`);
+                return;
+            }
+            const existing = farmRows.find(r => r.itemId === itemId);
+            if (existing) {
+                existing.count = count;
+            } else {
+                farmRows.push({
+                    uid: uidSeed++,
+                    itemId: itemId,
+                    count: count,
+                    monsterId: bestMonsterFor(itemId),
+                    sec: ''
+                });
+            }
+            renderFarmRows();
+            calcFarm();
+            if (switchTab) switchToTab('farm');
+        }
+
+        function importAllToFarm() {
+            if (!currentSummary) return;
+            const farmableIds = Object.keys(currentSummary)
+                .filter(id => isFarmable(id) && currentSummary[id].count > 0);
+            if (!farmableIds.length) {
+                alert('当前统计中没有可刷取的怪物掉落材料');
+                return;
+            }
+            for (const id of farmableIds) {
+                const existing = farmRows.find(r => r.itemId === id);
+                if (existing) {
+                    existing.count = currentSummary[id].count;
+                } else {
+                    farmRows.push({
+                        uid: uidSeed++,
+                        itemId: id,
+                        count: currentSummary[id].count,
+                        monsterId: bestMonsterFor(id),
+                        sec: ''
+                    });
+                }
+            }
+            // 清掉空行
+            farmRows = farmRows.filter(r => r.itemId);
+            renderFarmRows();
+            calcFarm();
+            switchToTab('farm');
+        }
+
+        function switchToTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.tab === tab);
+            });
+            document.querySelectorAll('.tab-page').forEach(p => {
+                p.classList.toggle('active', p.id === 'tab-' + tab);
+            });
+        }
+
+        // ------------------------------------------------------------------
+        // 工具函数
+        // ------------------------------------------------------------------
+        function fmtInt(n) {
+            return Math.round(n).toLocaleString('zh-CN');
+        }
+
+        function fmtNum(n, digits) {
+            if (!isFinite(n)) return '∞';
+            if (n >= 100) return fmtInt(n);
+            const d = digits != null ? digits : 2;
+            return n.toFixed(d).replace(/\.?0+$/, '') || '0';
+        }
+
+        function fmtTime(sec) {
+            if (!isFinite(sec)) return '∞';
+            const s = Math.round(sec);
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const ss = s % 60;
+            if (h > 0) return `${h}小时${m}分${ss}秒`;
+            if (m > 0) return `${m}分${ss}秒`;
+            return `${ss}秒`;
+        }
+
+        // ------------------------------------------------------------------
+        // 数据加载与刷新
+        // ------------------------------------------------------------------
+        function fmtTimeOfDay(t) {
+            return new Date(t).toLocaleTimeString('zh-CN', { hour12: false });
+        }
+
+        function setStatus(text, warn) {
+            const el = document.getElementById('dataStatus');
+            el.textContent = text;
+            const wrap = document.getElementById('dataStatusWrap');
+            wrap.classList.toggle('warn', !!warn);
+        }
+
+        async function loadDefs(force) {
+            const seq = ++loadSeq;
+            if (force) setStatus('正在刷新数据…');
+            try {
+                const res = await fetch(API_PATH, force ? { cache: 'reload' } : undefined);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const defs = await res.json();
+                if (seq !== loadSeq) return; // 已有更新的请求在处理
+                applyDefs(defs, true);
+            } catch (e) {
+                if (seq !== loadSeq) return;
+                if (dataReady) {
+                    setStatus('刷新失败，继续使用 ' + fmtTimeOfDay(lastFetchAt) + ' 拉取的数据', true);
+                    return;
+                }
+                const cached = readCache();
+                if (cached) {
+                    applyDefs(cached.defs, false, cached.t);
+                } else {
+                    setStatus('数据加载失败（上游不可达且无本地缓存）', true);
+                    document.getElementById('materialTree').innerHTML =
+                        '<div class="empty-state"><div class="empty-state-icon">⚠</div><div>数据加载失败，请点击右上角「刷新数据」重试</div></div>';
+                }
+            }
+        }
+
+        function applyDefs(defs, live, cachedAt) {
+            const built = buildData(defs);
+            ITEM_DEFS = built.items;
+            RECIPES = built.recipes;
+            SHOP_PRICES = defs.SHOP_PRICES || {};
+            dataReady = true;
+            if (live) {
+                lastFetchAt = Date.now();
+                saveCache(defs);
+            }
+
+            // 构建怪物注册表与掉落索引
+            const reg = buildMonsters(defs);
+            MONSTERS = reg.monsters;
+            MONSTER_BY_ID = {};
+            for (const m of MONSTERS) MONSTER_BY_ID[m.id] = m;
+            DROPPABLE = {};
+            for (const [item, ids] of Object.entries(reg.index)) {
+                DROPPABLE[item] = ids.sort((a, b) =>
+                    (MONSTER_BY_ID[b].expDrops[item] || 0) - (MONSTER_BY_ID[a].expDrops[item] || 0));
+            }
+
+            rebuildSelects();
+
+            const recipeCount = Object.keys(RECIPES).length;
+            const monsterCount = MONSTERS.length;
+            if (live) {
+                setStatus(`数据来自 kt.ikui.vip · ${recipeCount} 条配方 · ${monsterCount} 种可刷怪物 · 拉取于 ${fmtTimeOfDay(lastFetchAt)}`);
+            } else {
+                setStatus(`网络异常，使用离线缓存 · ${recipeCount} 条配方 · ${monsterCount} 种可刷怪物 · 缓存于 ${fmtTimeOfDay(cachedAt)}`, true);
+            }
+
+            // 若之前已算过材料，用新数据重算
+            if (currentTrees.length) {
+                const targets = targetRows.filter(r => r.itemId);
+                if (targets.length) {
+                    calculate();
+                } else {
+                    resetPanels();
+                }
+            }
+            calcFarm();
+        }
+
+        function rebuildSelects() {
+            renderTargetRows();
+            renderFarmRows();
+        }
+
+        // 初始化
+        async function init() {
+            document.getElementById('refreshBtn').onclick = () => loadDefs(true);
+
+            // 页签切换
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.onclick = () => switchToTab(btn.dataset.tab);
+            });
+
+            // 默认各留一行
+            if (!targetRows.length) {
+                targetRows.push({ uid: uidSeed++, itemId: '', count: 1 });
+            }
+            if (!farmRows.length) {
+                farmRows.push({ uid: uidSeed++, itemId: '', count: 1, monsterId: '', sec: '' });
+            }
+            renderTargetRows();
+            renderFarmRows();
+
+            await loadDefs();
+
+            // 页面驻留时定期自动刷新（仅前台标签页）
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    loadDefs();
+                }
+            }, REFRESH_INTERVAL);
+
+            // 切回标签页时，若数据已超过 10 分钟则刷新
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' &&
+                    lastFetchAt && Date.now() - lastFetchAt > REFRESH_INTERVAL / 3) {
+                    loadDefs();
+                }
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
