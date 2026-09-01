@@ -28,8 +28,8 @@
 - **数据实时化**：页面每次访问经 `/api/data/defs` 拉取上游数据；失败自动回退 `localStorage` 离线缓存；页面驻留时每 30 分钟自动刷新，切回标签页超过 10 分钟也会刷新
 - **两个 Cloudflare Pages Functions 边缘代理**：
   - `functions/api/data/defs.js` — 代理游戏数据 API，边缘缓存 5 分钟，上游 5xx/超时自动重试
-  - `functions/source/[[path]].js` — 代理上游图片服务器（游戏图标为 HTTP 资源，需转成同源 HTTPS 才能在页面上显示），边缘缓存 1 小时
-- **图标多级回退**：上游代理失败时自动切换到本地 `icons/` 镜像（按文件名匹配）
+  - `functions/source/[[path]].js` — 代理上游图片服务器（游戏图标为 HTTP 资源，需转成同源 HTTPS 才能在页面上显示），边缘缓存 1 小时；**多源回退**（lanxi 隧道 → 直连旧 IP），隧道域名失效后可通过 Pages 环境变量 `IMAGE_PROXY_ORIGIN` 免代码更新新地址
+- **图标多级回退**：上游代理失败时自动切换到本地 `icons/` 镜像（按文件名匹配）；游戏新增物品后执行 `node scripts/sync-icons.mjs` 一键补齐镜像（`--check` 只报告不下载），避免代理挂掉时新物品贴图空白
 - 免费额度友好：数据接口每个边缘节点最多 5 分钟回源一次，图片缓存 1 小时，Pages Functions 请求消耗极低
 
 ## 目录结构
@@ -38,10 +38,23 @@
 ├── index.html                 # 前端单页应用（全部 UI 与逻辑）
 ├── functions/
 │   ├── api/data/defs.js       # 游戏数据 API 边缘代理（缓存 5 分钟）
-│   └── source/[[path]].js     # 图片资源边缘代理（缓存 1 小时）
-├── icons/                     # 本地图标回退库（170+ 游戏素材）
+│   └── source/[[path]].js     # 图片资源边缘代理（缓存 1 小时，多源回退）
+├── scripts/
+│   └── sync-icons.mjs         # 本地图标镜像同步脚本（新增物品后运行）
+├── icons/                     # 本地图标回退库（200+ 游戏素材）
 └── .wrangler/                 # Wrangler 本地缓存（不入库）
 ```
+
+## 图标链路与故障排查
+
+页面图标加载顺序：`/source/` 边缘代理（缓存 1h）→ 本地 `icons/` 镜像（按文件名匹配）。
+
+若线上出现「新物品贴图空白」，按序检查：
+
+1. **本地镜像是否缺新图标**：`node scripts/sync-icons.mjs --check`，缺则去掉 `--check` 下载
+2. **代理回源是否可用**：`curl -I https://<pages域名>/source/items/玄铁锭.png` 看 `x-proxy-cache` 与状态码
+3. **lanxi 隧道域名是否还活着**：`functions/source/[[path]].js` 依赖的 trycloudflare 快速隧道域名会随 cloudflared 重启而更换；失效时在 Cloudflare Pages 环境变量里设置 `IMAGE_PROXY_ORIGIN` 为新隧道地址即可恢复（无需改代码），或在 `DEFAULT_ORIGINS` 中更新后重新部署
+4. 注意：上游图片服务器 `203.135.99.28:32001` 对 Cloudflare 边缘 IP 段有 ACL（返回 521），从国内家庭宽带直连则正常——这是当初引入 lanxi 中转的原因
 
 ## 本地开发
 

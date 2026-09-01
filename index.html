@@ -777,6 +777,9 @@
 
         .eq-stat-name { color: var(--ink-soft); }
 
+        /* 未收录进 STAT_DEFS 的词条：弱化显示原始 key，提示需要补词条映射 */
+        .eq-stat-unmapped { opacity: 0.55; font-style: italic; }
+
         .eq-stat-val {
             color: var(--accent);
             font-weight: 600;
@@ -1465,23 +1468,29 @@
         // 装备属性悬浮提示（hover 武器/装备图标或名称时显示）
         // ------------------------------------------------------------------
         // 属性 key -> 中文名（数值形态在格式化时区分 flat/pct/区间）
+        // pct: true 表示该词条的数值单位是百分比（flat:8 → +8%），
+        // 命名与单位均按游戏公告/属性面板原文对齐（如「+12%暴击几率」「+10%物理穿透」）
         const STAT_DEFS = {
             physDmg:          { name: '物理伤害' },
             magicDmg:         { name: '魔法伤害' },
             trueDmg:          { name: '真实伤害' },
-            attackSpeed:      { name: '攻击速度' },
-            critChance:       { name: '暴击率' },
-            critChanceResist: { name: '暴击抗性' },
+            rangedDmg:        { name: '远程伤害' },
+            attackSpeed:      { name: '攻速' },
+            multishot:        { name: '连射' },
+            critChance:       { name: '暴击几率', pct: true },
+            critChanceResist: { name: '暴击抵抗', pct: true },
             critDmgFlat:      { name: '暴击伤害' },
-            critDmgPct:       { name: '暴击伤害' },
-            lifestealFlat:    { name: '生命偷取' },
-            lifestealPct:     { name: '生命偷取' },
-            maxHp:            { name: '最大生命' },
+            critDmgPct:       { name: '暴击伤害', pct: true },
+            lifestealFlat:    { name: '吸血' },
+            lifestealPct:     { name: '吸血几率', pct: true },
+            maxHp:            { name: '生命值' },
             physRes:          { name: '物理抗性' },
             magicRes:         { name: '魔法抗性' },
-            armorPen:         { name: '护甲穿透' },
-            finalDmgPct:      { name: '最终伤害' },
-            dodge:            { name: '闪避' },
+            armorPen:         { name: '物理穿透', pct: true },
+            finalDmgPct:      { name: '最终伤害', pct: true },
+            dmgReducePct:     { name: '伤害抵消', pct: true },
+            blockChance:      { name: '格挡几率', pct: true },
+            dodge:            { name: '闪避' },   // 值为 {pct} 形态，展示时自带 %
             satRegen:         { name: '饱食回复' },
         };
 
@@ -1508,13 +1517,15 @@
         // 把一个属性值格式化为可读文本，支持四种形态：
         // {flat:2} → "+2" | {flatMin:70,flatMax:75} → "+70~75"
         // {pct:2} → "+2%" | {flat:80,pct:20} → "+80 / +20%"
-        function formatStatValue(v) {
+        // pctUnit=true 时 flat 值也按百分比展示（用于暴击几率/物理穿透等词条）
+        function formatStatValue(v, pctUnit) {
             if (v == null || typeof v !== 'object') return null;
             const parts = [];
+            const u = pctUnit ? '%' : '';
             if (v.flatMin != null && v.flatMax != null) {
-                parts.push('+' + v.flatMin + '~' + v.flatMax);
+                parts.push('+' + v.flatMin + '~' + v.flatMax + u);
             } else if (v.flat != null) {
-                parts.push('+' + v.flat);
+                parts.push('+' + v.flat + u);
             }
             if (v.pct != null) {
                 parts.push('+' + v.pct + '%');
@@ -1546,11 +1557,13 @@
 
             const statRows = [];
             for (const [key, rawVal] of Object.entries(eq.stats || {})) {
-                const def = STAT_DEFS[key];
-                if (!def) continue;
-                const valText = formatStatValue(rawVal);
+                // 未收录的 key 不再静默丢弃：直接用原始 key 兜底展示，
+                // 游戏新增词条时 tooltip 不会漏显示（此前 dmgReducePct 等就是这样丢的）
+                const def = STAT_DEFS[key] || { name: key, unmapped: true };
+                const valText = formatStatValue(rawVal, def.pct);
                 if (!valText) continue;
-                statRows.push(`<div class="eq-stat"><span class="eq-stat-name">${def.name}</span><span class="eq-stat-val">${valText}</span></div>`);
+                const nameCls = def.unmapped ? 'eq-stat-name eq-stat-unmapped' : 'eq-stat-name';
+                statRows.push(`<div class="eq-stat"><span class="${nameCls}">${escapeHtml(def.name)}</span><span class="eq-stat-val">${valText}</span></div>`);
             }
             if (statRows.length) {
                 html += `<div class="eq-stats">${statRows.join('')}</div>`;
