@@ -26,7 +26,7 @@
 //   a) 在 Cloudflare Pages 项目环境变量里设置 IMAGE_PROXY_ORIGIN 为新隧道地址（免改代码）
 //   b) 直接修改下面 DEFAULT_ORIGINS 的第一项后重新部署
 const DEFAULT_ORIGINS = [
-  'https://span-corporation-transparency-agriculture.trycloudflare.com', // lanxi quick tunnel（2026-09-05 升级 cloudflared 2026.8.3 后新域名）
+  'https://icons.coldrain.ink', // lanxi 命名隧道（持久域名，隧道重连不变）
   'http://203.135.99.28:32001', // 直连旧 IP（被上游 ACL 拦 CF 边缘，返回 403/521，保留兜底）
 ];
 
