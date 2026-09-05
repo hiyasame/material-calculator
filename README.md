@@ -53,8 +53,8 @@
 
 1. **本地镜像是否缺新图标**：`node scripts/sync-icons.mjs --check`，缺则去掉 `--check` 下载
 2. **代理回源是否可用**：`curl -I https://<pages域名>/source/items/玄铁锭.png` 看 `x-proxy-cache` 与状态码
-3. **lanxi 隧道域名是否还活着**：`functions/source/[[path]].js` 依赖的 trycloudflare 快速隧道域名会随 cloudflared 重启而更换；失效时在 Cloudflare Pages 环境变量里设置 `IMAGE_PROXY_ORIGIN` 为新隧道地址即可恢复（无需改代码），或在 `DEFAULT_ORIGINS` 中更新后重新部署
-4. 注意：上游图片服务器 `203.135.99.28:32001` 对 Cloudflare 边缘 IP 段有 ACL（返回 521），从国内家庭宽带直连则正常——这是当初引入 lanxi 中转的原因
+3. **lanxi 命名隧道是否健康**：图片源走固定域名 `icons.coldrain.ink`（命名隧道 `mc-icon-proxy`，不会因为重启换域名）。直接测：`curl -I https://icons.coldrain.ink/source/items/玄铁锭.png`；异常时 `ssh lanxi` 后 `docker logs --tail 30 mc-icon-proxy-cloudflared-1` 查看连接状态
+4. 注意：上游图片服务器 `203.135.99.28:32001` 对 Cloudflare 边缘 IP 段有 ACL（返回 403/521），从国内家庭宽带直连则正常——这是引入 lanxi 中转的原因
 
 ## 本地开发
 
