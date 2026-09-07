@@ -1726,6 +1726,10 @@
                         <input type="checkbox" id="profitIgnoreRes" style="min-width:auto;width:auto" onchange="onProfitBuildChange()">
                         忽略怪物抗性
                     </label>
+                    <label class="hint-inline" style="cursor:pointer" title="守望猪/将军猪/军士猪等商店VIP称号：商店购买9折、出售价+10%。勾选后掉落与召唤材料均按 +10% 出售价折算">
+                        <input type="checkbox" id="profitWatchPig" style="min-width:auto;width:auto" onchange="onProfitBuildChange()">
+                        🐷 守望猪（出售价 +10%）
+                    </label>
                 </div>
                 <div class="control-row">
                     <span class="hint-inline">收益口径：期望掉落（含神域币）按商店出售价折算 − 召唤成本（召唤币 + 召唤材料按商店出售价折算）；击杀耗时按所选配装的期望伤害估算（在线=每刀最多杀一只；离线=按 DPS 折算、每秒最多 5 只），团队Boss 已排除，DPS 低于怪物回血的自动排除。无商店卖价的材料不计入金额，在卡片「未估价材料」中单独列出供参考。</span>
@@ -4749,7 +4753,7 @@
         // 时薪 = 净收益/杀 ÷ 击杀秒数 × 3600
         // ------------------------------------------------------------------
         const PROFIT_OPTIONS_KEY = 'mc_profit_options_v1';
-        let profitOptions = { buildId: '', hours: 1, ignoreRes: false, mode: 'online' };
+        let profitOptions = { buildId: '', hours: 1, ignoreRes: false, mode: 'online', watchPig: false };
 
         function loadProfitOptions() {
             try {
@@ -4761,7 +4765,8 @@
                             buildId: typeof o.buildId === 'string' ? o.buildId : '',
                             hours: (typeof o.hours === 'number' && o.hours > 0) ? o.hours : 1,
                             ignoreRes: !!o.ignoreRes,
-                            mode: o.mode === 'offline' ? 'offline' : 'online'
+                            mode: o.mode === 'offline' ? 'offline' : 'online',
+                            watchPig: !!o.watchPig
                         };
                     }
                 }
@@ -4839,15 +4844,20 @@
             if (modeOnline && modeOffline) {
                 profitOptions.mode = modeOffline.checked ? 'offline' : 'online';
             }
+            const watchPigEl = document.getElementById('profitWatchPig');
+            if (watchPigEl) profitOptions.watchPig = watchPigEl.checked;
             saveProfitOptions();
             renderProfitRanking();
         }
 
         // 商店出售价：无卖价返回 null（神域币恒为 1）
+        // 守望猪等商店VIP称号（将军猪/军士猪/守望猪）：出售价 ×1.1（游戏源码 iK：QG ? t*1.1 : t）
+        // 结果按游戏 aK 口径保留 1 位小数，避免浮点误差
         function sellPriceOf(itemId) {
             if (itemId === 'currency') return 1;
             const p = SHOP_PRICES[itemId];
-            return (p && typeof p.sell === 'number' && p.sell > 0) ? p.sell : null;
+            if (!(p && typeof p.sell === 'number' && p.sell > 0)) return null;
+            return profitOptions.watchPig ? Math.round(p.sell * 1.1 * 10) / 10 : p.sell;
         }
 
         // 单只怪收益核算
@@ -4985,7 +4995,8 @@
                 (panel.dps.bow > 0 ? ` + 副手弓 ${fmtNum(panel.dps.bow)}/秒` : '') +
                 `，合计 ≈ <b>${fmtNum(panel.dps.total)}/秒</b>（未计怪物抗性；各怪按自身抗性折算${profitOptions.ignoreRes ? '，当前已忽略抗性' : ''}）。` +
                 `击杀算法：<b>${modeLabel}</b>。共核算 ${rows.length} 种可刷怪物` +
-                `（排除团队Boss ${skippedBoss} 种、DPS 不足或无战斗数据 ${skippedUnkillable} 种），按时薪排序取前 5。`;
+                `（排除团队Boss ${skippedBoss} 种、DPS 不足或无战斗数据 ${skippedUnkillable} 种），按时薪排序取前 5。` +
+                (profitOptions.watchPig ? `<br>🐷 守望猪已启用：掉落与召唤材料均按商店出售价 <b>×1.1</b> 折算（神域币除外）。` : '');
             wrap.appendChild(summary);
 
             const top = rows.slice(0, 5);
@@ -5037,7 +5048,7 @@
                     ));
                 }
                 dropLines.push(profitLine('掉落合计', '+' + fmtInt(Math.round(p.dropValue)), 'total'));
-                appendProfitCol(grid, '期望掉落/只（按商店卖价）', dropLines);
+                appendProfitCol(grid, profitOptions.watchPig ? '期望掉落/只（守望猪卖价 ×1.1）' : '期望掉落/只（按商店卖价）', dropLines);
 
                 const costLines = [];
                 if (p.summonCoin > 0) {
@@ -5276,6 +5287,8 @@
             if (profitHoursEl) profitHoursEl.value = profitOptions.hours;
             const profitIgnoreEl = document.getElementById('profitIgnoreRes');
             if (profitIgnoreEl) profitIgnoreEl.checked = profitOptions.ignoreRes;
+            const watchPigEl = document.getElementById('profitWatchPig');
+            if (watchPigEl) watchPigEl.checked = profitOptions.watchPig;
             syncModeRadios('profit', profitOptions.mode);
             renderProfitRanking();
 
