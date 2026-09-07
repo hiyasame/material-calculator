@@ -1507,7 +1507,7 @@
                         <div id="vaultTabs"></div>
                         <div id="vaultBody"></div>
                         <div class="hint-inline slot-note">
-                            加成数值以游戏内收藏库为准；标注「估算」的数值未公开，可点击修改。若收藏室还有未列出的套装，可在「额外加成」中手动补录。
+                            内置数值提取自游戏服务器（2026-09-07）。游戏更新收藏室后，点击「⬇ 从游戏导入」粘贴最新的游戏 state JSON 即可刷新。
                         </div>
                     </div>
 
@@ -3206,57 +3206,116 @@
             master: { name: '大师护符', slots: 3 }
         };
 
-        // 收藏室（装备库）定义：加成数值来自游戏公告；
-        // known=false 的为估算值（游戏未公开），UI 中可编辑
-        const VAULT_WEAPON_DEFS = [
-            { id: 'blackIronSword',       stats: [{ stat: 'physDmg', val: 3,  known: true }] },
-            { id: 'moonSlash',            stats: [{ stat: 'physDmg', val: 5,  known: true }] },
-            { id: 'nightDemonSword',      stats: [{ stat: 'magicDmg', val: 2, known: true }] },
-            { id: 'blackIronSwordVX',     stats: [{ stat: 'armorPen', val: 10, known: true }] },
-            { id: 'voidSword',            stats: [{ stat: 'magicDmg', val: 10, known: true }] },
-            { id: 'sanctionBlade',        stats: [{ stat: 'trueDmg', val: 3,  known: true }] },
-            { id: 'bloodDrinkingSword',   stats: [{ stat: 'lifestealFlat', val: 2, known: false }] },
-            { id: 'trueBloodDrinkingSword', stats: [{ stat: 'lifestealFlat', val: 3, known: false }] },
-            { id: 'weepingBloodBlade',    stats: [{ stat: 'lifestealFlat', val: 4, known: false }] },
-            { id: 'huangqieZhanlingSword', stats: [{ stat: 'critChance', val: 3, known: true }] },
-            { id: 'darkTideFollower',     stats: [{ stat: 'physRes', val: 2, known: false }, { stat: 'magicRes', val: 2, known: false }] }
-        ];
-        // 盔甲库：四件套卡片，每放一件拿一份加成，放满 4 件再额外加一份
-        const VAULT_ARMOR_SETS = [
-            {
-                id: 'blackIron', name: '玄铁', pieceLabel: '玄铁系列',
-                items: { helmet: 'blackIronHelmet', chest: 'blackIronArmor', legs: 'blackIronLegs', boots: 'blackIronBoots' },
-                stats: [{ stat: 'maxHp', val: 10, known: false }]
-            },
-            {
-                id: 'corpseKing', name: '尸王铠', pieceLabel: '尸王铠系列',
-                items: { helmet: 'corpseKingHelmet', chest: 'corpseKingArmor', legs: 'corpseKingLegs', boots: 'corpseKingBoots' },
-                stats: [{ stat: 'finalDmgPct', val: 2, known: false }]
-            },
-            {
-                id: 'glazedCore', name: '琉璃核心', pieceLabel: '琉璃核心系列',
-                items: { helmet: 'glazedCoreHelmet', chest: 'glazedCoreArmor', legs: 'glazedCoreLegs', boots: 'glazedCoreBoots' },
-                stats: [{ stat: 'dodge', val: 2, known: false }]
-            },
-            {
-                id: 'sulfurTech', name: '硫磺火科技装甲', pieceLabel: '硫磺火科技系列',
-                items: { helmet: 'sulfurTechArmor1', chest: 'sulfurTechArmor2', legs: 'sulfurTechArmor3', boots: 'sulfurTechArmor4' },
-                stats: [{ stat: 'critChance', val: 2, known: false }]
-            },
-            {
-                id: 'endLanling', name: '终界蓝凌', pieceLabel: '终界蓝凌系列',
-                items: { helmet: 'endLanlingArmor1', chest: 'endLanlingArmor2', legs: 'endLanlingArmor3', boots: 'endLanlingArmor4' },
-                stats: [{ stat: 'magicRes', val: 2, known: true }]
+        // 收藏室（装备库）定义：数据结构与游戏 /api/game/state 下发的
+        // weaponVaultDefs / armorVaultDefs / offhandVaultDefs 完全一致。
+        // 默认值为 2026-09-07 从游戏服务器提取的真实数值；
+        // 游戏更新后可通过「从游戏导入」按钮粘贴最新 state 一键刷新。
+        const VAULT_IMPORT_KEY = 'mc_vault_defs_v1';
+        const VAULT_DEFAULTS = {
+            weapon: [
+                { id: 'blackIronSword',          bonuses: [{ attr: 'physDmg', flat: 3 }] },
+                { id: 'moonSlash',               bonuses: [{ attr: 'physDmg', flat: 5 }] },
+                { id: 'nightDemonSword',         bonuses: [{ attr: 'magicDmg', flat: 2 }] },
+                { id: 'blackIronSwordVX',        bonuses: [{ attr: 'armorPen', flat: 10 }] },
+                { id: 'voidSword',               bonuses: [{ attr: 'magicDmg', flat: 10 }] },
+                { id: 'sanctionBlade',           bonuses: [{ attr: 'trueDmg', flat: 3 }] },
+                { id: 'bloodDrinkingSword',      bonuses: [{ attr: 'lifestealFlat', flat: 1 }] },
+                { id: 'trueBloodDrinkingSword',  bonuses: [{ attr: 'lifestealFlat', flat: 2 }] },
+                { id: 'weepingBloodBlade',       bonuses: [{ attr: 'lifestealFlat', flat: 4 }] },
+                { id: 'huangqieZhanlingSword',   bonuses: [{ attr: 'critChance', flat: 3 }] },
+                { id: 'darkTideFollower',        bonuses: [{ attr: 'physRes', flat: 5 }, { attr: 'magicRes', flat: 5 }] }
+            ],
+            // 盔甲库：每件 pieceFlat(pieceAttr)，四件放满再 +setFlat
+            armor: [
+                { id: 'blackIron',     name: '玄铁',           pieceAttr: 'maxHp',            pieceFlat: 1, setFlat: 1,
+                  pieces: { helmet: 'blackIronHelmet', chest: 'blackIronArmor', legs: 'blackIronLegs', boots: 'blackIronBoots' } },
+                { id: 'corpseKing',    name: '尸王铠',         pieceAttr: 'finalDmgPct',      pieceFlat: 1, setFlat: 1,
+                  pieces: { helmet: 'corpseKingHelmet', chest: 'corpseKingArmor', legs: 'corpseKingLegs', boots: 'corpseKingBoots' } },
+                { id: 'glazedCore',    name: '琉璃核心',       pieceAttr: 'dodge',            pieceFlat: 1, setFlat: 1,
+                  pieces: { helmet: 'glazedCoreHelmet', chest: 'glazedCoreArmor', legs: 'glazedCoreLegs', boots: 'glazedCoreBoots' } },
+                { id: 'sulfurTech',    name: '硫磺火科技装甲', pieceAttr: 'critChance',       pieceFlat: 1, setFlat: 1,
+                  pieces: { helmet: 'sulfurTechArmor1', chest: 'sulfurTechArmor2', legs: 'sulfurTechArmor3', boots: 'sulfurTechArmor4' } },
+                { id: 'diamondStar',   name: '钻石星辰',       pieceAttr: 'dmgReducePct',     pieceFlat: 1, setFlat: 1,
+                  pieces: { helmet: 'diamondStarArmor1', chest: 'diamondStarArmor2', legs: 'diamondStarArmor3', boots: 'diamondStarArmor4' } },
+                { id: 'endLanling',    name: '终界蓝凌',       pieceAttr: 'magicRes',         pieceFlat: 2, setFlat: 2,
+                  pieces: { helmet: 'endLanlingArmor1', chest: 'endLanlingArmor2', legs: 'endLanlingArmor3', boots: 'endLanlingArmor4' } },
+                { id: 'exoticLanling', name: '异域-终界蓝凌',  pieceAttr: 'critChanceResist', pieceFlat: 1, setFlat: 1,
+                  pieces: { helmet: 'exoticLanlingArmor1', chest: 'exoticLanlingArmor2', legs: 'exoticLanlingArmor3', boots: 'exoticLanlingArmor4' } }
+            ],
+            offhand: [
+                { id: 'ironBow',           bonuses: [{ attr: 'rangedDmg', flat: 2 }] },
+                { id: 'nightBow',          bonuses: [{ attr: 'rangedDmg', flat: 4 }] },
+                { id: 'glazedBow',         bonuses: [{ attr: 'rangedDmg', flat: 6 }] },
+                { id: 'sulfurFireTechBow', bonuses: [{ attr: 'rangedDmg', flat: 5 }] },
+                { id: 'darkChaser',        bonuses: [{ attr: 'rangedDmg', flat: 8 }] },
+                { id: 'voidArrow',         bonuses: [{ attr: 'rangedDmg', flat: 8 }] }
+            ]
+        };
+
+        let vaultDefs = null; // { weapon:[], armor:[], offhand:[] }，当前生效的收藏室定义
+
+        // 从 localStorage 恢复导入过的收藏室数据；无效则用内置默认值
+        function loadVaultDefs() {
+            try {
+                const raw = localStorage.getItem(VAULT_IMPORT_KEY);
+                if (raw) {
+                    const d = JSON.parse(raw);
+                    if (d && Array.isArray(d.weapon) && Array.isArray(d.armor) && Array.isArray(d.offhand)) {
+                        vaultDefs = d;
+                        return;
+                    }
+                }
+            } catch (e) { /* 忽略损坏缓存 */ }
+            vaultDefs = JSON.parse(JSON.stringify(VAULT_DEFAULTS));
+        }
+
+        function saveVaultDefs(d) {
+            vaultDefs = d;
+            try {
+                localStorage.setItem(VAULT_IMPORT_KEY, JSON.stringify(d));
+            } catch (e) { /* 存储满了就放弃 */ }
+        }
+
+        // 解析用户粘贴的游戏 state JSON（整份或只含三个数组的片段均可），
+        // 返回规范化的 { weapon, armor, offhand } 或 null
+        function parseVaultImport(text) {
+            let obj;
+            try {
+                obj = JSON.parse(text);
+            } catch (e) {
+                return null;
             }
-        ];
-        const VAULT_OFFHAND_DEFS = [
-            { id: 'ironBow',         stats: [{ stat: 'rangedDmg', val: 2, known: true }] },
-            { id: 'nightBow',        stats: [{ stat: 'rangedDmg', val: 4, known: true }] },
-            { id: 'glazedBow',       stats: [{ stat: 'rangedDmg', val: 6, known: true }] },
-            { id: 'sulfurFireTechBow', stats: [{ stat: 'rangedDmg', val: 5, known: true }] },
-            { id: 'darkChaser',      stats: [{ stat: 'rangedDmg', val: 8, known: true }] },
-            { id: 'voidArrow',       stats: [{ stat: 'rangedDmg', val: 8, known: true }] }
-        ];
+            const root = (obj && obj.state && typeof obj.state === 'object') ? obj.state : obj;
+            const w = root.weaponVaultDefs, a = root.armorVaultDefs, o = root.offhandVaultDefs;
+            if (!Array.isArray(w) || !Array.isArray(a) || !Array.isArray(o)) return null;
+
+            const normBonus = (b) => b && b.attr ? { attr: b.attr, flat: Number(b.flat) || 0 } : null;
+            const weapon = w.map(d => ({
+                id: d.id,
+                bonuses: (d.bonuses || []).map(normBonus).filter(Boolean)
+            })).filter(d => d.id && d.bonuses.length);
+            const offhand = o.map(d => ({
+                id: d.id,
+                bonuses: (d.bonuses || []).map(normBonus).filter(Boolean)
+            })).filter(d => d.id && d.bonuses.length);
+            const armor = a.map(s => {
+                // 游戏端 pieces 为数组 [{id, slot}]，转为 {slot: id} 映射
+                const items = {};
+                if (Array.isArray(s.pieces)) {
+                    for (const p of s.pieces) items[p.slot || 'helmet'] = p.id;
+                } else if (s.pieces && typeof s.pieces === 'object') {
+                    Object.assign(items, s.pieces);
+                }
+                return {
+                    id: s.id, name: s.name || s.id,
+                    pieceAttr: s.pieceAttr, pieceFlat: Number(s.pieceFlat) || 0,
+                    setFlat: Number(s.setFlat) || 0,
+                    pieces: items
+                };
+            }).filter(s => s.id && s.pieceAttr && Object.keys(s.pieces).length);
+            if (!weapon.length || !armor.length || !offhand.length) return null;
+            return { weapon, armor, offhand };
+        }
 
         const STAT_UNIT_PCT = new Set(['critChance', 'critChanceResist', 'lifestealPct', 'dodge', 'blockChance', 'critDmgPct', 'armorPen', 'finalDmgPct', 'dmgReducePct']);
 
@@ -3297,8 +3356,8 @@
                 custom: Array.isArray(s.custom) ? s.custom.filter(c => c && c.stat) : [],
                 charm: (s.charm && typeof s.charm === 'object') ? { slots: Array.isArray(s.charm.slots) ? s.charm.slots : [] } : { slots: [] },
                 vault: (s.vault && typeof s.vault === 'object')
-                    ? { stored: (s.vault.stored && typeof s.vault.stored === 'object') ? s.vault.stored : {}, values: (s.vault.values && typeof s.vault.values === 'object') ? s.vault.values : {} }
-                    : { stored: {}, values: {} }
+                    ? { stored: (s.vault.stored && typeof s.vault.stored === 'object') ? s.vault.stored : {} }
+                    : { stored: {} }
             };
         }
 
@@ -3665,25 +3724,25 @@
         let vaultActiveTab = 'weapon';
 
         function vaultCountOf(tab) {
-            if (!panelState.vault) return { on: 0, total: 0 };
-            const stored = panelState.vault.stored || {};
+            if (!vaultDefs) loadVaultDefs();
+            const stored = (panelState.vault && panelState.vault.stored) || {};
             if (tab === 'weapon') {
-                return { on: VAULT_WEAPON_DEFS.filter(d => stored[d.id]).length, total: VAULT_WEAPON_DEFS.length };
+                return { on: vaultDefs.weapon.filter(d => stored[d.id]).length, total: vaultDefs.weapon.length };
             }
             if (tab === 'armor') {
                 let on = 0, total = 0;
-                for (const set of VAULT_ARMOR_SETS) {
-                    const ids = Object.values(set.items);
+                for (const set of vaultDefs.armor) {
+                    const ids = Object.values(set.pieces);
                     total += ids.length;
                     on += ids.filter(id => stored[id]).length;
                 }
                 return { on, total };
             }
-            return { on: VAULT_OFFHAND_DEFS.filter(d => stored[d.id]).length, total: VAULT_OFFHAND_DEFS.length };
+            return { on: vaultDefs.offhand.filter(d => stored[d.id]).length, total: vaultDefs.offhand.length };
         }
 
         function toggleVaultStored(id) {
-            if (!panelState.vault) panelState.vault = { stored: {}, values: {} };
+            if (!panelState.vault) panelState.vault = { stored: {} };
             if (!panelState.vault.stored) panelState.vault.stored = {};
             if (panelState.vault.stored[id]) {
                 delete panelState.vault.stored[id];
@@ -3701,46 +3760,53 @@
             return (QUALITY_DEFS[q] && QUALITY_DEFS[q].color) || null;
         }
 
-        // 收藏加成标签（known=false 渲染可编辑输入框）
-        function appendVaultBonusLine(container, ownerId, statDef) {
+        // 单条收藏加成展示行（数值来自游戏真实数据）
+        function appendVaultBonusLine(container, bonus) {
             const line = document.createElement('div');
-            const statName = (STAT_DEFS[statDef.stat] && STAT_DEFS[statDef.stat].name) || statDef.stat;
-            const unit = STAT_UNIT_PCT.has(statDef.stat) ? '%' : '';
-            const key = ownerId + ':' + statDef.stat;
-            const cur = (panelState.vault.values || {})[key];
-            if (statDef.known) {
-                line.className = 'vault-bonus';
-                line.textContent = `+${statDef.val}${unit} ${statName}`;
-            } else {
-                line.className = 'vault-bonus';
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.value = (typeof cur === 'number' && isFinite(cur)) ? cur : statDef.val;
-                input.step = 'any';
-                input.title = '游戏未公开该数值，此为估算值，可按游戏内实际修改';
-                input.onclick = (e) => e.stopPropagation();
-                input.oninput = () => {
-                    if (!panelState.vault.values) panelState.vault.values = {};
-                    const v = parseFloat(input.value);
-                    panelState.vault.values[key] = isNaN(v) ? 0 : v;
-                    savePanelState();
-                    calcPanel();
-                };
-                line.appendChild(document.createTextNode('≈ +'));
-                line.appendChild(input);
-                line.appendChild(document.createTextNode(unit + ' ' + statName + ' '));
-                const est = document.createElement('span');
-                est.className = 'est';
-                est.textContent = '估算';
-                line.appendChild(est);
-            }
+            line.className = 'vault-bonus';
+            const statName = (STAT_DEFS[bonus.attr] && STAT_DEFS[bonus.attr].name) || bonus.attr;
+            const unit = STAT_UNIT_PCT.has(bonus.attr) ? '%' : '';
+            line.textContent = `+${bonus.flat}${unit} ${statName}`;
             container.appendChild(line);
+        }
+
+        // 从游戏导入收藏室数据
+        function importVaultFromGame() {
+            const text = prompt(
+                '粘贴游戏 state JSON（含 weaponVaultDefs / armorVaultDefs / offhandVaultDefs）。\n\n' +
+                '获取方法：在已登录的游戏页面按 F12 打开控制台，运行：\n' +
+                'fetch("/api/game/state",{headers:{Authorization:"Bearer "+sessionStorage.getItem("game_token")}}).then(r=>r.json()).then(d=>copy(d))\n' +
+                '（copy 会自动复制到剪贴板），然后粘贴到这里。'
+            );
+            if (!text) return;
+            const parsed = parseVaultImport(text);
+            if (!parsed) {
+                alert('解析失败：未找到有效的 weaponVaultDefs / armorVaultDefs / offhandVaultDefs。\n请确认粘贴的是完整的 state JSON。');
+                return;
+            }
+            saveVaultDefs(parsed);
+            // 清掉已失效的勾选（新数据里不存在的装备）
+            validatePanelState();
+            renderVaultUI();
+            calcPanel();
+            const n = parsed.weapon.length + parsed.armor.length + parsed.offhand.length;
+            alert(`导入成功：武器库 ${parsed.weapon.length} 件 · 盔甲库 ${parsed.armor.length} 套 · 副手库 ${parsed.offhand.length} 件（共 ${n} 项）。`);
+        }
+
+        function resetVaultDefs() {
+            if (!confirm('恢复内置的收藏室数值（2026-09-07 提取自游戏）？')) return;
+            localStorage.removeItem(VAULT_IMPORT_KEY);
+            loadVaultDefs();
+            validatePanelState();
+            renderVaultUI();
+            calcPanel();
         }
 
         function renderVaultUI() {
             const tabsWrap = document.getElementById('vaultTabs');
             const body = document.getElementById('vaultBody');
             if (!tabsWrap || !body) return;
+            if (!vaultDefs) loadVaultDefs();
             tabsWrap.innerHTML = '';
             body.innerHTML = '';
             if (!dataReady) {
@@ -3770,6 +3836,24 @@
                 };
                 tabsWrap.appendChild(btn);
             }
+            // 工具按钮：从游戏导入 / 恢复默认
+            const importBtn = document.createElement('button');
+            importBtn.type = 'button';
+            importBtn.className = 'vault-tab';
+            importBtn.textContent = '⬇ 从游戏导入';
+            importBtn.title = '粘贴游戏 state JSON，用最新真实数值替换内置收藏室数据';
+            importBtn.onclick = importVaultFromGame;
+            tabsWrap.appendChild(importBtn);
+            const isImported = !!localStorage.getItem(VAULT_IMPORT_KEY);
+            if (isImported) {
+                const resetBtn = document.createElement('button');
+                resetBtn.type = 'button';
+                resetBtn.className = 'vault-tab';
+                resetBtn.textContent = '↺ 恢复内置';
+                resetBtn.title = '清除导入的数据，恢复内置数值';
+                resetBtn.onclick = resetVaultDefs;
+                tabsWrap.appendChild(resetBtn);
+            }
 
             const stored = (panelState.vault && panelState.vault.stored) || {};
 
@@ -3781,8 +3865,8 @@
                 hint.textContent = '每个套装 4 格。放入一件拿一份加成，四件放满再额外加一份。';
                 body.appendChild(hint);
 
-                for (const set of VAULT_ARMOR_SETS) {
-                    const pieceIds = Object.values(set.items);
+                for (const set of vaultDefs.armor) {
+                    const pieceIds = Object.values(set.pieces);
                     const on = pieceIds.filter(id => stored[id]).length;
                     const full = on >= 4;
                     const setCard = document.createElement('div');
@@ -3794,13 +3878,11 @@
                     nameSpan.className = 'set-name';
                     nameSpan.textContent = set.name;
                     head.appendChild(nameSpan);
+                    const statName = (STAT_DEFS[set.pieceAttr] && STAT_DEFS[set.pieceAttr].name) || set.pieceAttr;
+                    const unit = STAT_UNIT_PCT.has(set.pieceAttr) ? '%' : '';
                     const bonusSpan = document.createElement('span');
                     bonusSpan.className = 'set-bonus';
-                    for (const s of set.stats) {
-                        const statName = (STAT_DEFS[s.stat] && STAT_DEFS[s.stat].name) || s.stat;
-                        const unit = STAT_UNIT_PCT.has(s.stat) ? '%' : '';
-                        bonusSpan.textContent += (bonusSpan.textContent ? ' / ' : '') + `每件 +${s.val}${unit} ${statName}`;
-                    }
+                    bonusSpan.textContent = `每件 +${set.pieceFlat}${unit} ${statName}，放满 4 件再 +${set.setFlat}${unit}`;
                     head.appendChild(bonusSpan);
                     const countSpan = document.createElement('span');
                     countSpan.className = 'set-count';
@@ -3810,7 +3892,8 @@
 
                     const grid = document.createElement('div');
                     grid.className = 'armor-piece-grid';
-                    for (const [slotKey, itemId] of Object.entries(set.items)) {
+                    const slotNames = { helmet: '头盔', chest: '胸甲', legs: '护腿', boots: '战靴' };
+                    for (const [slotKey, itemId] of Object.entries(set.pieces)) {
                         const info = ITEM_DEFS[itemId];
                         const piece = document.createElement('div');
                         piece.className = 'armor-piece' + (stored[itemId] ? ' on' : '');
@@ -3819,7 +3902,7 @@
                         if (img) piece.appendChild(img);
                         const slotLabel = document.createElement('span');
                         slotLabel.className = 'slot-label';
-                        slotLabel.textContent = { helmet: '头盔', chest: '胸甲', legs: '护腿', boots: '战靴' }[slotKey] || slotKey;
+                        slotLabel.textContent = slotNames[slotKey] || slotKey;
                         piece.appendChild(slotLabel);
                         const nameEl = document.createElement('span');
                         nameEl.className = 'slot-label';
@@ -3833,7 +3916,7 @@
                 return;
             }
 
-            const defs = vaultActiveTab === 'weapon' ? VAULT_WEAPON_DEFS : VAULT_OFFHAND_DEFS;
+            const defs = vaultActiveTab === 'weapon' ? vaultDefs.weapon : vaultDefs.offhand;
             const hint = document.createElement('div');
             hint.className = 'hint-inline';
             hint.style.marginBottom = '10px';
@@ -3849,7 +3932,7 @@
                 const card = document.createElement('div');
                 card.className = 'vault-card' + (stored[def.id] ? ' on' : '');
                 const qc = vaultQualityColor(def.id);
-                if (qc) card.style.borderColor = stored[def.id] ? qc : '';
+                if (qc && stored[def.id]) card.style.borderColor = qc;
                 card.onclick = () => toggleVaultStored(def.id);
 
                 const pic = document.createElement('div');
@@ -3870,8 +3953,8 @@
                 attachEquipTooltip(name, def.id);
                 card.appendChild(name);
 
-                for (const s of def.stats) {
-                    appendVaultBonusLine(card, def.id, s);
+                for (const b of def.bonuses) {
+                    appendVaultBonusLine(card, b);
                 }
                 grid.appendChild(card);
             }
@@ -3948,32 +4031,28 @@
         function computeVaultBonus(vault) {
             const v = vault || {};
             const stored = v.stored || {};
-            const values = v.values || {};
             const b = {};
             const add = (stat, val) => {
                 if (!val) return;
                 const t = (b[stat] = b[stat] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 });
                 t.flat += val;
             };
-            const valOf = (ownerId, stat, defVal) => {
-                const k = ownerId + ':' + stat;
-                const x = values[k];
-                return (typeof x === 'number' && isFinite(x)) ? x : defVal;
-            };
-            for (const w of VAULT_WEAPON_DEFS) {
+            if (!vaultDefs) loadVaultDefs();
+            // 武器库 / 副手库：入库即得全部加成
+            for (const w of vaultDefs.weapon) {
                 if (!stored[w.id]) continue;
-                for (const s of w.stats) add(s.stat, valOf(w.id, s.stat, s.val));
+                for (const s of w.bonuses) add(s.attr, s.flat);
             }
-            for (const set of VAULT_ARMOR_SETS) {
-                const pieceIds = Object.values(set.items);
+            for (const o of vaultDefs.offhand) {
+                if (!stored[o.id]) continue;
+                for (const s of o.bonuses) add(s.attr, s.flat);
+            }
+            // 盔甲库：每件 pieceFlat，四件放满再 +setFlat（与游戏一致）
+            for (const set of vaultDefs.armor) {
+                const pieceIds = Object.values(set.pieces);
                 const n = pieceIds.filter(id => stored[id]).length;
                 if (!n) continue;
-                const shares = n + (n >= 4 ? 1 : 0);
-                for (const s of set.stats) add(s.stat, valOf(set.id, s.stat, s.val) * shares);
-            }
-            for (const o of VAULT_OFFHAND_DEFS) {
-                if (!stored[o.id]) continue;
-                for (const s of o.stats) add(s.stat, valOf(o.id, s.stat, s.val));
+                add(set.pieceAttr, set.pieceFlat * n + (n >= 4 ? set.setFlat : 0));
             }
             return b;
         }
@@ -4543,6 +4622,7 @@
 
             // 页签三：恢复配装状态并渲染
             loadPanelState();
+            loadVaultDefs();
             renderPanelSlots();
             renderCharmEditor();
             renderVaultUI();
