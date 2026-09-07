@@ -1702,7 +1702,7 @@
                     </label>
                 </div>
                 <div class="control-row">
-                    <span class="hint-inline">收益口径：期望掉落（含神域币）按商店出售价折算 − 召唤成本（召唤币 + 召唤材料按商店出售价折算）；击杀耗时按所选配装的期望伤害估算，DPS 低于怪物回血的自动排除。无商店卖价的材料不计入金额，在卡片「未估价材料」中单独列出供参考。</span>
+                    <span class="hint-inline">收益口径：期望掉落（含神域币）按商店出售价折算 − 召唤成本（召唤币 + 召唤材料按商店出售价折算）；击杀耗时按所选配装的期望伤害估算（每刀最多杀一只：秒杀怪按实战刀数/秒封顶），DPS 低于怪物回血的自动排除。无商店卖价的材料不计入金额，在卡片「未估价材料」中单独列出供参考。</span>
                 </div>
             </div>
 
@@ -2981,8 +2981,10 @@
             return getPanelByBuildId(farmOptions.buildId);
         }
 
-        // 估算单只击杀秒数；返回 { sec, dps, net } 或 null
+        // 估算单只击杀秒数；返回 { sec, dps, net, swings, swingSec } 或 null
         // ignoreRes 缺省时沿用挂机页开关（收益页显式传入）
+        // 击杀节奏约束：每刀最多杀一只（服务端按刀结算），
+        // 故 击杀耗时 = max(所需刀数, 1) × 攻击间隔，所需刀数 = ceil(怪物血量 ÷ 单刀有效伤害)
         function estimateKillSec(monster, panel, ignoreResOverride) {
             const ignoreRes = (ignoreResOverride != null) ? ignoreResOverride : farmOptions.ignoreRes;
             const c = monster.combat;
@@ -3009,7 +3011,19 @@
                 : 0;
             const dps = meleeDps + bowDps;
             const net = dps - (c.regen || 0);
-            return { sec: net > 0 ? c.hpAvg / net : Infinity, dps: dps, net: net };
+
+            // 每刀节奏：单刀期望伤害（近战部分 ÷ 刀数；弓的箭按固定射速独立计）
+            const swings = Math.max(1, st.attackFreqRounded); // 实战每秒刀数（已取整）
+            const perSwing = (physOut + otherOut) || 0;        // 单刀期望伤害（近战）
+            const swingSec = swings > 0 ? 1 / swings : Infinity; // 攻击间隔
+            const regenPerSwing = (c.regen || 0) * swingSec;    // 一个攻击间隔内怪物回血
+            const effectivePerSwing = perSwing - regenPerSwing;  // 单刀净伤害
+            if (effectivePerSwing <= 0) {
+                return { sec: Infinity, dps: dps, net: net, swings, swingSec };
+            }
+            const swingsNeeded = Math.ceil(c.hpAvg / effectivePerSwing);
+            const sec = swingsNeeded * swingSec;
+            return { sec, dps, net, swings, swingSec, swingsNeeded };
         }
 
         // 挂机时间计算
@@ -4767,6 +4781,12 @@
             const est = estimateKillSec(monster, panel, profitOptions.ignoreRes);
             if (!est) return null;
             if (!isFinite(est.sec) || est.sec <= 0) return null;
+            // 每刀最多杀一只：整刀结算（ceil 血量/单刀净伤害 × 攻击间隔）；
+            // 与 DPS 均摊口径（血量/有效DPS）取较慢者，确保不超出每刀一杀的节奏
+            const swingSec = est.sec; // estimateKillSec 已按整刀结算
+            const dpsSec = est.net > 0 ? monster.combat.hpAvg / est.net : Infinity;
+            const killSec = Math.max(swingSec, dpsSec);
+            const killRate = isFinite(killSec) && killSec > 0 ? 1 / killSec : 0;
 
             const drops = [];
             const unpriced = [];
@@ -4802,10 +4822,13 @@
             }
 
             const netPerKill = dropValue - summonCost;
-            const killsPerHour = 3600 / est.sec;
+            // 击杀节奏受「每刀一杀」约束：秒杀怪最多按 实战刀数/只 结算
+            const killsPerHour = killRate * 3600;
             const netPerHour = netPerKill * killsPerHour;
             return {
-                killSec: est.sec, dps: est.dps,
+                killSec: killSec, dps: est.dps,
+                swingsNeeded: est.swingsNeeded, swingSec: est.swingSec,
+                rateLimited: swingSec > dpsSec, // 整刀结算比 DPS 均摊慢 → 刀数是瓶颈
                 drops, unpriced, dropValue,
                 summonCoin: typeof monster.summonCoin === 'number' ? monster.summonCoin : 0,
                 summonItems, summonUnpriced, summonCost,
@@ -4972,7 +4995,10 @@
                 const stats = document.createElement('div');
                 stats.className = 'profit-stats';
                 const c = m.combat || {};
-                stats.innerHTML = `击杀耗时 ≈ <b>${fmtNum(p.killSec, 2)} 秒/只</b>（估算DPS ${fmtNum(p.dps)}/秒 ÷ 有效输出 ${fmtNum(p.dps - (c.regen || 0))}/秒 扣回血）· 怪物生命 ${c.hpText || '?'} · 物理抗性 ${c.res != null ? c.res : '?'}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''}`;
+                const swingInfo = p.swingsNeeded != null
+                    ? `${p.swingsNeeded} 刀 × ${p.swingSec.toFixed(2)} 秒/刀${p.rateLimited ? '（已按每刀一杀封顶）' : ''}`
+                    : '';
+                stats.innerHTML = `击杀耗时 ≈ <b>${fmtNum(p.killSec, 2)} 秒/只</b>${swingInfo ? `（${swingInfo}，每刀最多杀一只）` : `（估算DPS ${fmtNum(p.dps)}/秒 ÷ 有效输出 ${fmtNum(p.dps - (c.regen || 0))}/秒 扣回血）`} · 怪物生命 ${c.hpText || '?'} · 物理抗性 ${c.res != null ? c.res : '?'}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''}`;
                 main.appendChild(stats);
 
                 card.appendChild(main);
