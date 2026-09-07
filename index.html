@@ -981,6 +981,299 @@
             background: var(--red-soft);
         }
 
+        /* ===== 护符镌刻台 ===== */
+        .charm-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .charm-name-preview {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .charm-grade-tag {
+            font-size: 11px;
+            border: 1px solid var(--line-strong);
+            background: #f0ede6;
+            border-radius: 999px;
+            padding: 1px 9px;
+            color: var(--ink-soft);
+        }
+
+        .charm-slot-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--line);
+        }
+
+        .charm-slot-row:last-child { border-bottom: none; }
+
+        .charm-slot-idx {
+            font-size: 11px;
+            color: var(--ink-faint);
+            width: 34px;
+            flex-shrink: 0;
+        }
+
+        .charm-slot-row select {
+            flex: 1;
+            min-width: 0;
+            padding: 5px 8px;
+            font-size: 13px;
+        }
+
+        .charm-slot-val {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent);
+            min-width: 52px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .charm-ancient-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--ink-soft);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .charm-ancient-label input { min-width: auto; width: auto; }
+
+        .charm-ancient-label.on { color: var(--amber); font-weight: 600; }
+
+        /* ===== 收藏室（装备库） ===== */
+        .vault-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .vault-tab {
+            padding: 5px 14px;
+            font-size: 13px;
+            border: 1px solid var(--line-strong);
+            border-radius: 999px;
+            background: transparent;
+            color: var(--ink-soft);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .vault-tab:hover { border-color: var(--accent); color: var(--accent); }
+
+        .vault-tab.on {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .vault-tab em {
+            font-style: normal;
+            font-size: 11px;
+            opacity: 0.75;
+            margin-left: 3px;
+        }
+
+        .vault-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+            gap: 10px;
+        }
+
+        .vault-card {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: #fff;
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+            text-align: center;
+        }
+
+        .vault-card:hover { border-color: var(--ink-faint); }
+
+        .vault-card.on {
+            background: var(--accent-soft);
+            box-shadow: inset 0 0 0 1px var(--accent);
+        }
+
+        .vault-card.on::after {
+            content: '✓';
+            position: absolute;
+            top: 4px;
+            right: 7px;
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .vault-pic {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .vault-pic img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+
+        .vault-name {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.3;
+            color: var(--ink);
+        }
+
+        .vault-bonus {
+            font-size: 11px;
+            color: var(--ink-soft);
+            line-height: 1.5;
+        }
+
+        .vault-bonus .est {
+            color: var(--ink-faint);
+            font-size: 10px;
+        }
+
+        .vault-bonus input {
+            width: 44px;
+            min-width: 44px;
+            padding: 1px 4px;
+            font-size: 11px;
+            border: 1px dashed var(--line-strong);
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        /* 盔甲库套装卡 */
+        .armor-set-card {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: #fff;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .armor-set-card.full {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .armor-set-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .armor-set-head .set-name { font-weight: 700; }
+
+        .armor-set-head .set-count {
+            font-size: 12px;
+            color: var(--amber);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .armor-set-head .set-bonus {
+            font-size: 11px;
+            color: var(--ink-soft);
+        }
+
+        .armor-piece-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .armor-piece-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .armor-piece {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 8px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: #fff;
+        }
+
+        .armor-piece:hover { border-color: var(--ink-faint); }
+
+        .armor-piece.on {
+            background: var(--accent-soft);
+            box-shadow: inset 0 0 0 1px var(--accent);
+        }
+
+        .armor-piece .slot-label {
+            font-size: 11px;
+            color: var(--ink-faint);
+        }
+
+        .armor-piece img {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+        }
+
+        /* ===== 挂机页：配装估算 ===== */
+        .farm-build-info {
+            background: var(--accent-soft);
+            border: 1px solid var(--accent-line);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            font-size: 12.5px;
+            color: var(--ink-soft);
+            line-height: 1.7;
+            margin-top: 10px;
+        }
+
+        .farm-build-info b { color: var(--accent); }
+
+        .farm-build-info .warn { color: var(--amber); }
+
+        .est-tag {
+            font-size: 11px;
+            color: var(--accent);
+            background: var(--accent-soft);
+            border: 1px solid var(--accent-line);
+            padding: 1px 7px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
         /* ===== 装备属性悬浮提示 ===== */
         .has-equip-tip { cursor: help; }
 
@@ -1149,11 +1442,23 @@
                 </div>
                 <div class="control-row">
                     <div class="control-group">
+                        <label>击杀耗时估算</label>
+                        <select id="farmBuildSelect" onchange="onFarmBuildChange()"></select>
+                    </div>
+                    <label class="hint-inline" style="cursor:pointer">
+                        <input type="checkbox" id="farmIgnoreRes" style="min-width:auto;width:auto" onchange="onFarmBuildChange()">
+                        忽略怪物抗性
+                    </label>
+                    <span class="hint-inline">选中后按属性面板的期望伤害 ÷ 怪物平均血量估算每只击杀秒数（行内「秒/只」留空时自动采用）</span>
+                </div>
+                <div class="control-row">
+                    <div class="control-group">
                         <label>每只怪物击杀秒数</label>
                         <input type="number" id="farmDefaultSec" value="5" min="0.1" max="600" step="0.5" onchange="calcFarm()">
                         <span class="hint-inline">每行可单独覆盖；召唤 / 副本 Boss 请自行估计含召唤等待的总耗时</span>
                     </div>
                 </div>
+                <div id="farmBuildInfo"></div>
                 <div class="control-row">
                     <span class="hint-inline">预期掉率按每次击杀的期望掉落计算（rate × 掉落区间均值，含宝袋分解）</span>
                 </div>
@@ -1184,14 +1489,31 @@
                             <button class="btn ghost" type="button" onclick="savePanelBuild()">💾 保存当前配装</button>
                         </div>
                         <div class="hint-inline slot-note">
-                            护符（普通/精工/大师）词条为随机镌刻，请在下方「额外加成」手动填入；
-                            武器/护甲库的收藏属性为个人数据，暂不支持计算。
+                            护符（普通/精工/大师）装备后在下方「护符镌刻台」选择词条；收藏室加成在「收藏室」卡片勾选。
+                        </div>
+                    </div>
+
+                    <div class="panel-card" id="charmCard" style="display:none">
+                        <div class="panel-title">📿 护符镌刻台
+                            <span class="hint">词条数值与游戏 Wiki 一致；太古 = 数值向上取整 ×1.25，名称加 ★</span>
+                        </div>
+                        <div id="charmEditorBody"></div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">🎒 收藏室（装备库）
+                            <span class="hint">勾选你已在游戏收藏室入库的装备，收藏属性计入面板</span>
+                        </div>
+                        <div id="vaultTabs"></div>
+                        <div id="vaultBody"></div>
+                        <div class="hint-inline slot-note">
+                            加成数值以游戏内收藏库为准；标注「估算」的数值未公开，可点击修改。若收藏室还有未列出的套装，可在「额外加成」中手动补录。
                         </div>
                     </div>
 
                     <div class="panel-card">
                         <div class="panel-title">额外加成
-                            <span class="hint">手动填入护符镌刻词条或其他来源加成（如 +8%暴击几率 → 暴击几率 8）</span>
+                            <span class="hint">手动填入其他来源加成（如 +8%暴击几率 → 暴击几率 8）</span>
                         </div>
                         <div id="customBonusRows"></div>
                         <div class="panel-actions">
@@ -1400,17 +1722,44 @@
                 return out;
             };
 
-            const pushMonster = (m) => {
+            // 战斗数值（击杀耗时估算用）：品阶基础 hp/res + monsterMod 修正（hpSet/hp/res），Boss 用固定值
+            const applyCombat = (m, fixed) => {
+                const td = tiers[m.tier] || {};
+                const mod = m.mod || {};
+                let hpMin, hpMax;
+                if (fixed && fixed.hp != null) {
+                    hpMin = hpMax = fixed.hp;
+                } else if (mod.hpSet != null) {
+                    hpMin = hpMax = mod.hpSet;
+                } else {
+                    const thp = td.hp || [0, 0];
+                    hpMin = (thp[0] || 0) + (mod.hp || 0);
+                    hpMax = (thp[1] || 0) + (mod.hp || 0);
+                }
+                m.combat = {
+                    hpAvg: (hpMin + hpMax) / 2,
+                    hpText: hpMin === hpMax ? String(hpMin) : (hpMin + '~' + hpMax),
+                    res: fixed && fixed.res != null ? fixed.res : ((td.res || 0) + (mod.res || 0)),
+                    regen: fixed && fixed.regen != null ? fixed.regen : (mod.hpRegenPerSec || 0)
+                };
+            };
+
+            const pushMonster = (m, fixed) => {
                 if (!m.drops.length && !m.summonCoin && !(m.summonItems || []).length) return;
                 m.expDrops = {};
                 for (const dr of m.drops) {
                     m.expDrops[dr.item] = (m.expDrops[dr.item] || 0) + dr.rate * (dr.min + dr.max) / 2;
                 }
-                // 神域币按怪物品阶掉落
-                const coin = tierCoin(m.tier);
-                if (coin > 0) {
-                    m.expDrops.currency = coin;
+                // 神域币按怪物品阶掉落；Boss 奖励固定在宝袋里（coin 为召唤者奖励，不计入期望）
+                if (fixed && fixed.isBoss) {
+                    // 不按品阶计币
+                } else {
+                    const coin = tierCoin(m.tier);
+                    if (coin > 0) {
+                        m.expDrops.currency = coin;
+                    }
                 }
+                applyCombat(m, fixed);
                 monsters.push(m);
             };
 
@@ -1425,6 +1774,7 @@
                     summonCoin: typeof s.cost === 'number' ? s.cost : 0,
                     summonItems: (s.costItems || []).map(c => ({ item: c.item, count: c.count })),
                     feeNote: extraFeeNote || null,
+                    mod: s.monsterMod || {},
                     drops: expandDrops(s.drops)
                 });
             };
@@ -1446,6 +1796,7 @@
                         summonCoin: null,
                         summonItems: [],
                         feeNote: null,
+                        mod: {},
                         drops: expandDrops(area.normalDrops)
                     });
                 }
@@ -1472,6 +1823,7 @@
                             summonCoin: null,
                             summonItems: [],
                             feeNote: null,
+                            mod: sd.monsterMod || {},
                             drops: expandDrops(sd.normalDrops)
                         });
                     }
@@ -1480,7 +1832,7 @@
                             addSummon(s, loc, feeNote);
                         }
                     }
-                    // Boss（尸王：summonCost 为 {coin, item: count}）
+                    // Boss（尸王：固定血量/护甲/回血；summonCost 为 {coin, item: count}）
                     if (sd.boss && Array.isArray(sd.boss.drops)) {
                         const sc = sd.boss.summonCost || {};
                         const summonItems = Object.entries(sc)
@@ -1496,25 +1848,67 @@
                             summonCoin: typeof sc.coin === 'number' ? sc.coin : 0,
                             summonItems: summonItems,
                             feeNote: null,
+                            mod: {},
                             drops: expandDrops(sd.boss.drops)
+                        }, {
+                            isBoss: true,
+                            hp: sd.boss.hp,
+                            res: sd.boss.armor != null ? sd.boss.armor : undefined,
+                            regen: sd.boss.regen != null ? sd.boss.regen
+                                : (sd.boss.hpRegenPerSec != null ? sd.boss.hpRegenPerSec : undefined)
                         });
                     }
                 }
 
-                // 琉璃森林分区
+                // 琉璃森林/悲鸣森林等分区
                 for (const z of (area.zones || [])) {
+                    const zloc = areaName + ' · ' + (z.name || z.id || '');
                     if (Array.isArray(z.drops) && z.drops.length) {
                         pushMonster({
                             id: 'm_' + monsters.length,
                             name: z.monsterName || z.name,
-                            location: areaName + ' · ' + z.name,
+                            location: zloc,
                             tier: z.tier,
                             tierName: tierName(z.tier),
                             img: normalizeImgUrl(z.monsterImg),
                             summonCoin: null,
                             summonItems: [],
                             feeNote: null,
+                            mod: z.monsterMod || {},
                             drops: expandDrops(z.drops)
+                        });
+                    }
+                    // 分区召唤（痛苦女皇等）
+                    for (const s of (z.summons || [])) {
+                        if (s && Array.isArray(s.drops)) {
+                            addSummon(s, zloc, null);
+                        }
+                    }
+                    // 分区 Boss（琉璃王：固定血量/每秒回血）
+                    if (z.boss && Array.isArray(z.boss.drops)) {
+                        const sc = z.boss.summonCost || {};
+                        const summonItems = Object.entries(sc)
+                            .filter(([k]) => k !== 'coin')
+                            .map(([k, v]) => ({ item: k, count: v }));
+                        const qName = z.boss.quality ? ((defs.EQUIP_QUALITIES || {})[z.boss.quality] || {}).name || z.boss.quality : '';
+                        pushMonster({
+                            id: 'm_' + monsters.length,
+                            name: z.boss.name || z.name,
+                            location: zloc + '（团队Boss·召唤）',
+                            tier: z.boss.tier || z.boss.quality || 'legend',
+                            tierName: tierName(z.boss.tier) || qName || '',
+                            img: normalizeImgUrl(z.monsterImg),
+                            summonCoin: typeof sc.coin === 'number' ? sc.coin : 0,
+                            summonItems: summonItems,
+                            feeNote: null,
+                            mod: {},
+                            drops: expandDrops(z.boss.drops)
+                        }, {
+                            isBoss: true,
+                            hp: z.boss.hp,
+                            res: z.boss.armor != null ? z.boss.armor : undefined,
+                            regen: z.boss.hpRegenPerSec != null ? z.boss.hpRegenPerSec
+                                : (z.boss.regen != null ? z.boss.regen : undefined)
                         });
                     }
                 }
@@ -1532,6 +1926,7 @@
                             summonCoin: null,
                             summonItems: [],
                             feeNote: feeNote,
+                            mod: layer.monsterMod || {},
                             drops: expandDrops(layer.drops)
                         });
                     }
@@ -2265,7 +2660,7 @@
                 sec.type = 'number';
                 sec.className = 'small';
                 sec.value = row.sec;
-                sec.placeholder = '默认';
+                sec.placeholder = '默认/估算';
                 sec.min = 0.1;
                 sec.step = 0.5;
                 sec.oninput = () => {
@@ -2305,10 +2700,155 @@
             }
         }
 
+        // ------------------------------------------------------------------
+        // 击杀耗时估算：用属性面板的期望伤害 ÷ 怪物平均血量
+        // 抗性折算为估算公式（游戏未公开结算细节）：
+        //   有效抗性 = max(0, 怪物物理抗性 × (1 - 玩家护甲穿透/100))
+        //   物理伤害 × 100 / (100 + 有效抗性 × 1.5)；魔法/真实伤害不受物理抗性影响
+        //   怪物每秒回血直接从 DPS 中扣除
+        // ------------------------------------------------------------------
+        const FARM_OPTIONS_KEY = 'mc_farm_options_v1';
+        let farmOptions = { buildId: '', ignoreRes: false };
+
+        function loadFarmOptions() {
+            try {
+                const raw = localStorage.getItem(FARM_OPTIONS_KEY);
+                if (raw) {
+                    const o = JSON.parse(raw);
+                    if (o && typeof o === 'object') {
+                        farmOptions = {
+                            buildId: typeof o.buildId === 'string' ? o.buildId : '',
+                            ignoreRes: !!o.ignoreRes
+                        };
+                    }
+                }
+            } catch (e) { /* 忽略 */ }
+        }
+
+        function saveFarmOptions() {
+            try {
+                localStorage.setItem(FARM_OPTIONS_KEY, JSON.stringify(farmOptions));
+            } catch (e) { /* 存储满了就放弃 */ }
+        }
+
+        function fillFarmBuildSelect() {
+            const sel = document.getElementById('farmBuildSelect');
+            if (!sel) return;
+            const prev = farmOptions.buildId;
+            sel.innerHTML = '';
+
+            const optNone = document.createElement('option');
+            optNone.value = '';
+            optNone.textContent = '不使用（手动输入秒/只）';
+            sel.appendChild(optNone);
+
+            if (dataReady) {
+                const optCur = document.createElement('option');
+                optCur.value = '__current__';
+                optCur.textContent = '当前配装（属性面板页签）';
+                sel.appendChild(optCur);
+
+                const builds = loadPanelBuilds();
+                if (builds.length) {
+                    const og = document.createElement('optgroup');
+                    og.label = '已保存配装';
+                    builds.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+                    for (const b of builds) {
+                        const o = document.createElement('option');
+                        o.value = String(b.id);
+                        o.textContent = b.name;
+                        og.appendChild(o);
+                    }
+                    sel.appendChild(og);
+                }
+            }
+
+            // 恢复选择；失效则回落
+            let ok = false;
+            for (const o of sel.options) {
+                if (o.value === prev) { o.selected = true; ok = true; break; }
+            }
+            if (!ok) {
+                farmOptions.buildId = '';
+                sel.options[0].selected = true;
+            }
+        }
+
+        function onFarmBuildChange() {
+            const sel = document.getElementById('farmBuildSelect');
+            const cb = document.getElementById('farmIgnoreRes');
+            if (sel) farmOptions.buildId = sel.value;
+            if (cb) farmOptions.ignoreRes = cb.checked;
+            saveFarmOptions();
+            calcFarm();
+        }
+
+        // 当前选中的配装面板（未选择时返回 null）
+        function getFarmPanel() {
+            if (!dataReady || !farmOptions.buildId) return null;
+            if (farmOptions.buildId === '__current__') {
+                return computePanel(panelState);
+            }
+            const build = loadPanelBuilds().find(b => String(b.id) === farmOptions.buildId);
+            return build ? computePanel(normalizePanelState(build.state)) : null;
+        }
+
+        // 估算单只击杀秒数；返回 { sec, dps, net } 或 null
+        function estimateKillSec(monster, panel) {
+            const c = monster.combat;
+            if (!c || !c.hpAvg) return null;
+            const st = panel.stats;
+            let physMult = 1;
+            if (!farmOptions.ignoreRes && c.res > 0) {
+                const effRes = Math.max(0, c.res * (1 - (st.armorPen || 0) / 100));
+                physMult = 100 / (100 + effRes * 1.5);
+            }
+            const strengthLv = panel.buffs.strength || 0;
+            const strengthDmg = strengthLv * ((BUFF_EFFECT_DATA.strength && BUFF_EFFECT_DATA.strength.dmgPerLevel) || 2);
+            const cc = Math.min(Math.max(st.critChance, 0), 100) / 100;
+            const critMult = 1 + cc * st.critDmgPct / 100;
+            const finalMult = 1 + st.finalDmgPct / 100;
+            // 近战：物理（吃抗性）+ 魔法/真实（不受物理抗性影响）× 实战取整刀数
+            const avgPhys = (st.physDmg.min + st.physDmg.max) / 2 + strengthDmg;
+            const physOut = (avgPhys * critMult + cc * st.critDmgFlat) * finalMult * physMult;
+            const otherOut = ((st.magicDmg.min + st.magicDmg.max) / 2 + st.trueDmg) * finalMult;
+            const meleeDps = (physOut + otherOut) * st.attackFreqRounded;
+            // 副手弓：固定每秒连射 N 箭，不计暴击
+            const bowDps = st.rangedDmg > 0
+                ? st.rangedDmg * Math.max(1, st.multishot) * finalMult * physMult
+                : 0;
+            const dps = meleeDps + bowDps;
+            const net = dps - (c.regen || 0);
+            return { sec: net > 0 ? c.hpAvg / net : Infinity, dps: dps, net: net };
+        }
+
         // 挂机时间计算
         function calcFarm() {
             const cardsContainer = document.getElementById('farmCards');
             const totalContainer = document.getElementById('farmTotal');
+            const infoContainer = document.getElementById('farmBuildInfo');
+
+            // 配装估算信息栏
+            const farmPanel = getFarmPanel();
+            if (infoContainer) {
+                infoContainer.innerHTML = '';
+                if (farmPanel) {
+                    const st = farmPanel.stats;
+                    const div = document.createElement('div');
+                    div.className = 'farm-build-info';
+                    const buildName = farmOptions.buildId === '__current__'
+                        ? '当前配装' : (loadPanelBuilds().find(b => String(b.id) === farmOptions.buildId) || {}).name;
+                    let html = `<b>「${escapeHtml(buildName || '配装')}」输出估算</b>：单次期望 ${fmtNum(farmPanel.dps.hit)} × ${st.attackFreqRounded} 刀/秒`;
+                    if (farmPanel.dps.bow > 0) {
+                        html += ` + 副手弓 ${fmtNum(farmPanel.dps.bow)}/秒`;
+                    }
+                    html += `，合计 ≈ <b>${fmtNum(farmPanel.dps.total)}/秒</b>（未计怪物抗性；行内耗时按各自怪物抗性折算）`;
+                    if (farmOptions.ignoreRes) html += `<span class="warn">［已忽略怪物抗性］</span>`;
+                    html += '<br>抗性折算为估算公式：物理伤害 × 100/(100+有效抗性×1.5)，护甲穿透按百分比削减怪物抗性；魔法/真实伤害不受物理抗性影响；怪物回血从 DPS 中扣除。游戏未公开具体结算，结果仅供参考。';
+                    div.innerHTML = html;
+                    infoContainer.appendChild(div);
+                }
+            }
 
             const rows = farmRows.filter(r => r.itemId);
             if (!rows.length) {
@@ -2363,8 +2903,11 @@
                 const exp = monster.expDrops[row.itemId] || 0;
                 if (exp <= 0) continue;
 
+                // 击杀耗时：行内覆盖 > 配装估算 > 全局默认
+                const est = farmPanel ? estimateKillSec(monster, farmPanel) : null;
+                const rowOverride = (row.sec !== '' && row.sec != null && isFinite(parseFloat(row.sec))) ? parseFloat(row.sec) : null;
+                const secPerKill = rowOverride != null ? rowOverride : (est ? est.sec : defaultSec);
                 const kills = row.count / exp;
-                const secPerKill = parseFloat(row.sec) || defaultSec;
                 const seconds = kills * secPerKill;
                 const killsCeil = Math.ceil(kills);
                 const summonCoin = typeof monster.summonCoin === 'number' ? monster.summonCoin * kills : null;
@@ -2377,6 +2920,27 @@
 
                 // 怪物行
                 card.appendChild(farmLine('刷取怪物', `${monster.name}`, `<span class="monster-info">${monster.location} · ${monster.tierName ? monster.tierName + ' · ' : ''}预期 ${fmtNum(exp)}/只</span>`));
+                // 击杀耗时（配装估算）
+                if (est && rowOverride == null) {
+                    if (!isFinite(est.sec)) {
+                        const warnLine = document.createElement('div');
+                        warnLine.className = 'invalid-row';
+                        warnLine.textContent = `⚠ 估算无法击杀：DPS ${fmtNum(est.dps)}/秒 ≤ 怪物回血 ${(monster.combat.regen || 0)}/秒，请换目标或提升输出`;
+                        card.appendChild(warnLine);
+                    } else {
+                        const estLine = farmLine('击杀耗时', `≈ ${fmtNum(est.sec, 2)} 秒/只`, null, true);
+                        const tag = document.createElement('span');
+                        tag.className = 'est-tag';
+                        tag.textContent = '配装估算';
+                        estLine.appendChild(tag);
+                        card.appendChild(estLine);
+                        const c = monster.combat;
+                        const note = document.createElement('div');
+                        note.className = 'farm-line';
+                        note.innerHTML = `<span class="k">怪物数值</span><span class="monster-info">生命 ${c.hpText} · 物理抗性 ${c.res}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''} · 估算DPS ${fmtNum(est.net)}/秒</span>`;
+                        card.appendChild(note);
+                    }
+                }
                 card.appendChild(farmLine('预计击杀', `≈ ${fmtInt(killsCeil)} 只`));
                 card.appendChild(farmLine('挂机时长', fmtTime(seconds), null, true));
 
@@ -2586,7 +3150,7 @@
         //                实战按四舍五入取整执行（如 2.75次/秒 = 每秒3刀）
         // ------------------------------------------------------------------
 
-        // 槽位布局：仿游戏装备栏（左列防具+主手，右列饰品+副手，护符共两槽）
+        // 槽位布局：仿游戏装备栏（左列防具+主手，右列饰品+副手；护符仅 1 个可用槽位）
         const PANEL_SLOT_LAYOUT = [
             { key: 'helmet',   accept: 'helmet',   col: 'left' },
             { key: 'chest',    accept: 'chest',    col: 'left' },
@@ -2594,7 +3158,6 @@
             { key: 'boots',    accept: 'boots',    col: 'left' },
             { key: 'mainHand', accept: 'mainHand', col: 'left' },
             { key: 'amulet1',  accept: 'amulet',   col: 'right', name: '护符' },
-            { key: 'amulet2',  accept: 'amulet',   col: 'right', name: '护符Ⅱ' },
             { key: 'necklace', accept: 'necklace', col: 'right' },
             { key: 'ring',     accept: 'ring',     col: 'right', name: '戒指' },
             { key: 'totem',    accept: 'totem',    col: 'right' },
@@ -2603,8 +3166,99 @@
 
         const PANEL_SLOT_ICONS = {
             helmet: '⛑️', chest: '🦺', legs: '👖', boots: '👢', mainHand: '⚔️',
-            amulet1: '📿', amulet2: '📿', necklace: '📿', ring: '💍', totem: '🪬', offHand: '🛡️'
+            amulet1: '📿', necklace: '📿', ring: '💍', totem: '🪬', offHand: '🛡️'
         };
+
+        // 护符镌刻词条池（数值与游戏 Wiki 的护符鉴定模拟完全一致）
+        // 每槽 70% 成功 / 20% 作废 / 10% 反噬；成功词条从池中等概率抽取，可重复
+        // 太古 = 数值向上取整 ×1.25；pct 类词条以 % 展示
+        const CHARM_BASE_POOL = [
+            { key: 'maxHp',   name: '生命值',   value: 15 },
+            { key: 'physRes', name: '物理抗性', value: 5 },
+            { key: 'magicRes', name: '魔法抗性', value: 5 },
+            { key: 'physDmg', name: '物理伤害', value: 10 }
+        ];
+        const CHARM_POOLS = {
+            normal: CHARM_BASE_POOL,
+            fine: CHARM_BASE_POOL.concat([
+                { key: 'critChance',       name: '暴击几率', value: 5, pct: true },
+                { key: 'critChanceResist', name: '暴击抵抗', value: 5, pct: true },
+                { key: 'lifestealFlat',    name: '吸血',     value: 3 }
+            ]),
+            master: null // 下方拼接
+        };
+        CHARM_POOLS.master = CHARM_POOLS.fine.concat([
+            { key: 'attackSpeed',  name: '攻速',     value: 5 },
+            { key: 'dodge',        name: '闪避',     value: 5, pct: true },
+            { key: 'lifestealPct', name: '吸血几率', value: 1, pct: true },
+            { key: 'blockChance',  name: '格挡几率', value: 5, pct: true }
+        ]);
+
+        // 护符装备 id -> 品级（词条槽数：普通1 / 精工2 / 大师3）
+        const CHARM_GRADE_MAP = {
+            charmNormal: 'normal',
+            charmFine: 'fine',
+            charmMaster: 'master'
+        };
+        const CHARM_GRADE_INFO = {
+            normal: { name: '普通护符', slots: 1 },
+            fine:   { name: '精工护符', slots: 2 },
+            master: { name: '大师护符', slots: 3 }
+        };
+
+        // 收藏室（装备库）定义：加成数值来自游戏公告；
+        // known=false 的为估算值（游戏未公开），UI 中可编辑
+        const VAULT_WEAPON_DEFS = [
+            { id: 'blackIronSword',       stats: [{ stat: 'physDmg', val: 3,  known: true }] },
+            { id: 'moonSlash',            stats: [{ stat: 'physDmg', val: 5,  known: true }] },
+            { id: 'nightDemonSword',      stats: [{ stat: 'magicDmg', val: 2, known: true }] },
+            { id: 'blackIronSwordVX',     stats: [{ stat: 'armorPen', val: 10, known: true }] },
+            { id: 'voidSword',            stats: [{ stat: 'magicDmg', val: 10, known: true }] },
+            { id: 'sanctionBlade',        stats: [{ stat: 'trueDmg', val: 3,  known: true }] },
+            { id: 'bloodDrinkingSword',   stats: [{ stat: 'lifestealFlat', val: 2, known: false }] },
+            { id: 'trueBloodDrinkingSword', stats: [{ stat: 'lifestealFlat', val: 3, known: false }] },
+            { id: 'weepingBloodBlade',    stats: [{ stat: 'lifestealFlat', val: 4, known: false }] },
+            { id: 'huangqieZhanlingSword', stats: [{ stat: 'critChance', val: 3, known: true }] },
+            { id: 'darkTideFollower',     stats: [{ stat: 'physRes', val: 2, known: false }, { stat: 'magicRes', val: 2, known: false }] }
+        ];
+        // 盔甲库：四件套卡片，每放一件拿一份加成，放满 4 件再额外加一份
+        const VAULT_ARMOR_SETS = [
+            {
+                id: 'blackIron', name: '玄铁', pieceLabel: '玄铁系列',
+                items: { helmet: 'blackIronHelmet', chest: 'blackIronArmor', legs: 'blackIronLegs', boots: 'blackIronBoots' },
+                stats: [{ stat: 'maxHp', val: 10, known: false }]
+            },
+            {
+                id: 'corpseKing', name: '尸王铠', pieceLabel: '尸王铠系列',
+                items: { helmet: 'corpseKingHelmet', chest: 'corpseKingArmor', legs: 'corpseKingLegs', boots: 'corpseKingBoots' },
+                stats: [{ stat: 'finalDmgPct', val: 2, known: false }]
+            },
+            {
+                id: 'glazedCore', name: '琉璃核心', pieceLabel: '琉璃核心系列',
+                items: { helmet: 'glazedCoreHelmet', chest: 'glazedCoreArmor', legs: 'glazedCoreLegs', boots: 'glazedCoreBoots' },
+                stats: [{ stat: 'dodge', val: 2, known: false }]
+            },
+            {
+                id: 'sulfurTech', name: '硫磺火科技装甲', pieceLabel: '硫磺火科技系列',
+                items: { helmet: 'sulfurTechArmor1', chest: 'sulfurTechArmor2', legs: 'sulfurTechArmor3', boots: 'sulfurTechArmor4' },
+                stats: [{ stat: 'critChance', val: 2, known: false }]
+            },
+            {
+                id: 'endLanling', name: '终界蓝凌', pieceLabel: '终界蓝凌系列',
+                items: { helmet: 'endLanlingArmor1', chest: 'endLanlingArmor2', legs: 'endLanlingArmor3', boots: 'endLanlingArmor4' },
+                stats: [{ stat: 'magicRes', val: 2, known: true }]
+            }
+        ];
+        const VAULT_OFFHAND_DEFS = [
+            { id: 'ironBow',         stats: [{ stat: 'rangedDmg', val: 2, known: true }] },
+            { id: 'nightBow',        stats: [{ stat: 'rangedDmg', val: 4, known: true }] },
+            { id: 'glazedBow',       stats: [{ stat: 'rangedDmg', val: 6, known: true }] },
+            { id: 'sulfurFireTechBow', stats: [{ stat: 'rangedDmg', val: 5, known: true }] },
+            { id: 'darkChaser',      stats: [{ stat: 'rangedDmg', val: 8, known: true }] },
+            { id: 'voidArrow',       stats: [{ stat: 'rangedDmg', val: 8, known: true }] }
+        ];
+
+        const STAT_UNIT_PCT = new Set(['critChance', 'critChanceResist', 'lifestealPct', 'dodge', 'blockChance', 'critDmgPct', 'armorPen', 'finalDmgPct', 'dmgReducePct']);
 
         // 额外加成词条可选项（key -> 显示名，括号内为数值单位）
         const CUSTOM_STAT_OPTIONS = [
@@ -2634,19 +3288,25 @@
 
         const PANEL_STATE_KEY = 'mc_panel_state_v1';
         const PANEL_BUILDS_KEY = 'mc_panel_builds_v1';
-        let panelState = { slots: {}, custom: [] };
+        let panelState = { slots: {}, custom: [], charm: { slots: [] }, vault: { stored: {}, values: {} } };
+
+        function normalizePanelState(obj) {
+            const s = (obj && typeof obj === 'object') ? obj : {};
+            return {
+                slots: (s.slots && typeof s.slots === 'object') ? s.slots : {},
+                custom: Array.isArray(s.custom) ? s.custom.filter(c => c && c.stat) : [],
+                charm: (s.charm && typeof s.charm === 'object') ? { slots: Array.isArray(s.charm.slots) ? s.charm.slots : [] } : { slots: [] },
+                vault: (s.vault && typeof s.vault === 'object')
+                    ? { stored: (s.vault.stored && typeof s.vault.stored === 'object') ? s.vault.stored : {}, values: (s.vault.values && typeof s.vault.values === 'object') ? s.vault.values : {} }
+                    : { stored: {}, values: {} }
+            };
+        }
 
         function loadPanelState() {
             try {
                 const raw = localStorage.getItem(PANEL_STATE_KEY);
                 if (!raw) return;
-                const obj = JSON.parse(raw);
-                if (obj && typeof obj === 'object') {
-                    panelState = {
-                        slots: (obj.slots && typeof obj.slots === 'object') ? obj.slots : {},
-                        custom: Array.isArray(obj.custom) ? obj.custom.filter(c => c && c.stat) : []
-                    };
-                }
+                panelState = normalizePanelState(JSON.parse(raw));
             } catch (e) { /* 忽略损坏缓存 */ }
         }
 
@@ -2700,6 +3360,12 @@
                 }
             }
             panelState.custom = panelState.custom.filter(c => c.stat);
+            // 收藏室：装备定义不存在的入库项清掉
+            if (panelState.vault && panelState.vault.stored) {
+                for (const id of Object.keys(panelState.vault.stored)) {
+                    if (!ITEM_DEFS[id]) delete panelState.vault.stored[id];
+                }
+            }
         }
 
         function slotDisplayName(sd) {
@@ -2750,6 +3416,7 @@
                             }
                             savePanelState();
                             updateSlotItemIcon(row, sd.key);
+                            if (sd.key === 'amulet1') renderCharmEditor();
                             calcPanel();
                         };
                     }
@@ -2881,6 +3548,336 @@
             });
         }
 
+        // ------------------------------------------------------------------
+        // 护符镌刻台：装备护符后出现，按品级选择 1~3 条词条（普通/太古）
+        // ------------------------------------------------------------------
+        function renderCharmEditor() {
+            const card = document.getElementById('charmCard');
+            const body = document.getElementById('charmEditorBody');
+            if (!card || !body) return;
+            const id = panelState.slots.amulet1 || '';
+            const grade = CHARM_GRADE_MAP[id] || null;
+            if (!grade || !dataReady) {
+                card.style.display = 'none';
+                return;
+            }
+            card.style.display = '';
+            const info = CHARM_GRADE_INFO[grade];
+            const pool = CHARM_POOLS[grade];
+            if (!panelState.charm) panelState.charm = { slots: [] };
+            if (!Array.isArray(panelState.charm.slots)) panelState.charm.slots = [];
+            // 槽位数量按品级裁剪
+            panelState.charm.slots = panelState.charm.slots.slice(0, info.slots);
+
+            const filled = panelState.charm.slots.filter(s => s && s.stat).length;
+            const ancients = panelState.charm.slots.filter(s => s && s.stat && s.ancient).length;
+            // 命名规则与游戏一致：按成功槽数 完美的/有瑕疵的/残余的，太古加 ★
+            const prefix = filled >= info.slots ? '完美的'
+                : (filled === info.slots - 1 ? '有瑕疵的' : (filled > 0 ? '残余的' : '未镌刻'));
+            const namePreview = prefix + info.name + (ancients ? '★'.repeat(ancients) : '');
+
+            body.innerHTML = '';
+
+            const head = document.createElement('div');
+            head.className = 'charm-head';
+            const nameEl = document.createElement('span');
+            nameEl.className = 'charm-name-preview';
+            nameEl.textContent = namePreview;
+            const gradeTag = document.createElement('span');
+            gradeTag.className = 'charm-grade-tag';
+            gradeTag.textContent = `${info.slots} 槽 · 已选 ${filled}/${info.slots}`;
+            head.appendChild(nameEl);
+            head.appendChild(gradeTag);
+            body.appendChild(head);
+
+            for (let i = 0; i < info.slots; i++) {
+                const slotState = panelState.charm.slots[i] || (panelState.charm.slots[i] = { stat: '', ancient: false });
+                const row = document.createElement('div');
+                row.className = 'charm-slot-row';
+
+                const idx = document.createElement('span');
+                idx.className = 'charm-slot-idx';
+                idx.textContent = '槽 ' + (i + 1);
+                row.appendChild(idx);
+
+                const sel = document.createElement('select');
+                const empty = document.createElement('option');
+                empty.value = '';
+                empty.textContent = '-- 未镌刻 --';
+                sel.appendChild(empty);
+                for (const affix of pool) {
+                    const o = document.createElement('option');
+                    o.value = affix.key;
+                    o.textContent = affix.name;
+                    if (affix.key === slotState.stat) o.selected = true;
+                    sel.appendChild(o);
+                }
+                sel.onchange = () => {
+                    slotState.stat = sel.value;
+                    savePanelState();
+                    renderCharmEditor();
+                    calcPanel();
+                };
+                row.appendChild(sel);
+
+                // 词条数值预览（太古 = 向上取整 ×1.25）
+                const valSpan = document.createElement('span');
+                valSpan.className = 'charm-slot-val';
+                if (slotState.stat) {
+                    const affix = pool.find(a => a.key === slotState.stat);
+                    if (affix) {
+                        const v = slotState.ancient ? Math.ceil(affix.value * 1.25) : affix.value;
+                        valSpan.textContent = '+' + v + (affix.pct || STAT_UNIT_PCT.has(affix.key) ? '%' : '');
+                    }
+                }
+                row.appendChild(valSpan);
+
+                const ancLabel = document.createElement('label');
+                ancLabel.className = 'charm-ancient-label' + (slotState.ancient ? ' on' : '');
+                const ancCb = document.createElement('input');
+                ancCb.type = 'checkbox';
+                ancCb.checked = !!slotState.ancient;
+                ancCb.disabled = !slotState.stat;
+                ancCb.onchange = () => {
+                    slotState.ancient = ancCb.checked;
+                    savePanelState();
+                    renderCharmEditor();
+                    calcPanel();
+                };
+                ancLabel.appendChild(ancCb);
+                ancLabel.appendChild(document.createTextNode('★ 太古'));
+                ancLabel.title = '太古词条：数值向上取整 ×1.25，名称末尾加 ★';
+                row.appendChild(ancLabel);
+
+                body.appendChild(row);
+            }
+
+            const hint = document.createElement('div');
+            hint.className = 'hint-inline';
+            hint.style.marginTop = '8px';
+            hint.textContent = '词条池与游戏一致（等概率可重复）；赫拉迪姆魔盒合成的 3/3 完美大师护符 = 三槽全选。';
+            body.appendChild(hint);
+        }
+
+        // ------------------------------------------------------------------
+        // 收藏室（装备库）：武器库 / 盔甲库 / 副手库，UI 对齐游戏装备库
+        // ------------------------------------------------------------------
+        let vaultActiveTab = 'weapon';
+
+        function vaultCountOf(tab) {
+            if (!panelState.vault) return { on: 0, total: 0 };
+            const stored = panelState.vault.stored || {};
+            if (tab === 'weapon') {
+                return { on: VAULT_WEAPON_DEFS.filter(d => stored[d.id]).length, total: VAULT_WEAPON_DEFS.length };
+            }
+            if (tab === 'armor') {
+                let on = 0, total = 0;
+                for (const set of VAULT_ARMOR_SETS) {
+                    const ids = Object.values(set.items);
+                    total += ids.length;
+                    on += ids.filter(id => stored[id]).length;
+                }
+                return { on, total };
+            }
+            return { on: VAULT_OFFHAND_DEFS.filter(d => stored[d.id]).length, total: VAULT_OFFHAND_DEFS.length };
+        }
+
+        function toggleVaultStored(id) {
+            if (!panelState.vault) panelState.vault = { stored: {}, values: {} };
+            if (!panelState.vault.stored) panelState.vault.stored = {};
+            if (panelState.vault.stored[id]) {
+                delete panelState.vault.stored[id];
+            } else {
+                panelState.vault.stored[id] = true;
+            }
+            savePanelState();
+            renderVaultUI();
+            calcPanel();
+        }
+
+        function vaultQualityColor(id) {
+            const eq = ITEM_DEFS[id] && ITEM_DEFS[id].equip;
+            const q = (eq && eq.quality) || '';
+            return (QUALITY_DEFS[q] && QUALITY_DEFS[q].color) || null;
+        }
+
+        // 收藏加成标签（known=false 渲染可编辑输入框）
+        function appendVaultBonusLine(container, ownerId, statDef) {
+            const line = document.createElement('div');
+            const statName = (STAT_DEFS[statDef.stat] && STAT_DEFS[statDef.stat].name) || statDef.stat;
+            const unit = STAT_UNIT_PCT.has(statDef.stat) ? '%' : '';
+            const key = ownerId + ':' + statDef.stat;
+            const cur = (panelState.vault.values || {})[key];
+            if (statDef.known) {
+                line.className = 'vault-bonus';
+                line.textContent = `+${statDef.val}${unit} ${statName}`;
+            } else {
+                line.className = 'vault-bonus';
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = (typeof cur === 'number' && isFinite(cur)) ? cur : statDef.val;
+                input.step = 'any';
+                input.title = '游戏未公开该数值，此为估算值，可按游戏内实际修改';
+                input.onclick = (e) => e.stopPropagation();
+                input.oninput = () => {
+                    if (!panelState.vault.values) panelState.vault.values = {};
+                    const v = parseFloat(input.value);
+                    panelState.vault.values[key] = isNaN(v) ? 0 : v;
+                    savePanelState();
+                    calcPanel();
+                };
+                line.appendChild(document.createTextNode('≈ +'));
+                line.appendChild(input);
+                line.appendChild(document.createTextNode(unit + ' ' + statName + ' '));
+                const est = document.createElement('span');
+                est.className = 'est';
+                est.textContent = '估算';
+                line.appendChild(est);
+            }
+            container.appendChild(line);
+        }
+
+        function renderVaultUI() {
+            const tabsWrap = document.getElementById('vaultTabs');
+            const body = document.getElementById('vaultBody');
+            if (!tabsWrap || !body) return;
+            tabsWrap.innerHTML = '';
+            body.innerHTML = '';
+            if (!dataReady) {
+                body.innerHTML = '<div class="hint-inline">数据加载中…</div>';
+                return;
+            }
+
+            // 页签（与游戏一致：武器库 N/M · 装备库 · 副手库 N/M）
+            const tabDefs = [
+                { key: 'weapon', label: '武器库' },
+                { key: 'armor', label: '装备库' },
+                { key: 'offhand', label: '副手库' }
+            ];
+            for (const t of tabDefs) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'vault-tab' + (vaultActiveTab === t.key ? ' on' : '');
+                let label = t.label;
+                if (t.key !== 'armor') {
+                    const c = vaultCountOf(t.key);
+                    label += ` <em>${c.on}/${c.total}</em>`;
+                }
+                btn.innerHTML = label;
+                btn.onclick = () => {
+                    vaultActiveTab = t.key;
+                    renderVaultUI();
+                };
+                tabsWrap.appendChild(btn);
+            }
+
+            const stored = (panelState.vault && panelState.vault.stored) || {};
+
+            if (vaultActiveTab === 'armor') {
+                // 盔甲库：套装卡片 + 四件格子（与游戏 armor-set-card 一致）
+                const hint = document.createElement('div');
+                hint.className = 'hint-inline';
+                hint.style.marginBottom = '10px';
+                hint.textContent = '每个套装 4 格。放入一件拿一份加成，四件放满再额外加一份。';
+                body.appendChild(hint);
+
+                for (const set of VAULT_ARMOR_SETS) {
+                    const pieceIds = Object.values(set.items);
+                    const on = pieceIds.filter(id => stored[id]).length;
+                    const full = on >= 4;
+                    const setCard = document.createElement('div');
+                    setCard.className = 'armor-set-card' + (full ? ' full' : '');
+
+                    const head = document.createElement('div');
+                    head.className = 'armor-set-head';
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'set-name';
+                    nameSpan.textContent = set.name;
+                    head.appendChild(nameSpan);
+                    const bonusSpan = document.createElement('span');
+                    bonusSpan.className = 'set-bonus';
+                    for (const s of set.stats) {
+                        const statName = (STAT_DEFS[s.stat] && STAT_DEFS[s.stat].name) || s.stat;
+                        const unit = STAT_UNIT_PCT.has(s.stat) ? '%' : '';
+                        bonusSpan.textContent += (bonusSpan.textContent ? ' / ' : '') + `每件 +${s.val}${unit} ${statName}`;
+                    }
+                    head.appendChild(bonusSpan);
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'set-count';
+                    countSpan.textContent = on + '/4' + (full ? '（放满 +1 份）' : '');
+                    head.appendChild(countSpan);
+                    setCard.appendChild(head);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'armor-piece-grid';
+                    for (const [slotKey, itemId] of Object.entries(set.items)) {
+                        const info = ITEM_DEFS[itemId];
+                        const piece = document.createElement('div');
+                        piece.className = 'armor-piece' + (stored[itemId] ? ' on' : '');
+                        piece.onclick = () => toggleVaultStored(itemId);
+                        const img = info ? createItemImg(info.img, '') : null;
+                        if (img) piece.appendChild(img);
+                        const slotLabel = document.createElement('span');
+                        slotLabel.className = 'slot-label';
+                        slotLabel.textContent = { helmet: '头盔', chest: '胸甲', legs: '护腿', boots: '战靴' }[slotKey] || slotKey;
+                        piece.appendChild(slotLabel);
+                        const nameEl = document.createElement('span');
+                        nameEl.className = 'slot-label';
+                        nameEl.textContent = info ? info.name : itemId;
+                        piece.appendChild(nameEl);
+                        grid.appendChild(piece);
+                    }
+                    setCard.appendChild(grid);
+                    body.appendChild(setCard);
+                }
+                return;
+            }
+
+            const defs = vaultActiveTab === 'weapon' ? VAULT_WEAPON_DEFS : VAULT_OFFHAND_DEFS;
+            const hint = document.createElement('div');
+            hint.className = 'hint-inline';
+            hint.style.marginBottom = '10px';
+            hint.textContent = vaultActiveTab === 'weapon'
+                ? '把武器放进库中可获得收藏属性，随时可以取回。'
+                : '把副手弓放进库中可获得远程伤害加成，随时可以取回。';
+            body.appendChild(hint);
+
+            const grid = document.createElement('div');
+            grid.className = 'vault-grid';
+            for (const def of defs) {
+                const info = ITEM_DEFS[def.id];
+                const card = document.createElement('div');
+                card.className = 'vault-card' + (stored[def.id] ? ' on' : '');
+                const qc = vaultQualityColor(def.id);
+                if (qc) card.style.borderColor = stored[def.id] ? qc : '';
+                card.onclick = () => toggleVaultStored(def.id);
+
+                const pic = document.createElement('div');
+                pic.className = 'vault-pic';
+                if (info && info.img) {
+                    const img = createItemImg(info.img, '');
+                    if (img) {
+                        attachEquipTooltip(img, def.id);
+                        pic.appendChild(img);
+                    }
+                }
+                card.appendChild(pic);
+
+                const name = document.createElement('div');
+                name.className = 'vault-name';
+                name.textContent = info ? info.name : def.id;
+                if (qc) name.style.color = qc;
+                attachEquipTooltip(name, def.id);
+                card.appendChild(name);
+
+                for (const s of def.stats) {
+                    appendVaultBonusLine(card, def.id, s);
+                }
+                grid.appendChild(card);
+            }
+            body.appendChild(grid);
+        }
+
         // 聚合一组 stats 对象（{key: {flat/flatMin/flatMax/pct}}）为加和
         function aggregateBonus(statsList) {
             const b = {};
@@ -2927,7 +3924,61 @@
             return s;
         }
 
-        // 核心计算：返回 { stats, eqBonus, cuBonus, buffs, dps, warnings, selected }
+        // 护符词条 → 加成桶（state 可为任意保存的配装状态）
+        function computeCharmBonus(state) {
+            const grade = CHARM_GRADE_MAP[state.slots.amulet1] || null;
+            if (!grade) return {};
+            const info = CHARM_GRADE_INFO[grade];
+            const pool = CHARM_POOLS[grade];
+            const slots = (state.charm && Array.isArray(state.charm.slots)) ? state.charm.slots : [];
+            const stats = {};
+            for (let i = 0; i < info.slots; i++) {
+                const s = slots[i];
+                if (!s || !s.stat) continue;
+                const affix = pool.find(a => a.key === s.stat);
+                if (!affix) continue;
+                const val = s.ancient ? Math.ceil(affix.value * 1.25) : affix.value;
+                const t = (stats[affix.key] = stats[affix.key] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 });
+                t.flat += val;
+            }
+            return stats;
+        }
+
+        // 收藏室 → 加成桶（武器库/盔甲库/副手库；盔甲套装每件一份、放满额外一份）
+        function computeVaultBonus(vault) {
+            const v = vault || {};
+            const stored = v.stored || {};
+            const values = v.values || {};
+            const b = {};
+            const add = (stat, val) => {
+                if (!val) return;
+                const t = (b[stat] = b[stat] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 });
+                t.flat += val;
+            };
+            const valOf = (ownerId, stat, defVal) => {
+                const k = ownerId + ':' + stat;
+                const x = values[k];
+                return (typeof x === 'number' && isFinite(x)) ? x : defVal;
+            };
+            for (const w of VAULT_WEAPON_DEFS) {
+                if (!stored[w.id]) continue;
+                for (const s of w.stats) add(s.stat, valOf(w.id, s.stat, s.val));
+            }
+            for (const set of VAULT_ARMOR_SETS) {
+                const pieceIds = Object.values(set.items);
+                const n = pieceIds.filter(id => stored[id]).length;
+                if (!n) continue;
+                const shares = n + (n >= 4 ? 1 : 0);
+                for (const s of set.stats) add(s.stat, valOf(set.id, s.stat, s.val) * shares);
+            }
+            for (const o of VAULT_OFFHAND_DEFS) {
+                if (!stored[o.id]) continue;
+                for (const s of o.stats) add(s.stat, valOf(o.id, s.stat, s.val));
+            }
+            return b;
+        }
+
+        // 核心计算：返回 { stats, eqBonus, charmBonus, vaultBonus, cuBonus, buffs, dps, warnings, selected }
         function computePanel(state) {
             const selected = [];
             for (const sd of PANEL_SLOT_LAYOUT) {
@@ -2949,8 +4000,10 @@
                 }
             }
 
-            // 装备词条聚合 + 额外加成聚合
+            // 各来源加成聚合：装备 / 护符词条 / 收藏室 / 额外手动
             const eqBonus = aggregateBonus(selected.map(it => it.info.equip.stats));
+            const charmBonus = computeCharmBonus(state);
+            const vaultBonus = computeVaultBonus(state.vault);
             const customStats = {};
             for (const c of (state.custom || [])) {
                 if (!c.stat) continue;
@@ -2958,7 +4011,8 @@
                 t.flat += Number(c.val) || 0;
             }
             const cuBonus = aggregateBonus([customStats]);
-            const S = k => mergeBonus(eqBonus, cuBonus)[k] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 };
+            const total = mergeBonus(mergeBonus(eqBonus, charmBonus), mergeBonus(vaultBonus, cuBonus));
+            const S = k => total[k] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 };
 
             // Buff 聚合：同名不叠加，取最高等级（套装规则）
             const buffs = {};
@@ -3023,43 +4077,41 @@
             const dps = {};
             dps.hit = (expPhysHit + avgMagic + stats.trueDmg) * finalMult;
             dps.freq = stats.attackFreqRounded; // 实战按取整后的刀数结算
-            dps.total = dps.hit * stats.attackFreqRounded;
-            dps.ranged = stats.rangedDmg > 0
-                ? stats.rangedDmg * Math.max(1, stats.multishot) * critMult * finalMult * stats.attackFreqRounded
-                : null;
+            dps.melee = dps.hit * stats.attackFreqRounded;
+            // 副手弓：固定每秒按连射射出（不受攻速/急迫影响），不计暴击
+            dps.bow = stats.rangedDmg > 0
+                ? stats.rangedDmg * Math.max(1, stats.multishot) * finalMult
+                : 0;
+            dps.total = dps.melee + dps.bow;
 
-            return { stats, eqBonus, cuBonus, buffs, dps, warnings, selected };
+            return { stats, eqBonus, charmBonus, vaultBonus, cuBonus, buffs, dps, warnings, selected };
         }
 
-        // 贡献明细文本（基础/装备/额外），无加成时返回 null
-        function contribText(key, eq, cu, kind) {
-            const e = (eq && eq[key]) || null;
-            const c = (cu && cu[key]) || null;
+        // 贡献明细文本（装备/护符/收藏/额外 各来源分列），无加成时返回 null
+        function contribText(key, buckets, kind) {
             const parts = [];
-            const eFlat = e ? (e.flat || 0) : 0;
-            const cFlat = c ? (c.flat || 0) : 0;
-            const ePct = e ? (e.pct || 0) : 0;
-            const cPct = c ? (c.pct || 0) : 0;
-            const hasEquip = e && (eFlat || ePct || e.flatMin || e.flatMax);
-            const hasCustom = c && (cFlat || cPct);
-            if (!hasEquip && !hasCustom) return null;
-
-            if (kind === 'range') {
-                const eMin = (e ? e.flatMin + e.flat : 0);
-                const eMax = (e ? e.flatMax + e.flat : 0);
-                const bits = [];
-                if (hasEquip) bits.push(`装备 +${eMin}~${eMax}`);
-                if (hasCustom) bits.push(`额外 +${cFlat}`);
-                if (ePct || cPct) bits.push(`×${(1 + (ePct + cPct) / 100).toFixed(2)}`);
-                return bits.join(' ｜ ');
+            let anyPct = 0;
+            let any = false;
+            for (const bucket of (buckets || [])) {
+                const v = (bucket.b && bucket.b[key]) || null;
+                if (!v) continue;
+                const flat = v.flat || 0;
+                const pct = v.pct || 0;
+                if (!flat && !pct && !v.flatMin && !v.flatMax) continue;
+                any = true;
+                anyPct += pct;
+                if (kind === 'range') {
+                    parts.push(`${bucket.label} +${(v.flatMin || 0) + flat}~${(v.flatMax || 0) + flat}`);
+                } else {
+                    parts.push(`${bucket.label} +${flat}` + (pct ? ` / +${pct}%` : ''));
+                }
             }
-            const bits = [];
-            if (hasEquip) bits.push(`装备 +${eFlat}${ePct ? ' / +' + ePct + '%' : ''}`);
-            if (hasCustom) bits.push(`额外 +${cFlat}${cPct ? ' / +' + cPct + '%' : ''}`);
-            if (kind === 'mixed' && (ePct || cPct) && !eFlat && !cFlat) {
-                bits.push(`×${(1 + (ePct + cPct) / 100).toFixed(2)}`);
+            if (!any) return null;
+            // 仅百分比放大时（如 maxHp 只有 pct），显示乘数
+            if (kind === 'mixed' && anyPct) {
+                parts.push(`×${(1 + anyPct / 100).toFixed(2)}`);
             }
-            return bits.join(' ｜ ');
+            return parts.join(' ｜ ');
         }
 
         function attrRow(label, valueHtml, contribHtml, opts) {
@@ -3101,9 +4153,13 @@
 
             const panel = computePanel(panelState);
             const st = panel.stats;
-            const eq = panel.eqBonus;
-            const cu = panel.cuBonus;
-            const ct = (key, kind) => contribText(key, eq, cu, kind);
+            const buckets = [
+                { label: '装备', b: panel.eqBonus },
+                { label: '护符', b: panel.charmBonus },
+                { label: '收藏', b: panel.vaultBonus },
+                { label: '额外', b: panel.cuBonus }
+            ];
+            const ct = (key, kind) => contribText(key, buckets, kind);
 
             card.innerHTML = '';
             const title = document.createElement('div');
@@ -3205,11 +4261,12 @@
             dpsBlock.className = 'dps-block';
             let dpsHtml = '<div class="dps-title">输出估算</div>';
             dpsHtml += `<div>单次期望伤害 ≈ <b>${fmtNum(panel.dps.hit)}</b>（物理期望 + 魔法均值 + 真实伤害${panel.buffs.strength ? ' + 力量Buff' : ''}${st.finalDmgPct ? '，含最终伤害×' + (1 + st.finalDmgPct / 100).toFixed(2) : ''}）</div>`;
-            dpsHtml += `<div>期望输出 ≈ <span class="dps-num">${fmtNum(panel.dps.total)}</span> /秒（单次期望 × 实战 ${st.attackFreqRounded} 刀/秒）</div>`;
-            if (panel.dps.ranged != null) {
-                dpsHtml += `<div>远程估算 ≈ <span class="dps-num">${fmtNum(panel.dps.ranged)}</span> /秒（远程伤害 ${st.rangedDmg} × 连射 ${Math.max(1, st.multishot)} × 暴击期望 × ${st.attackFreqRounded} 刀/秒）</div>`;
+            dpsHtml += `<div>近战期望 ≈ <span class="dps-num">${fmtNum(panel.dps.melee)}</span> /秒（单次期望 × 实战 ${st.attackFreqRounded} 刀/秒）</div>`;
+            if (panel.dps.bow > 0) {
+                dpsHtml += `<div>副手弓 ≈ <span class="dps-num">${fmtNum(panel.dps.bow)}</span> /秒（远程伤害 ${st.rangedDmg} × 连射 ${Math.max(1, st.multishot)} 箭/秒，固定射速不受攻速影响）</div>`;
             }
-            dpsHtml += '<div class="dps-note">攻击频率实战按四舍五入取整执行（如 2.75次/秒 = 每秒3刀），DPS 已按取整后刀数计算；暴击按物理攻击结算期望（暴击几率×暴击伤害，含暴击固定值），魔法/真实伤害未计暴击；不计目标抗性、护甲与闪避，仅供横向对比配装。</div>';
+            dpsHtml += `<div>合计期望 ≈ <span class="dps-num">${fmtNum(panel.dps.total)}</span> /秒</div>`;
+            dpsHtml += '<div class="dps-note">攻击频率实战按四舍五入取整执行（如 2.75次/秒 = 每秒3刀）；暴击按物理攻击结算期望（暴击几率×暴击伤害，含暴击固定值），魔法/真实伤害未计暴击，副手弓不计暴击；不计目标抗性、护甲与闪避，仅供横向对比配装（挂机页可按怪物抗性估算击杀耗时）。</div>';
             dpsBlock.innerHTML = dpsHtml;
             card.appendChild(dpsBlock);
         }
@@ -3222,8 +4279,10 @@
 
         function clearPanelSlots() {
             panelState.slots = {};
+            panelState.charm = { slots: [] };
             savePanelState();
             renderPanelSlots();
+            renderCharmEditor();
             calcPanel();
         }
 
@@ -3245,15 +4304,17 @@
             });
             savePanelBuildsList(builds);
             renderPanelBuilds();
+            fillFarmBuildSelect();
         }
 
         function loadPanelBuild(id) {
             const build = loadPanelBuilds().find(b => b.id === id);
             if (!build) return;
-            panelState = JSON.parse(JSON.stringify(build.state));
-            if (!panelState.custom) panelState.custom = [];
+            panelState = normalizePanelState(build.state);
             savePanelState();
             renderPanelSlots();
+            renderCharmEditor();
+            renderVaultUI();
             renderCustomBonusRows();
             calcPanel();
             switchToTab('panel');
@@ -3267,6 +4328,7 @@
             builds = builds.filter(b => b.id !== id);
             savePanelBuildsList(builds);
             renderPanelBuilds();
+            fillFarmBuildSelect();
         }
 
         function renderPanelBuilds() {
@@ -3450,9 +4512,12 @@
         function rebuildSelects() {
             renderTargetRows();
             renderFarmRows();
+            fillFarmBuildSelect();
             // 页签三：装备索引变化后重建选择器（保留已选状态）
             validatePanelState();
             renderPanelSlots();
+            renderCharmEditor();
+            renderVaultUI();
             renderCustomBonusRows();
             calcPanel();
         }
@@ -3479,9 +4544,17 @@
             // 页签三：恢复配装状态并渲染
             loadPanelState();
             renderPanelSlots();
+            renderCharmEditor();
+            renderVaultUI();
             renderCustomBonusRows();
             renderPanelBuilds();
             calcPanel();
+
+            // 挂机页：击杀耗时估算选项
+            loadFarmOptions();
+            fillFarmBuildSelect();
+            const ignoreResEl = document.getElementById('farmIgnoreRes');
+            if (ignoreResEl) ignoreResEl.checked = farmOptions.ignoreRes;
 
             await loadDefs();
 
