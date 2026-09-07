@@ -1274,6 +1274,148 @@
             white-space: nowrap;
         }
 
+        /* ===== 刷怪收益排行 ===== */
+        .profit-card {
+            background: var(--paper-raised);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        .profit-card.rank-1 { border-top: 3px solid #ffd700; }
+        .profit-card.rank-2 { border-top: 3px solid #b9b9b9; }
+        .profit-card.rank-3 { border-top: 3px solid #cd7f32; }
+
+        .profit-rank {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--ink-faint);
+            width: 40px;
+            flex-shrink: 0;
+            text-align: center;
+            align-self: flex-start;
+            padding-top: 2px;
+        }
+
+        .profit-card.rank-1 .profit-rank { color: #d4a017; }
+        .profit-card.rank-2 .profit-rank { color: #8f8f8f; }
+        .profit-card.rank-3 .profit-rank { color: #b07030; }
+
+        .profit-main { flex: 1; min-width: 0; }
+
+        .profit-head {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .profit-monster-name {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .profit-location {
+            font-size: 12px;
+            color: var(--ink-faint);
+        }
+
+        .profit-hour {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--amber);
+            font-variant-numeric: tabular-nums;
+            margin: 4px 0 10px;
+        }
+
+        .profit-hour .per {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--ink-faint);
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .profit-total-row {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 6px;
+            background: var(--amber-soft);
+            border: 1px solid #e8d5b5;
+            border-radius: var(--radius);
+            padding: 4px 12px;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .profit-total-row b { color: var(--amber); font-variant-numeric: tabular-nums; }
+
+        .profit-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            font-size: 12.5px;
+        }
+
+        @media (max-width: 768px) {
+            .profit-card { flex-direction: column; }
+            .profit-rank { width: auto; text-align: left; }
+            .profit-detail-grid { grid-template-columns: 1fr; }
+        }
+
+        .profit-col .col-title {
+            font-size: 11px;
+            color: var(--ink-faint);
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .profit-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 2px 0;
+            color: var(--ink-soft);
+        }
+
+        .profit-line .v {
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .profit-line.cost .v { color: var(--red); }
+
+        .profit-line.total { border-top: 1px dashed var(--line); margin-top: 3px; padding-top: 4px; font-weight: 600; }
+
+        .profit-unpriced {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--ink-faint);
+            line-height: 1.7;
+        }
+
+        .profit-unpriced .up-title { color: var(--amber); }
+
+        .profit-stats {
+            font-size: 12px;
+            color: var(--ink-faint);
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px dashed var(--line);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .profit-stats b { color: var(--ink-soft); }
+
         /* ===== 装备属性悬浮提示 ===== */
         .has-equip-tip { cursor: help; }
 
@@ -1394,6 +1536,7 @@
             <button class="tab-btn active" data-tab="calc" type="button">材料合成计算</button>
             <button class="tab-btn" data-tab="farm" type="button">挂机时间计算</button>
             <button class="tab-btn" data-tab="panel" type="button">属性面板计算</button>
+            <button class="tab-btn" data-tab="profit" type="button">刷怪收益排行</button>
         </div>
 
         <!-- ==================== 页签一：材料合成计算 ==================== -->
@@ -1536,6 +1679,37 @@
                             <div>选择装备后，属性面板将显示在这里</div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 页签四：刷怪收益排行 ==================== -->
+        <div class="tab-page" id="tab-profit">
+            <div class="controls">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>装备预设</label>
+                        <select id="profitBuildSelect" onchange="onProfitBuildChange()"></select>
+                    </div>
+                    <div class="control-group">
+                        <label>刷怪时长</label>
+                        <input type="number" id="profitHours" value="1" min="0.1" max="24" step="0.5" onchange="onProfitBuildChange()">
+                        <span class="hint-inline">小时（卡片同时显示时薪与该时长总收益）</span>
+                    </div>
+                    <label class="hint-inline" style="cursor:pointer">
+                        <input type="checkbox" id="profitIgnoreRes" style="min-width:auto;width:auto" onchange="onProfitBuildChange()">
+                        忽略怪物抗性
+                    </label>
+                </div>
+                <div class="control-row">
+                    <span class="hint-inline">收益口径：期望掉落（含神域币）按商店出售价折算 − 召唤成本（召唤币 + 召唤材料按商店出售价折算）；击杀耗时按所选配装的期望伤害估算，DPS 低于怪物回血的自动排除。无商店卖价的材料不计入金额，在卡片「未估价材料」中单独列出供参考。</span>
+                </div>
+            </div>
+
+            <div id="profitResults">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💰</div>
+                    <div>选择装备预设后，按期望伤害计算刷什么怪最赚钱（Top 5）</div>
                 </div>
             </div>
         </div>
@@ -2737,30 +2911,39 @@
             const prev = farmOptions.buildId;
             sel.innerHTML = '';
 
+            if (!dataReady) {
+                // 数据未就绪：暂不填充（也不重置已保存的选择），
+                // rebuildSelects 会在数据加载完成后再次调用本函数
+                const optWait = document.createElement('option');
+                optWait.textContent = '数据加载中…';
+                sel.appendChild(optWait);
+                sel.disabled = true;
+                return;
+            }
+            sel.disabled = false;
+
             const optNone = document.createElement('option');
             optNone.value = '';
             optNone.textContent = '不使用（手动输入秒/只）';
             sel.appendChild(optNone);
 
-            if (dataReady) {
-                const optCur = document.createElement('option');
-                optCur.value = '__current__';
-                optCur.textContent = '当前配装（属性面板页签）';
-                sel.appendChild(optCur);
+            const optCur = document.createElement('option');
+            optCur.value = '__current__';
+            optCur.textContent = '当前配装（属性面板页签）';
+            sel.appendChild(optCur);
 
-                const builds = loadPanelBuilds();
-                if (builds.length) {
-                    const og = document.createElement('optgroup');
-                    og.label = '已保存配装';
-                    builds.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
-                    for (const b of builds) {
-                        const o = document.createElement('option');
-                        o.value = String(b.id);
-                        o.textContent = b.name;
-                        og.appendChild(o);
-                    }
-                    sel.appendChild(og);
+            const builds = loadPanelBuilds();
+            if (builds.length) {
+                const og = document.createElement('optgroup');
+                og.label = '已保存配装';
+                builds.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+                for (const b of builds) {
+                    const o = document.createElement('option');
+                    o.value = String(b.id);
+                    o.textContent = b.name;
+                    og.appendChild(o);
                 }
+                sel.appendChild(og);
             }
 
             // 恢复选择；失效则回落
@@ -2783,23 +2966,30 @@
             calcFarm();
         }
 
-        // 当前选中的配装面板（未选择时返回 null）
-        function getFarmPanel() {
-            if (!dataReady || !farmOptions.buildId) return null;
-            if (farmOptions.buildId === '__current__') {
+        // 按 buildId 解析配装面板（'__current__' = 属性页当前配装；数字 = 已保存配装 id）
+        function getPanelByBuildId(buildId) {
+            if (!dataReady || !buildId) return null;
+            if (buildId === '__current__') {
                 return computePanel(panelState);
             }
-            const build = loadPanelBuilds().find(b => String(b.id) === farmOptions.buildId);
+            const build = loadPanelBuilds().find(b => String(b.id) === buildId);
             return build ? computePanel(normalizePanelState(build.state)) : null;
         }
 
+        // 当前选中的配装面板（挂机页；未选择时返回 null）
+        function getFarmPanel() {
+            return getPanelByBuildId(farmOptions.buildId);
+        }
+
         // 估算单只击杀秒数；返回 { sec, dps, net } 或 null
-        function estimateKillSec(monster, panel) {
+        // ignoreRes 缺省时沿用挂机页开关（收益页显式传入）
+        function estimateKillSec(monster, panel, ignoreResOverride) {
+            const ignoreRes = (ignoreResOverride != null) ? ignoreResOverride : farmOptions.ignoreRes;
             const c = monster.combat;
             if (!c || !c.hpAvg) return null;
             const st = panel.stats;
             let physMult = 1;
-            if (!farmOptions.ignoreRes && c.res > 0) {
+            if (!ignoreRes && c.res > 0) {
                 const effRes = Math.max(0, c.res * (1 - (st.armorPen || 0) / 100));
                 physMult = 100 / (100 + effRes * 1.5);
             }
@@ -4348,6 +4538,9 @@
             dpsHtml += '<div class="dps-note">攻击频率实战按四舍五入取整执行（如 2.75次/秒 = 每秒3刀）；暴击按物理攻击结算期望（暴击几率×暴击伤害，含暴击固定值），魔法/真实伤害未计暴击，副手弓不计暴击；不计目标抗性、护甲与闪避，仅供横向对比配装（挂机页可按怪物抗性估算击杀耗时）。</div>';
             dpsBlock.innerHTML = dpsHtml;
             card.appendChild(dpsBlock);
+
+            // 配装变化时刷新收益排行（若收益页绑定的是当前配装）
+            renderProfitRanking();
         }
 
         // 配装摘要（用于保存方案列表展示）
@@ -4384,6 +4577,7 @@
             savePanelBuildsList(builds);
             renderPanelBuilds();
             fillFarmBuildSelect();
+            fillProfitBuildSelect();
         }
 
         function loadPanelBuild(id) {
@@ -4408,6 +4602,7 @@
             savePanelBuildsList(builds);
             renderPanelBuilds();
             fillFarmBuildSelect();
+            fillProfitBuildSelect();
         }
 
         function renderPanelBuilds() {
@@ -4460,6 +4655,329 @@
 
                 wrap.appendChild(item);
             }
+        }
+
+        // ------------------------------------------------------------------
+        // 页签四：刷怪收益排行
+        // 净收益/杀 = 期望掉落折价（含神域币）− 召唤成本（召唤币 + 召唤材料折价）
+        // 材料/召唤物按商店「出售价」折算（机会成本口径）；无卖价的不计金额
+        // 击杀耗时按所选配装的期望伤害估算（与挂机页同一套公式）
+        // 时薪 = 净收益/杀 ÷ 击杀秒数 × 3600
+        // ------------------------------------------------------------------
+        const PROFIT_OPTIONS_KEY = 'mc_profit_options_v1';
+        let profitOptions = { buildId: '', hours: 1, ignoreRes: false };
+
+        function loadProfitOptions() {
+            try {
+                const raw = localStorage.getItem(PROFIT_OPTIONS_KEY);
+                if (raw) {
+                    const o = JSON.parse(raw);
+                    if (o && typeof o === 'object') {
+                        profitOptions = {
+                            buildId: typeof o.buildId === 'string' ? o.buildId : '',
+                            hours: (typeof o.hours === 'number' && o.hours > 0) ? o.hours : 1,
+                            ignoreRes: !!o.ignoreRes
+                        };
+                    }
+                }
+            } catch (e) { /* 忽略 */ }
+        }
+
+        function saveProfitOptions() {
+            try {
+                localStorage.setItem(PROFIT_OPTIONS_KEY, JSON.stringify(profitOptions));
+            } catch (e) { /* 存储满了就放弃 */ }
+        }
+
+        function fillProfitBuildSelect() {
+            const sel = document.getElementById('profitBuildSelect');
+            if (!sel) return;
+            const prev = profitOptions.buildId;
+            sel.innerHTML = '';
+
+            if (!dataReady) {
+                // 数据未就绪：暂不填充（也不重置已保存的选择）
+                const optWait = document.createElement('option');
+                optWait.textContent = '数据加载中…';
+                sel.appendChild(optWait);
+                sel.disabled = true;
+                return;
+            }
+            sel.disabled = false;
+
+            const optNone = document.createElement('option');
+            optNone.value = '';
+            optNone.textContent = '-- 选择装备预设 --';
+            sel.appendChild(optNone);
+
+            const optCur = document.createElement('option');
+            optCur.value = '__current__';
+            optCur.textContent = '当前配装（属性面板页签）';
+            sel.appendChild(optCur);
+
+            const builds = loadPanelBuilds();
+            if (builds.length) {
+                const og = document.createElement('optgroup');
+                og.label = '已保存配装';
+                builds.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+                for (const b of builds) {
+                    const o = document.createElement('option');
+                    o.value = String(b.id);
+                    o.textContent = b.name;
+                    og.appendChild(o);
+                }
+                sel.appendChild(og);
+            }
+
+            let ok = false;
+            for (const o of sel.options) {
+                if (o.value === prev) { o.selected = true; ok = true; break; }
+            }
+            if (!ok) {
+                profitOptions.buildId = '';
+                sel.options[0].selected = true;
+            }
+        }
+
+        function onProfitBuildChange() {
+            const sel = document.getElementById('profitBuildSelect');
+            const hoursEl = document.getElementById('profitHours');
+            const cb = document.getElementById('profitIgnoreRes');
+            if (sel) profitOptions.buildId = sel.value;
+            if (hoursEl) {
+                const h = parseFloat(hoursEl.value);
+                profitOptions.hours = (isFinite(h) && h > 0) ? h : 1;
+            }
+            if (cb) profitOptions.ignoreRes = cb.checked;
+            saveProfitOptions();
+            renderProfitRanking();
+        }
+
+        // 商店出售价：无卖价返回 null（神域币恒为 1）
+        function sellPriceOf(itemId) {
+            if (itemId === 'currency') return 1;
+            const p = SHOP_PRICES[itemId];
+            return (p && typeof p.sell === 'number' && p.sell > 0) ? p.sell : null;
+        }
+
+        // 单只怪收益核算
+        // 返回 null=无法击杀；{ killSec, dps, netPerKill, drops:[{item,qty,price,value}|], unpriced:[{item,qty}],
+        //          summonCoin, summonItems:[{item,qty,price,value}|], summonUnpriced:[{item,qty}], killsPerHour, netPerHour }
+        function computeMonsterProfit(monster, panel) {
+            const est = estimateKillSec(monster, panel, profitOptions.ignoreRes);
+            if (!est) return null;
+            if (!isFinite(est.sec) || est.sec <= 0) return null;
+
+            const drops = [];
+            const unpriced = [];
+            let dropValue = 0;
+            // 掉落按期望值降序展示
+            const entries = Object.entries(monster.expDrops || {})
+                .filter(([, e]) => e > 0)
+                .sort((a, b) => b[1] - a[1]);
+            for (const [item, qty] of entries) {
+                const price = sellPriceOf(item);
+                if (price != null) {
+                    const value = qty * price;
+                    dropValue += value;
+                    drops.push({ item, qty, price, value });
+                } else {
+                    unpriced.push({ item, qty });
+                }
+            }
+
+            const summonItems = [];
+            const summonUnpriced = [];
+            let summonCost = typeof monster.summonCoin === 'number' ? monster.summonCoin : 0;
+            for (const si of (monster.summonItems || [])) {
+                const price = sellPriceOf(si.item);
+                const qty = si.count || 0;
+                if (price != null) {
+                    const value = qty * price;
+                    summonCost += value;
+                    summonItems.push({ item: si.item, qty, price, value });
+                } else {
+                    summonUnpriced.push({ item: si.item, qty });
+                }
+            }
+
+            const netPerKill = dropValue - summonCost;
+            const killsPerHour = 3600 / est.sec;
+            const netPerHour = netPerKill * killsPerHour;
+            return {
+                killSec: est.sec, dps: est.dps,
+                drops, unpriced, dropValue,
+                summonCoin: typeof monster.summonCoin === 'number' ? monster.summonCoin : 0,
+                summonItems, summonUnpriced, summonCost,
+                netPerKill, killsPerHour, netPerHour
+            };
+        }
+
+        function profitLine(label, valueText, cls) {
+            const div = document.createElement('div');
+            div.className = 'profit-line' + (cls ? ' ' + cls : '');
+            const n = document.createElement('span');
+            n.textContent = label;
+            const v = document.createElement('span');
+            v.className = 'v';
+            v.textContent = valueText;
+            div.appendChild(n);
+            div.appendChild(v);
+            return div;
+        }
+
+        function appendProfitCol(parent, title, lines) {
+            const col = document.createElement('div');
+            col.className = 'profit-col';
+            const t = document.createElement('div');
+            t.className = 'col-title';
+            t.textContent = title;
+            col.appendChild(t);
+            for (const l of lines) col.appendChild(l);
+            parent.appendChild(col);
+        }
+
+        // 主渲染：计算全部可刷怪收益，排序取前 5
+        function renderProfitRanking() {
+            const wrap = document.getElementById('profitResults');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+
+            if (!dataReady) {
+                wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💰</div><div>数据加载中…</div></div>';
+                return;
+            }
+            const panel = getPanelByBuildId(profitOptions.buildId);
+            if (!panel) {
+                wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💰</div><div>请先选择装备预设（当前配装或已保存配装）</div></div>';
+                return;
+            }
+
+            const hours = profitOptions.hours || 1;
+
+            // 全量核算并排序
+            const rows = [];
+            let skippedUnkillable = 0;
+            for (const m of MONSTERS) {
+                const r = computeMonsterProfit(m, panel);
+                if (!r) { skippedUnkillable++; continue; }
+                rows.push({ monster: m, profit: r });
+            }
+            rows.sort((a, b) => b.profit.netPerHour - a.profit.netPerHour);
+
+            if (!rows.length) {
+                wrap.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💰</div><div>没有可击杀的怪物（DPS 均低于怪物回血或缺少战斗数值）</div></div>';
+                return;
+            }
+
+            // 概要行
+            const summary = document.createElement('div');
+            summary.className = 'farm-build-info';
+            const st = panel.stats;
+            const buildName = profitOptions.buildId === '__current__'
+                ? '当前配装' : (loadPanelBuilds().find(b => String(b.id) === profitOptions.buildId) || {}).name;
+            summary.innerHTML = `<b>「${escapeHtml(buildName || '配装')}」</b>：单次期望 ${fmtNum(panel.dps.hit)} × ${st.attackFreqRounded} 刀/秒` +
+                (panel.dps.bow > 0 ? ` + 副手弓 ${fmtNum(panel.dps.bow)}/秒` : '') +
+                `，合计 ≈ <b>${fmtNum(panel.dps.total)}/秒</b>（未计怪物抗性；各怪按自身抗性折算${profitOptions.ignoreRes ? '，当前已忽略抗性' : ''}）。` +
+                `共核算 ${rows.length} 种可击杀怪物（${skippedUnkillable} 种因 DPS 不足或无战斗数据排除），按时薪排序取前 5。`;
+            wrap.appendChild(summary);
+
+            const top = rows.slice(0, 5);
+            top.forEach((row, idx) => {
+                const m = row.monster;
+                const p = row.profit;
+                const card = document.createElement('div');
+                card.className = 'profit-card rank-' + (idx + 1);
+
+                const rank = document.createElement('div');
+                rank.className = 'profit-rank';
+                rank.textContent = '#' + (idx + 1);
+                card.appendChild(rank);
+
+                const main = document.createElement('div');
+                main.className = 'profit-main';
+
+                const head = document.createElement('div');
+                head.className = 'profit-head';
+                const name = document.createElement('span');
+                name.className = 'profit-monster-name';
+                name.textContent = m.name;
+                head.appendChild(name);
+                const loc = document.createElement('span');
+                loc.className = 'profit-location';
+                loc.textContent = `${m.location} · ${m.tierName || ''}`;
+                head.appendChild(loc);
+                main.appendChild(head);
+
+                const hour = document.createElement('div');
+                hour.className = 'profit-hour';
+                hour.innerHTML = `💰 ${fmtInt(Math.round(p.netPerHour))} <span class="per">神域币/小时</span>`;
+                main.appendChild(hour);
+
+                const totalRow = document.createElement('div');
+                totalRow.className = 'profit-total-row';
+                totalRow.innerHTML = `${hours} 小时预计净赚 <b>${fmtInt(Math.round(p.netPerHour * hours))}</b> 神域币（击杀 ≈ ${fmtInt(Math.floor(p.killsPerHour * hours))} 只）`;
+                main.appendChild(totalRow);
+
+                // 明细：掉落 vs 成本
+                const grid = document.createElement('div');
+                grid.className = 'profit-detail-grid';
+
+                const dropLines = [];
+                for (const d of p.drops) {
+                    dropLines.push(profitLine(
+                        `${getItemInfo(d.item).name} ×${fmtNum(d.qty)}/只`,
+                        `${fmtNum(d.price)}×${fmtNum(d.qty)} = ${fmtInt(Math.round(d.value))}`
+                    ));
+                }
+                dropLines.push(profitLine('掉落合计', '+' + fmtInt(Math.round(p.dropValue)), 'total'));
+                appendProfitCol(grid, '期望掉落/只（按商店卖价）', dropLines);
+
+                const costLines = [];
+                if (p.summonCoin > 0) {
+                    costLines.push(profitLine('召唤神域币', '-' + fmtInt(p.summonCoin), 'cost'));
+                }
+                for (const si of p.summonItems) {
+                    costLines.push(profitLine(
+                        `${getItemInfo(si.item).name} ×${fmtInt(si.qty)}`,
+                        `-${fmtInt(si.value)}`,
+                        'cost'
+                    ));
+                }
+                if (!p.summonCoin && !p.summonItems.length) {
+                    costLines.push(profitLine('无召唤成本（普通刷怪）', '0'));
+                }
+                costLines.push(profitLine('净收益/只', fmtInt(Math.round(p.netPerKill)), 'total'));
+                appendProfitCol(grid, '召唤成本/只', costLines);
+
+                main.appendChild(grid);
+
+                // 未估价材料
+                if (p.unpriced.length) {
+                    const up = document.createElement('div');
+                    up.className = 'profit-unpriced';
+                    const names = p.unpriced.map(u => `${getItemInfo(u.item).name} ×${fmtNum(u.qty)}/只`).join('、');
+                    up.innerHTML = `<span class="up-title">未估价材料</span>（无商店卖价，未计入金额）：${escapeHtml(names)}`;
+                    main.appendChild(up);
+                }
+                if (p.summonUnpriced.length) {
+                    const up = document.createElement('div');
+                    up.className = 'profit-unpriced';
+                    const names = p.summonUnpriced.map(u => `${getItemInfo(u.item).name} ×${fmtInt(u.qty)}`).join('、');
+                    up.innerHTML = `<span class="up-title">召唤材料未估价</span>（无商店卖价，未计入成本）：${escapeHtml(names)}`;
+                    main.appendChild(up);
+                }
+
+                // 战斗数据
+                const stats = document.createElement('div');
+                stats.className = 'profit-stats';
+                const c = m.combat || {};
+                stats.innerHTML = `击杀耗时 ≈ <b>${fmtNum(p.killSec, 2)} 秒/只</b>（估算DPS ${fmtNum(p.dps)}/秒 ÷ 有效输出 ${fmtNum(p.dps - (c.regen || 0))}/秒 扣回血）· 怪物生命 ${c.hpText || '?'} · 物理抗性 ${c.res != null ? c.res : '?'}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''}`;
+                main.appendChild(stats);
+
+                card.appendChild(main);
+                wrap.appendChild(card);
+            });
         }
 
         function switchToTab(tab) {
@@ -4592,6 +5110,7 @@
             renderTargetRows();
             renderFarmRows();
             fillFarmBuildSelect();
+            fillProfitBuildSelect();
             // 页签三：装备索引变化后重建选择器（保留已选状态）
             validatePanelState();
             renderPanelSlots();
@@ -4599,6 +5118,7 @@
             renderVaultUI();
             renderCustomBonusRows();
             calcPanel();
+            renderProfitRanking();
         }
 
         // 初始化
@@ -4635,6 +5155,15 @@
             fillFarmBuildSelect();
             const ignoreResEl = document.getElementById('farmIgnoreRes');
             if (ignoreResEl) ignoreResEl.checked = farmOptions.ignoreRes;
+
+            // 页签四：刷怪收益排行选项
+            loadProfitOptions();
+            fillProfitBuildSelect();
+            const profitHoursEl = document.getElementById('profitHours');
+            if (profitHoursEl) profitHoursEl.value = profitOptions.hours;
+            const profitIgnoreEl = document.getElementById('profitIgnoreRes');
+            if (profitIgnoreEl) profitIgnoreEl.checked = profitOptions.ignoreRes;
+            renderProfitRanking();
 
             await loadDefs();
 
