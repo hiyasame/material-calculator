@@ -2583,6 +2583,7 @@
         //   rangedDmg = round(flat × (1 + pct/100))
         //   dodge/blockChance/blockDmg = round(flat + pct 各自求和)
         //   attackFreq = 基础1.2 × (1 + min(攻速,30)/30) + 急速等级×0.35
+        //                实战按四舍五入取整执行（如 2.75次/秒 = 每秒3刀）
         // ------------------------------------------------------------------
 
         // 槽位布局：仿游戏装备栏（左列防具+主手，右列饰品+副手，护符共两槽）
@@ -3006,6 +3007,8 @@
             const hasteSpeed = (BUFF_EFFECT_DATA.haste && BUFF_EFFECT_DATA.haste.speedPerLevel) || 0.35;
             stats.attackFreq = weaponFreq * (1 + Math.min(stats.attackSpeed, speedCap) / speedCap) + hasteLv * hasteSpeed;
             stats.attackSpeedCapped = stats.attackSpeed > speedCap;
+            // 实战按四舍五入取整执行：2.75次/秒 实际为每秒3刀（服务端调度规则）
+            stats.attackFreqRounded = Math.round(stats.attackFreq);
 
             // 输出估算（不计目标抗性/闪避；暴击按物理结算估算）
             const strengthLv = buffs.strength || 0;
@@ -3019,10 +3022,10 @@
             const avgMagic = (stats.magicDmg.min + stats.magicDmg.max) / 2;
             const dps = {};
             dps.hit = (expPhysHit + avgMagic + stats.trueDmg) * finalMult;
-            dps.freq = stats.attackFreq;
-            dps.total = dps.hit * stats.attackFreq;
+            dps.freq = stats.attackFreqRounded; // 实战按取整后的刀数结算
+            dps.total = dps.hit * stats.attackFreqRounded;
             dps.ranged = stats.rangedDmg > 0
-                ? stats.rangedDmg * Math.max(1, stats.multishot) * critMult * finalMult * stats.attackFreq
+                ? stats.rangedDmg * Math.max(1, stats.multishot) * critMult * finalMult * stats.attackFreqRounded
                 : null;
 
             return { stats, eqBonus, cuBonus, buffs, dps, warnings, selected };
@@ -3130,7 +3133,11 @@
                 ct('attackSpeed', 'flat') + (st.attackSpeedCapped ? `<span style="color:var(--amber)">（超出上限，超出部分无效）</span>` : ''),
                 { dim: !st.attackSpeed }));
             frag.appendChild(attrRow('攻击频率',
-                `${st.attackFreq.toFixed(2)}<span class="unit">次/秒</span>`, null, { key: true }));
+                `${st.attackFreq.toFixed(2)}<span class="unit">次/秒</span>` +
+                (st.attackFreqRounded !== st.attackFreq
+                    ? ` <span class="unit">→ 实战 ${st.attackFreqRounded} 刀/秒</span>`
+                    : `<span class="unit">（实战 ${st.attackFreqRounded} 刀/秒）</span>`),
+                null, { key: true }));
 
             // —— 生存 ——
             frag.appendChild(panelSection('🛡 生存'));
@@ -3198,11 +3205,11 @@
             dpsBlock.className = 'dps-block';
             let dpsHtml = '<div class="dps-title">输出估算</div>';
             dpsHtml += `<div>单次期望伤害 ≈ <b>${fmtNum(panel.dps.hit)}</b>（物理期望 + 魔法均值 + 真实伤害${panel.buffs.strength ? ' + 力量Buff' : ''}${st.finalDmgPct ? '，含最终伤害×' + (1 + st.finalDmgPct / 100).toFixed(2) : ''}）</div>`;
-            dpsHtml += `<div>期望输出 ≈ <span class="dps-num">${fmtNum(panel.dps.total)}</span> /秒（× 攻击频率 ${st.attackFreq.toFixed(2)}/秒）</div>`;
+            dpsHtml += `<div>期望输出 ≈ <span class="dps-num">${fmtNum(panel.dps.total)}</span> /秒（单次期望 × 实战 ${st.attackFreqRounded} 刀/秒）</div>`;
             if (panel.dps.ranged != null) {
-                dpsHtml += `<div>远程估算 ≈ <span class="dps-num">${fmtNum(panel.dps.ranged)}</span> /秒（远程伤害 ${st.rangedDmg} × 连射 ${Math.max(1, st.multishot)} × 暴击期望）</div>`;
+                dpsHtml += `<div>远程估算 ≈ <span class="dps-num">${fmtNum(panel.dps.ranged)}</span> /秒（远程伤害 ${st.rangedDmg} × 连射 ${Math.max(1, st.multishot)} × 暴击期望 × ${st.attackFreqRounded} 刀/秒）</div>`;
             }
-            dpsHtml += '<div class="dps-note">按物理攻击结算暴击期望（暴击几率×暴击伤害，含暴击固定值），魔法/真实伤害未计暴击；不计目标抗性、护甲与闪避，仅供横向对比配装。</div>';
+            dpsHtml += '<div class="dps-note">攻击频率实战按四舍五入取整执行（如 2.75次/秒 = 每秒3刀），DPS 已按取整后刀数计算；暴击按物理攻击结算期望（暴击几率×暴击伤害，含暴击固定值），魔法/真实伤害未计暴击；不计目标抗性、护甲与闪避，仅供横向对比配装。</div>';
             dpsBlock.innerHTML = dpsHtml;
             card.appendChild(dpsBlock);
         }
@@ -3210,7 +3217,7 @@
         // 配装摘要（用于保存方案列表展示）
         function panelSummaryText(panel) {
             const st = panel.stats;
-            return `生命 ${st.maxHp} ｜ 物伤 ${st.physDmg.min}~${st.physDmg.max} ｜ 攻频 ${st.attackFreq.toFixed(2)}/s ｜ 暴击 ${st.critChance}%`;
+            return `生命 ${st.maxHp} ｜ 物伤 ${st.physDmg.min}~${st.physDmg.max} ｜ 攻频 ${st.attackFreqRounded}刀/s ｜ 暴击 ${st.critChance}%`;
         }
 
         function clearPanelSlots() {
