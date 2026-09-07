@@ -697,6 +697,290 @@
             color: var(--ink-faint);
         }
 
+        /* ===== 属性面板计算 ===== */
+        .panel-layout {
+            display: grid;
+            grid-template-columns: 1.15fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 968px) {
+            .panel-layout { grid-template-columns: 1fr; }
+        }
+
+        .panel-edit, .panel-result { min-width: 0; }
+
+        .panel-card {
+            background: var(--paper-raised);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 20px 22px;
+            margin-bottom: 20px;
+        }
+
+        .attr-card {
+            border-top: 3px solid var(--accent);
+            position: sticky;
+            top: 0;
+        }
+
+        /* 装备槽网格：左右两列，仿游戏装备栏 */
+        .slot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 22px;
+        }
+
+        @media (max-width: 640px) {
+            .slot-grid { grid-template-columns: 1fr; }
+            .attr-card { position: static; }
+        }
+
+        .slot-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slot-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px dashed var(--line);
+        }
+
+        .slot-row:last-child { border-bottom: none; }
+
+        .slot-icon {
+            font-size: 15px;
+            width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .slot-name {
+            font-size: 12px;
+            color: var(--ink-faint);
+            width: 42px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .slot-row select {
+            flex: 1;
+            min-width: 0;
+            padding: 5px 8px;
+            font-size: 13px;
+        }
+
+        .slot-row select option { color: var(--ink); }
+
+        .panel-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .panel-actions .btn { padding: 7px 16px; font-size: 13px; }
+
+        .slot-note {
+            display: block;
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        /* 额外加成行 */
+        .custom-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px dashed var(--line);
+        }
+
+        .custom-row select {
+            flex: 1;
+            min-width: 0;
+            padding: 5px 8px;
+            font-size: 13px;
+        }
+
+        .custom-row input {
+            width: 80px;
+            min-width: 80px;
+            padding: 5px 8px;
+            font-size: 13px;
+        }
+
+        /* 属性面板行 */
+        .attr-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--line);
+            font-size: 13px;
+        }
+
+        .attr-row:last-child { border-bottom: none; }
+
+        .attr-row .k {
+            color: var(--ink-soft);
+            flex-shrink: 0;
+        }
+
+        .attr-row .v {
+            color: var(--ink);
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+
+        .attr-row .v .unit {
+            color: var(--ink-faint);
+            font-weight: 400;
+            font-size: 12px;
+            margin-left: 2px;
+        }
+
+        .attr-row .contrib {
+            display: block;
+            font-size: 11px;
+            color: var(--ink-faint);
+            font-weight: 400;
+            margin-top: 1px;
+        }
+
+        .attr-row .contrib .plus { color: var(--accent); }
+
+        .attr-row.key-stat .v { color: var(--amber); font-size: 15px; }
+
+        .attr-section {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            margin: 14px 0 4px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--accent-line);
+            letter-spacing: 0.06em;
+        }
+
+        .attr-section:first-child { margin-top: 0; }
+
+        .buff-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 5px 0;
+            font-size: 13px;
+            border-bottom: 1px dashed var(--line);
+        }
+
+        .buff-row:last-child { border-bottom: none; }
+
+        .buff-row .bname {
+            font-weight: 600;
+            color: var(--ink);
+            flex-shrink: 0;
+        }
+
+        .buff-row.debuff .bname { color: var(--red); }
+
+        .buff-row .bdesc {
+            color: var(--ink-faint);
+            font-size: 12px;
+            flex: 1;
+        }
+
+        .dps-block {
+            margin-top: 14px;
+            padding: 12px 14px;
+            background: var(--amber-soft);
+            border: 1px solid #e8d5b5;
+            border-radius: var(--radius);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        .dps-block .dps-title {
+            font-weight: 700;
+            color: var(--amber);
+            margin-bottom: 4px;
+        }
+
+        .dps-block .dps-note {
+            font-size: 11px;
+            color: var(--ink-faint);
+            line-height: 1.5;
+            margin-top: 4px;
+        }
+
+        .dps-block .dps-num {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--amber);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* 配装方案列表 */
+        .build-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: var(--radius);
+            margin-bottom: 6px;
+            border: 1px solid var(--line);
+            background: #fff;
+        }
+
+        .build-info { flex: 1; min-width: 0; }
+
+        .build-name {
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .build-name:hover { color: var(--accent); }
+
+        .build-stats {
+            font-size: 11px;
+            color: var(--ink-faint);
+            margin-top: 3px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .build-btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            border-radius: var(--radius);
+            border: 1px solid var(--line-strong);
+            background: transparent;
+            color: var(--ink-soft);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+
+        .build-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .build-btn.danger:hover {
+            border-color: var(--red);
+            color: var(--red);
+            background: var(--red-soft);
+        }
+
         /* ===== 装备属性悬浮提示 ===== */
         .has-equip-tip { cursor: help; }
 
@@ -806,7 +1090,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>开拓生存 · 材料计算器<span class="sub">材料合成 与 挂机时长估算</span></h1>
+            <h1>开拓生存 · 材料计算器<span class="sub">材料合成 · 挂机时长 · 属性面板</span></h1>
             <span class="data-status" id="dataStatusWrap">
                 <span id="dataStatus">正在从 kt.ikui.vip 拉取数据…</span>
                 <button class="refresh-btn" id="refreshBtn" type="button">刷新数据</button>
@@ -816,6 +1100,7 @@
         <div class="tabs">
             <button class="tab-btn active" data-tab="calc" type="button">材料合成计算</button>
             <button class="tab-btn" data-tab="farm" type="button">挂机时间计算</button>
+            <button class="tab-btn" data-tab="panel" type="button">属性面板计算</button>
         </div>
 
         <!-- ==================== 页签一：材料合成计算 ==================== -->
@@ -884,6 +1169,54 @@
                 <div id="farmTotal"></div>
             </div>
         </div>
+        <!-- ==================== 页签三：属性面板计算 ==================== -->
+        <div class="tab-page" id="tab-panel">
+            <div class="panel-layout">
+                <!-- 左侧：配装编辑 -->
+                <div class="panel-edit">
+                    <div class="panel-card">
+                        <div class="panel-title">装备搭配
+                            <span class="hint">按游戏装备栏布局选择各槽位装备，实时计算属性面板</span>
+                        </div>
+                        <div class="slot-grid" id="slotGrid"></div>
+                        <div class="panel-actions">
+                            <button class="btn ghost" type="button" onclick="clearPanelSlots()">清空装备</button>
+                            <button class="btn ghost" type="button" onclick="savePanelBuild()">💾 保存当前配装</button>
+                        </div>
+                        <div class="hint-inline slot-note">
+                            护符（普通/精工/大师）词条为随机镌刻，请在下方「额外加成」手动填入；
+                            武器/护甲库的收藏属性为个人数据，暂不支持计算。
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">额外加成
+                            <span class="hint">手动填入护符镌刻词条或其他来源加成（如 +8%暴击几率 → 暴击几率 8）</span>
+                        </div>
+                        <div id="customBonusRows"></div>
+                        <div class="panel-actions">
+                            <button class="btn ghost" type="button" onclick="addCustomBonus()">＋ 添加词条</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">已保存配装</div>
+                        <div id="panelBuilds"></div>
+                    </div>
+                </div>
+
+                <!-- 右侧：属性面板结果 -->
+                <div class="panel-result">
+                    <div class="panel-card attr-card" id="attrPanelCard">
+                        <div class="panel-title">角色属性面板</div>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👤</div>
+                            <div>选择装备后，属性面板将显示在这里</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -915,6 +1248,13 @@
         let targetRows = [];  // 页签一：[{ uid, itemId, count }]
         let farmRows = [];    // 页签二：[{ uid, itemId, count, monsterId, sec }]
         let uidSeed = 1;
+
+        // 页签三：属性面板计算
+        let GAME_CONFIG = {};      // 上游 CONFIG：PLAYER_BASE_HP / ATTACK_SPEED_CAP 等
+        let BUFF_DEFS_DATA = {};   // buff id -> { name, desc, type, maxLevel }
+        let BUFF_EFFECT_DATA = {}; // buff id -> 数值参数（dmgPerLevel 等）
+        let EQUIP_BY_SLOT = {};    // 槽位 key -> [equipId...]（品质降序）
+        let EQUIP_SLOTS_RAW = [];  // 上游槽位定义（含 icon/column/order）
 
         // 上游绝对图片地址( http://203.135.99.28:32001/source/... )改写为同源代理路径
         function normalizeImgUrl(url) {
@@ -2233,6 +2573,747 @@
             switchToTab('farm');
         }
 
+        // ------------------------------------------------------------------
+        // 页签三：属性面板计算
+        // 公式严格对齐游戏客户端源码的 Calc 系列（equipBonus 由服务端计算、
+        // 客户端 le.val/le.physDmg 等负责合成），此处按同一规则在本地聚合：
+        //   maxHp     = round((基础20 + flat) × (1 + pct/100))
+        //   physDmg   = round((基础5~10 + flat + flatMin/Max) × (1 + pct/100))
+        //   physRes   = 基础5 + flat（无百分比放大）
+        //   rangedDmg = round(flat × (1 + pct/100))
+        //   dodge/blockChance/blockDmg = round(flat + pct 各自求和)
+        //   attackFreq = 基础1.2 × (1 + min(攻速,30)/30) + 急速等级×0.35
+        // ------------------------------------------------------------------
+
+        // 槽位布局：仿游戏装备栏（左列防具+主手，右列饰品+副手，护符共两槽）
+        const PANEL_SLOT_LAYOUT = [
+            { key: 'helmet',   accept: 'helmet',   col: 'left' },
+            { key: 'chest',    accept: 'chest',    col: 'left' },
+            { key: 'legs',     accept: 'legs',     col: 'left' },
+            { key: 'boots',    accept: 'boots',    col: 'left' },
+            { key: 'mainHand', accept: 'mainHand', col: 'left' },
+            { key: 'amulet1',  accept: 'amulet',   col: 'right', name: '护符' },
+            { key: 'amulet2',  accept: 'amulet',   col: 'right', name: '护符Ⅱ' },
+            { key: 'necklace', accept: 'necklace', col: 'right' },
+            { key: 'ring',     accept: 'ring',     col: 'right', name: '戒指' },
+            { key: 'totem',    accept: 'totem',    col: 'right' },
+            { key: 'offHand',  accept: 'offHand',  col: 'right' }
+        ];
+
+        const PANEL_SLOT_ICONS = {
+            helmet: '⛑️', chest: '🦺', legs: '👖', boots: '👢', mainHand: '⚔️',
+            amulet1: '📿', amulet2: '📿', necklace: '📿', ring: '💍', totem: '🪬', offHand: '🛡️'
+        };
+
+        // 额外加成词条可选项（key -> 显示名，括号内为数值单位）
+        const CUSTOM_STAT_OPTIONS = [
+            ['maxHp', '生命值'],
+            ['physDmg', '物理伤害'],
+            ['magicDmg', '魔法伤害'],
+            ['trueDmg', '真实伤害'],
+            ['rangedDmg', '远程伤害'],
+            ['attackSpeed', '攻速'],
+            ['multishot', '连射'],
+            ['critChance', '暴击几率 (%)'],
+            ['critDmgPct', '暴击伤害 (%)'],
+            ['critDmgFlat', '暴击伤害 (值)'],
+            ['critChanceResist', '暴击抵抗 (%)'],
+            ['armorPen', '物理穿透 (%)'],
+            ['finalDmgPct', '最终伤害 (%)'],
+            ['lifestealFlat', '吸血 (值)'],
+            ['lifestealPct', '吸血 (%)'],
+            ['physRes', '物理抗性'],
+            ['magicRes', '魔法抗性'],
+            ['dmgReducePct', '伤害抵消 (%)'],
+            ['dodge', '闪避 (%)'],
+            ['blockChance', '格挡几率 (%)'],
+            ['blockDmg', '格挡伤害'],
+            ['satRegen', '饱食回复']
+        ];
+
+        const PANEL_STATE_KEY = 'mc_panel_state_v1';
+        const PANEL_BUILDS_KEY = 'mc_panel_builds_v1';
+        let panelState = { slots: {}, custom: [] };
+
+        function loadPanelState() {
+            try {
+                const raw = localStorage.getItem(PANEL_STATE_KEY);
+                if (!raw) return;
+                const obj = JSON.parse(raw);
+                if (obj && typeof obj === 'object') {
+                    panelState = {
+                        slots: (obj.slots && typeof obj.slots === 'object') ? obj.slots : {},
+                        custom: Array.isArray(obj.custom) ? obj.custom.filter(c => c && c.stat) : []
+                    };
+                }
+            } catch (e) { /* 忽略损坏缓存 */ }
+        }
+
+        function savePanelState() {
+            try {
+                localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(panelState));
+            } catch (e) { /* 存储满了就放弃 */ }
+        }
+
+        function loadPanelBuilds() {
+            try {
+                const raw = localStorage.getItem(PANEL_BUILDS_KEY);
+                const arr = raw ? JSON.parse(raw) : [];
+                return Array.isArray(arr) ? arr : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function savePanelBuildsList(builds) {
+            try {
+                localStorage.setItem(PANEL_BUILDS_KEY, JSON.stringify(builds));
+            } catch (e) { /* 存储满了就放弃 */ }
+        }
+
+        // 槽位 -> 可选装备索引（品质降序、同品质按名称）
+        function buildEquipSlotIndex() {
+            const idx = {};
+            for (const [id, info] of Object.entries(ITEM_DEFS)) {
+                if (!info.equip || !info.equip.slot) continue;
+                (idx[info.equip.slot] = idx[info.equip.slot] || []).push(id);
+            }
+            const qmult = q => (QUALITY_DEFS[q] && QUALITY_DEFS[q].mult) || 0;
+            for (const k of Object.keys(idx)) {
+                idx[k].sort((a, b) => {
+                    const qa = qmult(ITEM_DEFS[a].equip.quality);
+                    const qb = qmult(ITEM_DEFS[b].equip.quality);
+                    if (qb !== qa) return qb - qa;
+                    return ITEM_DEFS[a].name.localeCompare(ITEM_DEFS[b].name, 'zh-CN');
+                });
+            }
+            return idx;
+        }
+
+        // 数据刷新后校验：槽位装备或词条 key 失效时清掉
+        function validatePanelState() {
+            for (const k of Object.keys(panelState.slots)) {
+                const id = panelState.slots[k];
+                if (id && (!ITEM_DEFS[id] || !ITEM_DEFS[id].equip)) {
+                    delete panelState.slots[k];
+                }
+            }
+            panelState.custom = panelState.custom.filter(c => c.stat);
+        }
+
+        function slotDisplayName(sd) {
+            if (sd.name) return sd.name;
+            return SLOT_NAMES[sd.key] || sd.key;
+        }
+
+        // 渲染装备槽选择区
+        function renderPanelSlots() {
+            const grid = document.getElementById('slotGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            const cols = { left: [], right: [] };
+            for (const sd of PANEL_SLOT_LAYOUT) cols[sd.col].push(sd);
+
+            for (const colName of ['left', 'right']) {
+                const colDiv = document.createElement('div');
+                colDiv.className = 'slot-col';
+
+                for (const sd of cols[colName]) {
+                    const row = document.createElement('div');
+                    row.className = 'slot-row';
+
+                    const icon = document.createElement('span');
+                    icon.className = 'slot-icon';
+                    icon.textContent = PANEL_SLOT_ICONS[sd.key] || '▫';
+                    row.appendChild(icon);
+
+                    const name = document.createElement('span');
+                    name.className = 'slot-name';
+                    name.textContent = slotDisplayName(sd);
+                    row.appendChild(name);
+
+                    const sel = document.createElement('select');
+                    if (!dataReady) {
+                        const o = document.createElement('option');
+                        o.textContent = '数据加载中…';
+                        sel.appendChild(o);
+                        sel.disabled = true;
+                    } else {
+                        fillPanelSlotSelect(sel, sd.accept, panelState.slots[sd.key] || '');
+                        sel.onchange = () => {
+                            if (sel.value) {
+                                panelState.slots[sd.key] = sel.value;
+                            } else {
+                                delete panelState.slots[sd.key];
+                            }
+                            savePanelState();
+                            updateSlotItemIcon(row, sd.key);
+                            calcPanel();
+                        };
+                    }
+                    row.appendChild(sel);
+
+                    const iconWrap = document.createElement('span');
+                    iconWrap.className = 'slot-item-icon';
+                    row.appendChild(iconWrap);
+                    updateSlotItemIcon(row, sd.key);
+
+                    colDiv.appendChild(row);
+                }
+                grid.appendChild(colDiv);
+            }
+        }
+
+        // 槽位行右侧：已选装备的小图标（hover 可查看属性详情）
+        function updateSlotItemIcon(row, slotKey) {
+            const wrap = row.querySelector('.slot-item-icon');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            const id = panelState.slots[slotKey];
+            if (!id || !ITEM_DEFS[id]) return;
+            const info = ITEM_DEFS[id];
+            if (info.img) {
+                const img = createItemImg(info.img, 'summary-icon');
+                if (img) {
+                    img.style.width = '26px';
+                    img.style.height = '26px';
+                    attachEquipTooltip(img, id);
+                    wrap.appendChild(img);
+                }
+            }
+        }
+
+        // 装备下拉：按品质分组
+        function fillPanelSlotSelect(sel, acceptSlot, selectedId) {
+            const empty = document.createElement('option');
+            empty.value = '';
+            empty.textContent = '-- 空 --';
+            sel.appendChild(empty);
+
+            const ids = EQUIP_BY_SLOT[acceptSlot] || [];
+            const groups = [];
+            const groupBy = {};
+            for (const id of ids) {
+                const info = ITEM_DEFS[id];
+                const q = (info.equip && info.equip.quality) || '';
+                const label = (QUALITY_DEFS[q] && QUALITY_DEFS[q].name) || '普通';
+                if (!groupBy[label]) {
+                    groupBy[label] = [];
+                    groups.push(label);
+                }
+                groupBy[label].push({ id, name: info.name });
+            }
+            for (const label of groups) {
+                const og = document.createElement('optgroup');
+                og.label = label;
+                for (const it of groupBy[label]) {
+                    const o = document.createElement('option');
+                    o.value = it.id;
+                    o.textContent = it.name;
+                    if (it.id === selectedId) o.selected = true;
+                    og.appendChild(o);
+                }
+                sel.appendChild(og);
+            }
+        }
+
+        // 额外加成词条行
+        function addCustomBonus() {
+            panelState.custom.push({ stat: 'maxHp', val: 0 });
+            savePanelState();
+            renderCustomBonusRows();
+            calcPanel();
+        }
+
+        function removeCustomBonus(idx) {
+            panelState.custom.splice(idx, 1);
+            savePanelState();
+            renderCustomBonusRows();
+            calcPanel();
+        }
+
+        function renderCustomBonusRows() {
+            const wrap = document.getElementById('customBonusRows');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            panelState.custom.forEach((c, idx) => {
+                const row = document.createElement('div');
+                row.className = 'custom-row';
+
+                const sel = document.createElement('select');
+                for (const [k, label] of CUSTOM_STAT_OPTIONS) {
+                    const o = document.createElement('option');
+                    o.value = k;
+                    o.textContent = label;
+                    if (k === c.stat) o.selected = true;
+                    sel.appendChild(o);
+                }
+                sel.onchange = () => {
+                    c.stat = sel.value;
+                    savePanelState();
+                    calcPanel();
+                };
+                row.appendChild(sel);
+
+                const val = document.createElement('input');
+                val.type = 'number';
+                val.value = c.val;
+                val.step = 'any';
+                val.placeholder = '0';
+                val.oninput = () => {
+                    c.val = parseFloat(val.value) || 0;
+                    savePanelState();
+                    calcPanel();
+                };
+                row.appendChild(val);
+
+                const rm = document.createElement('button');
+                rm.className = 'row-remove';
+                rm.type = 'button';
+                rm.textContent = '×';
+                rm.title = '移除该词条';
+                rm.onclick = () => removeCustomBonus(idx);
+                row.appendChild(rm);
+
+                wrap.appendChild(row);
+            });
+        }
+
+        // 聚合一组 stats 对象（{key: {flat/flatMin/flatMax/pct}}）为加和
+        function aggregateBonus(statsList) {
+            const b = {};
+            for (const stats of statsList) {
+                for (const [key, val] of Object.entries(stats || {})) {
+                    if (!val || typeof val !== 'object') continue;
+                    const t = (b[key] = b[key] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 });
+                    t.flat += val.flat || 0;
+                    t.flatMin += val.flatMin || 0;
+                    t.flatMax += val.flatMax || 0;
+                    t.pct += val.pct || 0;
+                }
+            }
+            return b;
+        }
+
+        function mergeBonus(a, b) {
+            const out = {};
+            const keys = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
+            for (const k of keys) {
+                const x = (a && a[k]) || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 };
+                const y = (b && b[k]) || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 };
+                out[k] = {
+                    flat: x.flat + y.flat,
+                    flatMin: x.flatMin + y.flatMin,
+                    flatMax: x.flatMax + y.flatMax,
+                    pct: x.pct + y.pct
+                };
+            }
+            return out;
+        }
+
+        // buff 描述模板替换（%d/%p/%f/%s → 实际数值，对齐游戏 oe()）
+        function formatBuffDesc(buffId) {
+            const def = BUFF_DEFS_DATA[buffId];
+            const eff = BUFF_EFFECT_DATA[buffId] || {};
+            if (!def) return '';
+            const fmt = v => (v == null || v === '') ? '' : String(v);
+            let s = def.desc || '';
+            s = s.replace(/%d/g, fmt(eff.damage ?? eff.dmgPerLevel ?? eff.perLevel));
+            s = s.replace(/%p/g, fmt(eff.pctPerLevel));
+            s = s.replace(/%f/g, fmt(eff.speedPerLevel));
+            s = s.replace(/%s/g, fmt(eff.perLevel));
+            return s;
+        }
+
+        // 核心计算：返回 { stats, eqBonus, cuBonus, buffs, dps, warnings, selected }
+        function computePanel(state) {
+            const selected = [];
+            for (const sd of PANEL_SLOT_LAYOUT) {
+                const id = state.slots[sd.key];
+                if (id && ITEM_DEFS[id] && ITEM_DEFS[id].equip) {
+                    selected.push({ slot: sd.key, id, info: ITEM_DEFS[id] });
+                }
+            }
+
+            // 唯一装备重复佩戴检测
+            const warnings = [];
+            const seen = {};
+            for (const it of selected) {
+                if (it.info.equip.unique) {
+                    if (seen[it.id]) {
+                        warnings.push(`「${it.info.name}」为唯一装备，不可同时佩戴多件`);
+                    }
+                    seen[it.id] = true;
+                }
+            }
+
+            // 装备词条聚合 + 额外加成聚合
+            const eqBonus = aggregateBonus(selected.map(it => it.info.equip.stats));
+            const customStats = {};
+            for (const c of (state.custom || [])) {
+                if (!c.stat) continue;
+                const t = (customStats[c.stat] = customStats[c.stat] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 });
+                t.flat += Number(c.val) || 0;
+            }
+            const cuBonus = aggregateBonus([customStats]);
+            const S = k => mergeBonus(eqBonus, cuBonus)[k] || { flat: 0, flatMin: 0, flatMax: 0, pct: 0 };
+
+            // Buff 聚合：同名不叠加，取最高等级（套装规则）
+            const buffs = {};
+            for (const it of selected) {
+                for (const [k, lv] of Object.entries(it.info.equip.equipBuffs || {})) {
+                    buffs[k] = Math.max(buffs[k] || 0, Number(lv) || 0);
+                }
+            }
+
+            const playerBaseHp = GAME_CONFIG.PLAYER_BASE_HP ?? 20;
+            const speedCap = GAME_CONFIG.ATTACK_SPEED_CAP ?? 30;
+            const weaponFreq = 1.2; // 游戏内基础攻击频率
+
+            const stats = {};
+            stats.maxHp = Math.round((playerBaseHp + S('maxHp').flat) * (1 + S('maxHp').pct / 100));
+            stats.physRes = 5 + S('physRes').flat;
+            stats.magicRes = S('magicRes').flat;
+            stats.physDmg = {
+                min: Math.round((5 + S('physDmg').flat + S('physDmg').flatMin) * (1 + S('physDmg').pct / 100)),
+                max: Math.round((10 + S('physDmg').flat + S('physDmg').flatMax) * (1 + S('physDmg').pct / 100))
+            };
+            stats.magicDmg = {
+                min: Math.round((S('magicDmg').flat + S('magicDmg').flatMin) * (1 + S('magicDmg').pct / 100)),
+                max: Math.round((S('magicDmg').flat + S('magicDmg').flatMax) * (1 + S('magicDmg').pct / 100))
+            };
+            stats.trueDmg = S('trueDmg').flat;
+            stats.attackSpeed = S('attackSpeed').flat;
+            stats.critChance = S('critChance').flat;
+            stats.critDmgPct = 50 + S('critDmgPct').flat;
+            stats.critDmgFlat = S('critDmgFlat').flat;
+            stats.lifestealFlat = S('lifestealFlat').flat;
+            stats.lifestealPct = S('lifestealPct').flat;
+            stats.satRegen = S('satRegen').flat;
+            stats.critChanceResist = S('critChanceResist').flat;
+            stats.armorPen = S('armorPen').flat;
+            stats.finalDmgPct = S('finalDmgPct').flat;
+            stats.rangedDmg = Math.round(S('rangedDmg').flat * (1 + S('rangedDmg').pct / 100));
+            stats.multishot = Math.max(0, Math.floor(S('multishot').flat));
+            stats.dmgReducePct = S('dmgReducePct').flat;
+            stats.dodge = Math.round(S('dodge').flat + S('dodge').pct);
+            stats.blockChance = Math.round(S('blockChance').flat + S('blockChance').pct);
+            stats.blockDmg = Math.round(S('blockDmg').flat + S('blockDmg').pct);
+
+            // 攻击频率 = 基础1.2 × (1 + min(攻速,30)/30) + 急速等级×0.35
+            const hasteLv = buffs.haste || 0;
+            const hasteSpeed = (BUFF_EFFECT_DATA.haste && BUFF_EFFECT_DATA.haste.speedPerLevel) || 0.35;
+            stats.attackFreq = weaponFreq * (1 + Math.min(stats.attackSpeed, speedCap) / speedCap) + hasteLv * hasteSpeed;
+            stats.attackSpeedCapped = stats.attackSpeed > speedCap;
+
+            // 输出估算（不计目标抗性/闪避；暴击按物理结算估算）
+            const strengthLv = buffs.strength || 0;
+            const strengthDmg = strengthLv * ((BUFF_EFFECT_DATA.strength && BUFF_EFFECT_DATA.strength.dmgPerLevel) || 2);
+            const cc = Math.min(Math.max(stats.critChance, 0), 100) / 100;
+            const critMult = 1 + cc * stats.critDmgPct / 100;
+            const critFlatExp = cc * stats.critDmgFlat;
+            const finalMult = 1 + stats.finalDmgPct / 100;
+            const avgPhys = (stats.physDmg.min + stats.physDmg.max) / 2 + strengthDmg;
+            const expPhysHit = avgPhys * critMult + critFlatExp;
+            const avgMagic = (stats.magicDmg.min + stats.magicDmg.max) / 2;
+            const dps = {};
+            dps.hit = (expPhysHit + avgMagic + stats.trueDmg) * finalMult;
+            dps.freq = stats.attackFreq;
+            dps.total = dps.hit * stats.attackFreq;
+            dps.ranged = stats.rangedDmg > 0
+                ? stats.rangedDmg * Math.max(1, stats.multishot) * critMult * finalMult * stats.attackFreq
+                : null;
+
+            return { stats, eqBonus, cuBonus, buffs, dps, warnings, selected };
+        }
+
+        // 贡献明细文本（基础/装备/额外），无加成时返回 null
+        function contribText(key, eq, cu, kind) {
+            const e = (eq && eq[key]) || null;
+            const c = (cu && cu[key]) || null;
+            const parts = [];
+            const eFlat = e ? (e.flat || 0) : 0;
+            const cFlat = c ? (c.flat || 0) : 0;
+            const ePct = e ? (e.pct || 0) : 0;
+            const cPct = c ? (c.pct || 0) : 0;
+            const hasEquip = e && (eFlat || ePct || e.flatMin || e.flatMax);
+            const hasCustom = c && (cFlat || cPct);
+            if (!hasEquip && !hasCustom) return null;
+
+            if (kind === 'range') {
+                const eMin = (e ? e.flatMin + e.flat : 0);
+                const eMax = (e ? e.flatMax + e.flat : 0);
+                const bits = [];
+                if (hasEquip) bits.push(`装备 +${eMin}~${eMax}`);
+                if (hasCustom) bits.push(`额外 +${cFlat}`);
+                if (ePct || cPct) bits.push(`×${(1 + (ePct + cPct) / 100).toFixed(2)}`);
+                return bits.join(' ｜ ');
+            }
+            const bits = [];
+            if (hasEquip) bits.push(`装备 +${eFlat}${ePct ? ' / +' + ePct + '%' : ''}`);
+            if (hasCustom) bits.push(`额外 +${cFlat}${cPct ? ' / +' + cPct + '%' : ''}`);
+            if (kind === 'mixed' && (ePct || cPct) && !eFlat && !cFlat) {
+                bits.push(`×${(1 + (ePct + cPct) / 100).toFixed(2)}`);
+            }
+            return bits.join(' ｜ ');
+        }
+
+        function attrRow(label, valueHtml, contribHtml, opts) {
+            const row = document.createElement('div');
+            row.className = 'attr-row' + ((opts && opts.key) ? ' key-stat' : '') + ((opts && opts.dim) ? ' zero' : '');
+            const k = document.createElement('span');
+            k.className = 'k';
+            k.textContent = label;
+            row.appendChild(k);
+            const v = document.createElement('span');
+            v.className = 'v';
+            v.innerHTML = valueHtml;
+            if (contribHtml) {
+                const c = document.createElement('span');
+                c.className = 'contrib';
+                c.innerHTML = contribHtml;
+                v.appendChild(c);
+            }
+            row.appendChild(v);
+            return row;
+        }
+
+        function panelSection(title) {
+            const div = document.createElement('div');
+            div.className = 'attr-section';
+            div.textContent = title;
+            return div;
+        }
+
+        // 计算并渲染属性面板
+        function calcPanel() {
+            const card = document.getElementById('attrPanelCard');
+            if (!card) return;
+            if (!dataReady) {
+                card.innerHTML = '<div class="panel-title">角色属性面板</div>' +
+                    '<div class="empty-state"><div class="empty-state-icon">👤</div><div>数据加载中…</div></div>';
+                return;
+            }
+
+            const panel = computePanel(panelState);
+            const st = panel.stats;
+            const eq = panel.eqBonus;
+            const cu = panel.cuBonus;
+            const ct = (key, kind) => contribText(key, eq, cu, kind);
+
+            card.innerHTML = '';
+            const title = document.createElement('div');
+            title.className = 'panel-title';
+            title.textContent = '角色属性面板';
+            card.appendChild(title);
+
+            const frag = document.createDocumentFragment();
+
+            // —— 输出 ——
+            frag.appendChild(panelSection('⚔ 输出'));
+            frag.appendChild(attrRow('物理伤害',
+                `${st.physDmg.min} ~ ${st.physDmg.max}`,
+                ct('physDmg', 'range'), { key: true }));
+            const magicZero = st.magicDmg.min === 0 && st.magicDmg.max === 0;
+            frag.appendChild(attrRow('魔法伤害',
+                `${st.magicDmg.min} ~ ${st.magicDmg.max}`,
+                ct('magicDmg', 'range'), { dim: magicZero }));
+            frag.appendChild(attrRow('真实伤害',
+                String(st.trueDmg), ct('trueDmg', 'flat'), { dim: !st.trueDmg }));
+            frag.appendChild(attrRow('远程伤害',
+                String(st.rangedDmg), ct('rangedDmg', 'flat'), { dim: !st.rangedDmg }));
+            frag.appendChild(attrRow('连射',
+                String(st.multishot), ct('multishot', 'flat'), { dim: !st.multishot }));
+            frag.appendChild(attrRow('攻速',
+                `${st.attackSpeed}<span class="unit">/ ${GAME_CONFIG.ATTACK_SPEED_CAP ?? 30}（满值频率翻倍）</span>`,
+                ct('attackSpeed', 'flat') + (st.attackSpeedCapped ? `<span style="color:var(--amber)">（超出上限，超出部分无效）</span>` : ''),
+                { dim: !st.attackSpeed }));
+            frag.appendChild(attrRow('攻击频率',
+                `${st.attackFreq.toFixed(2)}<span class="unit">次/秒</span>`, null, { key: true }));
+
+            // —— 生存 ——
+            frag.appendChild(panelSection('🛡 生存'));
+            frag.appendChild(attrRow('生命值',
+                String(st.maxHp), ct('maxHp', 'mixed'), { key: true }));
+            frag.appendChild(attrRow('物理抗性',
+                `${st.physRes}<span class="unit">（每点减伤×${GAME_CONFIG.ARMOR_REDUCTION_PER_POINT ?? 1.5}）</span>`,
+                ct('physRes', 'flat')));
+            frag.appendChild(attrRow('魔法抗性',
+                `${st.magicRes}<span class="unit">（每点减伤×${GAME_CONFIG.MAGIC_RES_REDUCTION_PER_POINT ?? 1.5}）</span>`,
+                ct('magicRes', 'flat'), { dim: !st.magicRes }));
+            frag.appendChild(attrRow('伤害抵消',
+                `${st.dmgReducePct}%`, ct('dmgReducePct', 'flat'), { dim: !st.dmgReducePct }));
+
+            // —— 进阶 ——
+            frag.appendChild(panelSection('✦ 进阶'));
+            frag.appendChild(attrRow('暴击几率', `${st.critChance}%`, ct('critChance', 'flat'), { dim: !st.critChance }));
+            frag.appendChild(attrRow('暴击伤害',
+                `+${st.critDmgPct}% <span class="unit">+</span> ${st.critDmgFlat}<span class="unit">值</span>`,
+                ct('critDmgPct', 'flat'), { dim: st.critDmgPct === 50 && !st.critDmgFlat }));
+            frag.appendChild(attrRow('暴击抵抗', `${st.critChanceResist}%`, ct('critChanceResist', 'flat'), { dim: !st.critChanceResist }));
+            frag.appendChild(attrRow('物理穿透', `${st.armorPen}%`, ct('armorPen', 'flat'), { dim: !st.armorPen }));
+            frag.appendChild(attrRow('最终伤害', `${st.finalDmgPct}%`, ct('finalDmgPct', 'flat'), { dim: !st.finalDmgPct }));
+            frag.appendChild(attrRow('吸血',
+                `${st.lifestealFlat}<span class="unit">值</span> + ${st.lifestealPct}%`,
+                ct('lifestealFlat', 'flat'), { dim: !st.lifestealFlat && !st.lifestealPct }));
+            frag.appendChild(attrRow('闪避', `${st.dodge}%`, ct('dodge', 'flat'), { dim: !st.dodge }));
+            frag.appendChild(attrRow('格挡几率', `${st.blockChance}%`, ct('blockChance', 'flat'), { dim: !st.blockChance }));
+            frag.appendChild(attrRow('格挡伤害', String(st.blockDmg), ct('blockDmg', 'flat'), { dim: !st.blockDmg }));
+            frag.appendChild(attrRow('饱食回复', `+${st.satRegen}`, ct('satRegen', 'flat'), { dim: !st.satRegen }));
+
+            card.appendChild(frag);
+
+            // —— 装备 Buff ——
+            const buffIds = Object.keys(panel.buffs);
+            if (buffIds.length) {
+                const sec = panelSection('✨ 装备 Buff');
+                card.appendChild(sec);
+                for (const bid of buffIds) {
+                    const def = BUFF_DEFS_DATA[bid] || {};
+                    const row = document.createElement('div');
+                    row.className = 'buff-row' + (def.type === 'debuff' ? ' debuff' : '');
+                    const name = document.createElement('span');
+                    name.className = 'bname';
+                    name.textContent = `${def.name || bid} Lv.${panel.buffs[bid]}`;
+                    row.appendChild(name);
+                    const desc = document.createElement('span');
+                    desc.className = 'bdesc';
+                    desc.textContent = formatBuffDesc(bid);
+                    row.appendChild(desc);
+                    card.appendChild(row);
+                }
+            }
+
+            // —— 警告 ——
+            for (const w of panel.warnings) {
+                const warn = document.createElement('div');
+                warn.className = 'invalid-row';
+                warn.textContent = '⚠ ' + w;
+                card.appendChild(warn);
+            }
+
+            // —— 输出估算 ——
+            const dpsBlock = document.createElement('div');
+            dpsBlock.className = 'dps-block';
+            let dpsHtml = '<div class="dps-title">输出估算</div>';
+            dpsHtml += `<div>单次期望伤害 ≈ <b>${fmtNum(panel.dps.hit)}</b>（物理期望 + 魔法均值 + 真实伤害${panel.buffs.strength ? ' + 力量Buff' : ''}${st.finalDmgPct ? '，含最终伤害×' + (1 + st.finalDmgPct / 100).toFixed(2) : ''}）</div>`;
+            dpsHtml += `<div>期望输出 ≈ <span class="dps-num">${fmtNum(panel.dps.total)}</span> /秒（× 攻击频率 ${st.attackFreq.toFixed(2)}/秒）</div>`;
+            if (panel.dps.ranged != null) {
+                dpsHtml += `<div>远程估算 ≈ <span class="dps-num">${fmtNum(panel.dps.ranged)}</span> /秒（远程伤害 ${st.rangedDmg} × 连射 ${Math.max(1, st.multishot)} × 暴击期望）</div>`;
+            }
+            dpsHtml += '<div class="dps-note">按物理攻击结算暴击期望（暴击几率×暴击伤害，含暴击固定值），魔法/真实伤害未计暴击；不计目标抗性、护甲与闪避，仅供横向对比配装。</div>';
+            dpsBlock.innerHTML = dpsHtml;
+            card.appendChild(dpsBlock);
+        }
+
+        // 配装摘要（用于保存方案列表展示）
+        function panelSummaryText(panel) {
+            const st = panel.stats;
+            return `生命 ${st.maxHp} ｜ 物伤 ${st.physDmg.min}~${st.physDmg.max} ｜ 攻频 ${st.attackFreq.toFixed(2)}/s ｜ 暴击 ${st.critChance}%`;
+        }
+
+        function clearPanelSlots() {
+            panelState.slots = {};
+            savePanelState();
+            renderPanelSlots();
+            calcPanel();
+        }
+
+        function savePanelBuild() {
+            const hasAnything = Object.keys(panelState.slots).length || panelState.custom.length;
+            if (!hasAnything) {
+                alert('当前没有选择任何装备或额外加成');
+                return;
+            }
+            const name = prompt('给这套配装起个名字：', '配装 ' + (loadPanelBuilds().length + 1));
+            if (!name) return;
+            const builds = loadPanelBuilds();
+            builds.push({
+                id: Date.now(),
+                name: name,
+                state: JSON.parse(JSON.stringify(panelState)),
+                savedAt: Date.now(),
+                summary: dataReady ? panelSummaryText(computePanel(panelState)) : ''
+            });
+            savePanelBuildsList(builds);
+            renderPanelBuilds();
+        }
+
+        function loadPanelBuild(id) {
+            const build = loadPanelBuilds().find(b => b.id === id);
+            if (!build) return;
+            panelState = JSON.parse(JSON.stringify(build.state));
+            if (!panelState.custom) panelState.custom = [];
+            savePanelState();
+            renderPanelSlots();
+            renderCustomBonusRows();
+            calcPanel();
+            switchToTab('panel');
+        }
+
+        function deletePanelBuild(id) {
+            let builds = loadPanelBuilds();
+            const build = builds.find(b => b.id === id);
+            if (!build) return;
+            if (!confirm(`删除配装「${build.name}」？`)) return;
+            builds = builds.filter(b => b.id !== id);
+            savePanelBuildsList(builds);
+            renderPanelBuilds();
+        }
+
+        function renderPanelBuilds() {
+            const wrap = document.getElementById('panelBuilds');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            const builds = loadPanelBuilds();
+            if (!builds.length) {
+                const empty = document.createElement('div');
+                empty.className = 'hint-inline';
+                empty.textContent = '暂无保存的配装。搭好装备后点击「保存当前配装」，可随时载入对比。';
+                wrap.appendChild(empty);
+                return;
+            }
+            // 新的在前
+            builds.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+            for (const b of builds) {
+                const item = document.createElement('div');
+                item.className = 'build-item';
+
+                const info = document.createElement('div');
+                info.className = 'build-info';
+                const name = document.createElement('div');
+                name.className = 'build-name';
+                name.textContent = b.name;
+                name.title = '点击载入该配装';
+                name.onclick = () => loadPanelBuild(b.id);
+                info.appendChild(name);
+                if (b.summary) {
+                    const stats = document.createElement('div');
+                    stats.className = 'build-stats';
+                    stats.textContent = b.summary;
+                    info.appendChild(stats);
+                }
+                item.appendChild(info);
+
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'build-btn';
+                loadBtn.type = 'button';
+                loadBtn.textContent = '载入';
+                loadBtn.onclick = () => loadPanelBuild(b.id);
+                item.appendChild(loadBtn);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'build-btn danger';
+                delBtn.type = 'button';
+                delBtn.textContent = '删除';
+                delBtn.onclick = () => deletePanelBuild(b.id);
+                item.appendChild(delBtn);
+
+                wrap.appendChild(item);
+            }
+        }
+
         function switchToTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => {
                 b.classList.toggle('active', b.dataset.tab === tab);
@@ -2312,6 +3393,14 @@
             ITEM_DEFS = built.items;
             RECIPES = built.recipes;
             SHOP_PRICES = defs.SHOP_PRICES || {};
+
+            // 页签三：属性面板计算所需数据
+            GAME_CONFIG = defs.CONFIG || {};
+            BUFF_DEFS_DATA = defs.BUFF_DEFS || {};
+            BUFF_EFFECT_DATA = defs.BUFF_EFFECT || {};
+            EQUIP_SLOTS_RAW = Array.isArray(defs.EQUIP_SLOTS) ? defs.EQUIP_SLOTS : [];
+            EQUIP_BY_SLOT = buildEquipSlotIndex();
+
             dataReady = true;
             if (live) {
                 lastFetchAt = Date.now();
@@ -2354,6 +3443,11 @@
         function rebuildSelects() {
             renderTargetRows();
             renderFarmRows();
+            // 页签三：装备索引变化后重建选择器（保留已选状态）
+            validatePanelState();
+            renderPanelSlots();
+            renderCustomBonusRows();
+            calcPanel();
         }
 
         // 初始化
@@ -2374,6 +3468,13 @@
             }
             renderTargetRows();
             renderFarmRows();
+
+            // 页签三：恢复配装状态并渲染
+            loadPanelState();
+            renderPanelSlots();
+            renderCustomBonusRows();
+            renderPanelBuilds();
+            calcPanel();
 
             await loadDefs();
 
