@@ -1901,7 +1901,10 @@
             const tierName = (t) => (tiers[t] && tiers[t].name) || t || '';
 
             // 宝袋展开：直接掉落 + 宝袋内容物（via 标注来源）
-            const expandDrops = (rawDrops) => {
+            // 精英及以上品质（elite/epic/legend/oracle）另有独立的品阶掉落：瓶装魂×1~8 100%
+            //（与显式 drops 叠加，口径与游戏 Wiki 一致：Wiki 在显式掉落外追加显示该条目）
+            const ELITE_PLUS_TIERS = ['elite', 'epic', 'legend', 'oracle'];
+            const expandDrops = (rawDrops, tier) => {
                 const out = [];
                 for (const dr of (rawDrops || [])) {
                     out.push({ item: dr.item, min: dr.min, max: dr.max, rate: dr.rate, via: null });
@@ -1918,6 +1921,9 @@
                             });
                         }
                     }
+                }
+                if (tier && ELITE_PLUS_TIERS.includes(tier)) {
+                    out.push({ item: 'bottledSoul', min: 1, max: 8, rate: 1, via: '品阶加成' });
                 }
                 return out;
             };
@@ -1975,7 +1981,7 @@
                     summonItems: (s.costItems || []).map(c => ({ item: c.item, count: c.count })),
                     feeNote: extraFeeNote || null,
                     mod: s.monsterMod || {},
-                    drops: expandDrops(s.drops)
+                    drops: expandDrops(s.drops, s.tier)
                 });
             };
 
@@ -1997,7 +2003,7 @@
                         summonItems: [],
                         feeNote: null,
                         mod: {},
-                        drops: expandDrops(area.normalDrops)
+                        drops: expandDrops(area.normalDrops, area.tier)
                     });
                 }
 
@@ -2024,7 +2030,7 @@
                             summonItems: [],
                             feeNote: null,
                             mod: sd.monsterMod || {},
-                            drops: expandDrops(sd.normalDrops)
+                            drops: expandDrops(sd.normalDrops, sd.tier)
                         });
                     }
                     for (const s of (sd.summons || [])) {
@@ -2076,7 +2082,7 @@
                             summonItems: [],
                             feeNote: null,
                             mod: z.monsterMod || {},
-                            drops: expandDrops(z.drops)
+                            drops: expandDrops(z.drops, z.tier)
                         });
                     }
                     // 分区召唤（痛苦女皇等）
@@ -2129,7 +2135,7 @@
                             summonItems: [],
                             feeNote: feeNote,
                             mod: layer.monsterMod || {},
-                            drops: expandDrops(layer.drops)
+                            drops: expandDrops(layer.drops, layer.tier)
                         });
                     }
                 }
