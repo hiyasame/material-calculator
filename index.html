@@ -1274,6 +1274,22 @@
             white-space: nowrap;
         }
 
+        /* ===== 击杀算法单选 ===== */
+        .mode-opt {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: var(--ink-soft);
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .mode-opt input { min-width: auto; width: auto; }
+
+        .mode-opt:hover { color: var(--accent); }
+
         /* ===== 刷怪收益排行 ===== */
         .profit-card {
             background: var(--paper-raised);
@@ -1588,11 +1604,16 @@
                         <label>击杀耗时估算</label>
                         <select id="farmBuildSelect" onchange="onFarmBuildChange()"></select>
                     </div>
+                    <div class="control-group">
+                        <label>击杀算法</label>
+                        <label class="mode-opt"><input type="radio" name="farmKillMode" id="farmModeOnline" value="online" onchange="onFarmBuildChange()" checked> 在线（每刀一杀）</label>
+                        <label class="mode-opt"><input type="radio" name="farmKillMode" id="farmModeOffline" value="offline" onchange="onFarmBuildChange()"> 离线（每秒最多5只）</label>
+                    </div>
                     <label class="hint-inline" style="cursor:pointer">
                         <input type="checkbox" id="farmIgnoreRes" style="min-width:auto;width:auto" onchange="onFarmBuildChange()">
                         忽略怪物抗性
                     </label>
-                    <span class="hint-inline">选中后按属性面板的期望伤害 ÷ 怪物平均血量估算每只击杀秒数（行内「秒/只」留空时自动采用）</span>
+                    <span class="hint-inline">选中后按属性面板的期望伤害估算每只击杀秒数（行内「秒/只」留空时自动采用）</span>
                 </div>
                 <div class="control-row">
                     <div class="control-group">
@@ -1692,6 +1713,11 @@
                         <select id="profitBuildSelect" onchange="onProfitBuildChange()"></select>
                     </div>
                     <div class="control-group">
+                        <label>击杀算法</label>
+                        <label class="mode-opt"><input type="radio" name="profitKillMode" id="profitModeOnline" value="online" onchange="onProfitBuildChange()" checked> 在线（每刀一杀）</label>
+                        <label class="mode-opt"><input type="radio" name="profitKillMode" id="profitModeOffline" value="offline" onchange="onProfitBuildChange()"> 离线（每秒最多5只）</label>
+                    </div>
+                    <div class="control-group">
                         <label>刷怪时长</label>
                         <input type="number" id="profitHours" value="1" min="0.1" max="24" step="0.5" onchange="onProfitBuildChange()">
                         <span class="hint-inline">小时（卡片同时显示时薪与该时长总收益）</span>
@@ -1702,7 +1728,7 @@
                     </label>
                 </div>
                 <div class="control-row">
-                    <span class="hint-inline">收益口径：期望掉落（含神域币）按商店出售价折算 − 召唤成本（召唤币 + 召唤材料按商店出售价折算）；击杀耗时按所选配装的期望伤害估算（每刀最多杀一只：秒杀怪按实战刀数/秒封顶），DPS 低于怪物回血的自动排除。无商店卖价的材料不计入金额，在卡片「未估价材料」中单独列出供参考。</span>
+                    <span class="hint-inline">收益口径：期望掉落（含神域币）按商店出售价折算 − 召唤成本（召唤币 + 召唤材料按商店出售价折算）；击杀耗时按所选配装的期望伤害估算（在线=每刀最多杀一只；离线=按 DPS 折算、每秒最多 5 只），团队Boss 已排除，DPS 低于怪物回血的自动排除。无商店卖价的材料不计入金额，在卡片「未估价材料」中单独列出供参考。</span>
                 </div>
             </div>
 
@@ -2023,7 +2049,8 @@
                             summonItems: summonItems,
                             feeNote: null,
                             mod: {},
-                            drops: expandDrops(sd.boss.drops)
+                            drops: expandDrops(sd.boss.drops),
+                            isBoss: true
                         }, {
                             isBoss: true,
                             hp: sd.boss.hp,
@@ -2076,7 +2103,8 @@
                             summonItems: summonItems,
                             feeNote: null,
                             mod: {},
-                            drops: expandDrops(z.boss.drops)
+                            drops: expandDrops(z.boss.drops),
+                            isBoss: true
                         }, {
                             isBoss: true,
                             hp: z.boss.hp,
@@ -2882,7 +2910,7 @@
         //   怪物每秒回血直接从 DPS 中扣除
         // ------------------------------------------------------------------
         const FARM_OPTIONS_KEY = 'mc_farm_options_v1';
-        let farmOptions = { buildId: '', ignoreRes: false };
+        let farmOptions = { buildId: '', ignoreRes: false, mode: 'online' };
 
         function loadFarmOptions() {
             try {
@@ -2892,11 +2920,28 @@
                     if (o && typeof o === 'object') {
                         farmOptions = {
                             buildId: typeof o.buildId === 'string' ? o.buildId : '',
-                            ignoreRes: !!o.ignoreRes
+                            ignoreRes: !!o.ignoreRes,
+                            mode: o.mode === 'offline' ? 'offline' : 'online'
                         };
                     }
                 }
             } catch (e) { /* 忽略 */ }
+        }
+
+        // 击杀算法单选按钮（挂机页/收益页共用）
+        // 在线：每刀最多杀一只（整刀结算）；离线：离线结算每秒最多杀 5 只
+        function syncModeRadios(prefix, mode) {
+            const on = document.getElementById(prefix + 'ModeOnline');
+            const off = document.getElementById(prefix + 'ModeOffline');
+            if (on && off) {
+                on.checked = mode !== 'offline';
+                off.checked = mode === 'offline';
+            }
+        }
+
+        function readModeRadios(prefix) {
+            const off = document.getElementById(prefix + 'ModeOffline');
+            return (off && off.checked) ? 'offline' : 'online';
         }
 
         function saveFarmOptions() {
@@ -2962,6 +3007,7 @@
             const cb = document.getElementById('farmIgnoreRes');
             if (sel) farmOptions.buildId = sel.value;
             if (cb) farmOptions.ignoreRes = cb.checked;
+            farmOptions.mode = readModeRadios('farm');
             saveFarmOptions();
             calcFarm();
         }
@@ -2981,12 +3027,15 @@
             return getPanelByBuildId(farmOptions.buildId);
         }
 
-        // 估算单只击杀秒数；返回 { sec, dps, net, swings, swingSec } 或 null
-        // ignoreRes 缺省时沿用挂机页开关（收益页显式传入）
-        // 击杀节奏约束：每刀最多杀一只（服务端按刀结算），
-        // 故 击杀耗时 = max(所需刀数, 1) × 攻击间隔，所需刀数 = ceil(怪物血量 ÷ 单刀有效伤害)
-        function estimateKillSec(monster, panel, ignoreResOverride) {
-            const ignoreRes = (ignoreResOverride != null) ? ignoreResOverride : farmOptions.ignoreRes;
+        // 估算单只击杀秒数；返回 { sec, dps, net, mode, ... } 或 null
+        // opts: { ignoreRes, mode }
+        //   mode='online'  在线：每刀最多杀一只（服务端按刀结算），
+        //                  击杀耗时 = ceil(血量 ÷ 单个攻击间隔净伤害) × 攻击间隔
+        //   mode='offline' 离线：离线结算批量按 DPS 折算，每秒最多杀 5 只
+        function estimateKillSec(monster, panel, opts) {
+            const o = opts || {};
+            const ignoreRes = (o.ignoreRes != null) ? o.ignoreRes : farmOptions.ignoreRes;
+            const mode = o.mode === 'offline' ? 'offline' : 'online';
             const c = monster.combat;
             if (!c || !c.hpAvg) return null;
             const st = panel.stats;
@@ -3000,11 +3049,11 @@
             const cc = Math.min(Math.max(st.critChance, 0), 100) / 100;
             const critMult = 1 + cc * st.critDmgPct / 100;
             const finalMult = 1 + st.finalDmgPct / 100;
-            // 近战：物理（吃抗性）+ 魔法/真实（不受物理抗性影响）× 实战取整刀数
+            // 近战：物理（吃抗性）+ 魔法/真实（不受物理抗性影响）
             const avgPhys = (st.physDmg.min + st.physDmg.max) / 2 + strengthDmg;
-            const physOut = (avgPhys * critMult + cc * st.critDmgFlat) * finalMult * physMult;
-            const otherOut = ((st.magicDmg.min + st.magicDmg.max) / 2 + st.trueDmg) * finalMult;
-            const meleeDps = (physOut + otherOut) * st.attackFreqRounded;
+            const perSwing = (avgPhys * critMult + cc * st.critDmgFlat) * finalMult * physMult
+                + ((st.magicDmg.min + st.magicDmg.max) / 2 + st.trueDmg) * finalMult;
+            const meleeDps = perSwing * st.attackFreqRounded;
             // 副手弓：固定每秒连射 N 箭，不计暴击
             const bowDps = st.rangedDmg > 0
                 ? st.rangedDmg * Math.max(1, st.multishot) * finalMult * physMult
@@ -3012,18 +3061,27 @@
             const dps = meleeDps + bowDps;
             const net = dps - (c.regen || 0);
 
-            // 每刀节奏：单刀期望伤害（近战部分 ÷ 刀数；弓的箭按固定射速独立计）
-            const swings = Math.max(1, st.attackFreqRounded); // 实战每秒刀数（已取整）
-            const perSwing = (physOut + otherOut) || 0;        // 单刀期望伤害（近战）
-            const swingSec = swings > 0 ? 1 / swings : Infinity; // 攻击间隔
-            const regenPerSwing = (c.regen || 0) * swingSec;    // 一个攻击间隔内怪物回血
-            const effectivePerSwing = perSwing - regenPerSwing;  // 单刀净伤害
-            if (effectivePerSwing <= 0) {
-                return { sec: Infinity, dps: dps, net: net, swings, swingSec };
+            if (mode === 'offline') {
+                // 离线结算：按有效 DPS 折算击杀数，每秒封顶 5 只
+                if (net <= 0) return { sec: Infinity, dps, net, mode };
+                const dpsSec = c.hpAvg / net;
+                const capSec = 1 / 5; // 0.2 秒/只
+                const sec = Math.max(dpsSec, capSec);
+                return { sec, dps, net, mode, offlineCapped: dpsSec < capSec };
             }
-            const swingsNeeded = Math.ceil(c.hpAvg / effectivePerSwing);
-            const sec = swingsNeeded * swingSec;
-            return { sec, dps, net, swings, swingSec, swingsNeeded };
+
+            // 在线：整刀结算，每刀最多杀一只
+            const swings = Math.max(1, st.attackFreqRounded); // 实战每秒刀数（已取整）
+            const swingSec = swings > 0 ? 1 / swings : Infinity; // 攻击间隔
+            // 单个攻击间隔内的净伤害：近战一刀 + 该间隔内弓箭输出 − 该间隔内怪物回血
+            const perInterval = perSwing + bowDps * swingSec;
+            const regenPerInterval = (c.regen || 0) * swingSec;
+            const effectivePerInterval = perInterval - regenPerInterval;
+            if (effectivePerInterval <= 0) {
+                return { sec: Infinity, dps, net, mode, swings, swingSec };
+            }
+            const swingsNeeded = Math.ceil(c.hpAvg / effectivePerInterval);
+            return { sec: swingsNeeded * swingSec, dps, net, mode, swings, swingSec, swingsNeeded };
         }
 
         // 挂机时间计算
@@ -3048,7 +3106,10 @@
                     }
                     html += `，合计 ≈ <b>${fmtNum(farmPanel.dps.total)}/秒</b>（未计怪物抗性；行内耗时按各自怪物抗性折算）`;
                     if (farmOptions.ignoreRes) html += `<span class="warn">［已忽略怪物抗性］</span>`;
-                    html += '<br>抗性折算为估算公式：物理伤害 × 100/(100+有效抗性×1.5)，护甲穿透按百分比削减怪物抗性；魔法/真实伤害不受物理抗性影响；怪物回血从 DPS 中扣除。游戏未公开具体结算，结果仅供参考。';
+                    const modeLabel = farmOptions.mode === 'offline'
+                        ? '离线结算（按 DPS 折算，每秒最多杀 5 只）'
+                        : '在线战斗（每刀最多杀一只，整刀结算）';
+                    html += `<br>击杀算法：<b>${modeLabel}</b>。抗性折算为估算公式：物理伤害 × 100/(100+有效抗性×1.5)，护甲穿透按百分比削减怪物抗性；魔法/真实伤害不受物理抗性影响；怪物回血从 DPS 中扣除。游戏未公开具体结算，结果仅供参考。`;
                     div.innerHTML = html;
                     infoContainer.appendChild(div);
                 }
@@ -3108,7 +3169,7 @@
                 if (exp <= 0) continue;
 
                 // 击杀耗时：行内覆盖 > 配装估算 > 全局默认
-                const est = farmPanel ? estimateKillSec(monster, farmPanel) : null;
+                const est = farmPanel ? estimateKillSec(monster, farmPanel, { mode: farmOptions.mode }) : null;
                 const rowOverride = (row.sec !== '' && row.sec != null && isFinite(parseFloat(row.sec))) ? parseFloat(row.sec) : null;
                 const secPerKill = rowOverride != null ? rowOverride : (est ? est.sec : defaultSec);
                 const kills = row.count / exp;
@@ -3135,13 +3196,16 @@
                         const estLine = farmLine('击杀耗时', `≈ ${fmtNum(est.sec, 2)} 秒/只`, null, true);
                         const tag = document.createElement('span');
                         tag.className = 'est-tag';
-                        tag.textContent = '配装估算';
+                        tag.textContent = est.mode === 'offline' ? '离线估算' : '在线估算';
                         estLine.appendChild(tag);
                         card.appendChild(estLine);
                         const c = monster.combat;
+                        const paceNote = est.mode === 'offline'
+                            ? (est.offlineCapped ? '已达 5只/秒上限' : '按 DPS 折算，每秒最多5只')
+                            : `整刀结算：${est.swingsNeeded} 刀 × ${est.swingSec.toFixed(2)} 秒/刀`;
                         const note = document.createElement('div');
                         note.className = 'farm-line';
-                        note.innerHTML = `<span class="k">怪物数值</span><span class="monster-info">生命 ${c.hpText} · 物理抗性 ${c.res}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''} · 估算DPS ${fmtNum(est.net)}/秒</span>`;
+                        note.innerHTML = `<span class="k">怪物数值</span><span class="monster-info">生命 ${c.hpText} · 物理抗性 ${c.res}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''} · 有效DPS ${fmtNum(est.net)}/秒 · ${paceNote}</span>`;
                         card.appendChild(note);
                     }
                 }
@@ -4679,7 +4743,7 @@
         // 时薪 = 净收益/杀 ÷ 击杀秒数 × 3600
         // ------------------------------------------------------------------
         const PROFIT_OPTIONS_KEY = 'mc_profit_options_v1';
-        let profitOptions = { buildId: '', hours: 1, ignoreRes: false };
+        let profitOptions = { buildId: '', hours: 1, ignoreRes: false, mode: 'online' };
 
         function loadProfitOptions() {
             try {
@@ -4690,7 +4754,8 @@
                         profitOptions = {
                             buildId: typeof o.buildId === 'string' ? o.buildId : '',
                             hours: (typeof o.hours === 'number' && o.hours > 0) ? o.hours : 1,
-                            ignoreRes: !!o.ignoreRes
+                            ignoreRes: !!o.ignoreRes,
+                            mode: o.mode === 'offline' ? 'offline' : 'online'
                         };
                     }
                 }
@@ -4763,6 +4828,11 @@
                 profitOptions.hours = (isFinite(h) && h > 0) ? h : 1;
             }
             if (cb) profitOptions.ignoreRes = cb.checked;
+            const modeOnline = document.getElementById('profitModeOnline');
+            const modeOffline = document.getElementById('profitModeOffline');
+            if (modeOnline && modeOffline) {
+                profitOptions.mode = modeOffline.checked ? 'offline' : 'online';
+            }
             saveProfitOptions();
             renderProfitRanking();
         }
@@ -4778,15 +4848,15 @@
         // 返回 null=无法击杀；{ killSec, dps, netPerKill, drops:[{item,qty,price,value}|], unpriced:[{item,qty}],
         //          summonCoin, summonItems:[{item,qty,price,value}|], summonUnpriced:[{item,qty}], killsPerHour, netPerHour }
         function computeMonsterProfit(monster, panel) {
-            const est = estimateKillSec(monster, panel, profitOptions.ignoreRes);
+            // 算法（在线整刀/离线5只每秒）与抗性开关由收益页选项决定
+            const est = estimateKillSec(monster, panel, {
+                ignoreRes: profitOptions.ignoreRes,
+                mode: profitOptions.mode
+            });
             if (!est) return null;
             if (!isFinite(est.sec) || est.sec <= 0) return null;
-            // 每刀最多杀一只：整刀结算（ceil 血量/单刀净伤害 × 攻击间隔）；
-            // 与 DPS 均摊口径（血量/有效DPS）取较慢者，确保不超出每刀一杀的节奏
-            const swingSec = est.sec; // estimateKillSec 已按整刀结算
-            const dpsSec = est.net > 0 ? monster.combat.hpAvg / est.net : Infinity;
-            const killSec = Math.max(swingSec, dpsSec);
-            const killRate = isFinite(killSec) && killSec > 0 ? 1 / killSec : 0;
+            const killSec = est.sec;
+            const killRate = 1 / killSec;
 
             const drops = [];
             const unpriced = [];
@@ -4822,13 +4892,13 @@
             }
 
             const netPerKill = dropValue - summonCost;
-            // 击杀节奏受「每刀一杀」约束：秒杀怪最多按 实战刀数/只 结算
             const killsPerHour = killRate * 3600;
             const netPerHour = netPerKill * killsPerHour;
             return {
                 killSec: killSec, dps: est.dps,
+                mode: est.mode,
                 swingsNeeded: est.swingsNeeded, swingSec: est.swingSec,
-                rateLimited: swingSec > dpsSec, // 整刀结算比 DPS 均摊慢 → 刀数是瓶颈
+                offlineCapped: !!est.offlineCapped,
                 drops, unpriced, dropValue,
                 summonCoin: typeof monster.summonCoin === 'number' ? monster.summonCoin : 0,
                 summonItems, summonUnpriced, summonCost,
@@ -4881,7 +4951,10 @@
             // 全量核算并排序
             const rows = [];
             let skippedUnkillable = 0;
+            let skippedBoss = 0;
             for (const m of MONSTERS) {
+                // 团队Boss（尸王/琉璃王等）为一次性召唤战斗，不参与刷怪收益排行
+                if (m.isBoss) { skippedBoss++; continue; }
                 const r = computeMonsterProfit(m, panel);
                 if (!r) { skippedUnkillable++; continue; }
                 rows.push({ monster: m, profit: r });
@@ -4899,10 +4972,14 @@
             const st = panel.stats;
             const buildName = profitOptions.buildId === '__current__'
                 ? '当前配装' : (loadPanelBuilds().find(b => String(b.id) === profitOptions.buildId) || {}).name;
+            const modeLabel = profitOptions.mode === 'offline'
+                ? '离线结算（按 DPS 折算，每秒最多杀 5 只）'
+                : '在线战斗（每刀最多杀一只，按整刀结算）';
             summary.innerHTML = `<b>「${escapeHtml(buildName || '配装')}」</b>：单次期望 ${fmtNum(panel.dps.hit)} × ${st.attackFreqRounded} 刀/秒` +
                 (panel.dps.bow > 0 ? ` + 副手弓 ${fmtNum(panel.dps.bow)}/秒` : '') +
                 `，合计 ≈ <b>${fmtNum(panel.dps.total)}/秒</b>（未计怪物抗性；各怪按自身抗性折算${profitOptions.ignoreRes ? '，当前已忽略抗性' : ''}）。` +
-                `共核算 ${rows.length} 种可击杀怪物（${skippedUnkillable} 种因 DPS 不足或无战斗数据排除），按时薪排序取前 5。`;
+                `击杀算法：<b>${modeLabel}</b>。共核算 ${rows.length} 种可刷怪物` +
+                `（排除团队Boss ${skippedBoss} 种、DPS 不足或无战斗数据 ${skippedUnkillable} 种），按时薪排序取前 5。`;
             wrap.appendChild(summary);
 
             const top = rows.slice(0, 5);
@@ -4995,10 +5072,13 @@
                 const stats = document.createElement('div');
                 stats.className = 'profit-stats';
                 const c = m.combat || {};
-                const swingInfo = p.swingsNeeded != null
-                    ? `${p.swingsNeeded} 刀 × ${p.swingSec.toFixed(2)} 秒/刀${p.rateLimited ? '（已按每刀一杀封顶）' : ''}`
-                    : '';
-                stats.innerHTML = `击杀耗时 ≈ <b>${fmtNum(p.killSec, 2)} 秒/只</b>${swingInfo ? `（${swingInfo}，每刀最多杀一只）` : `（估算DPS ${fmtNum(p.dps)}/秒 ÷ 有效输出 ${fmtNum(p.dps - (c.regen || 0))}/秒 扣回血）`} · 怪物生命 ${c.hpText || '?'} · 物理抗性 ${c.res != null ? c.res : '?'}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''}`;
+                // 击杀节奏说明：在线=整刀结算；离线=DPS折算+每秒5只封顶
+                const paceInfo = p.mode === 'offline'
+                    ? (p.offlineCapped ? '离线结算 · 已达 5只/秒上限' : `离线结算（DPS ${fmtNum(p.dps)}/秒折算，每秒最多5只）`)
+                    : (p.swingsNeeded != null
+                        ? `在线 · ${p.swingsNeeded} 刀 × ${p.swingSec.toFixed(2)} 秒/刀，每刀最多杀一只`
+                        : `在线 · 估算DPS ${fmtNum(p.dps)}/秒`);
+                stats.innerHTML = `击杀耗时 ≈ <b>${fmtNum(p.killSec, 2)} 秒/只</b>（${paceInfo}） · 怪物生命 ${c.hpText || '?'} · 物理抗性 ${c.res != null ? c.res : '?'}${(c.regen || 0) > 0 ? ` · 每秒回血 ${c.regen}` : ''}`;
                 main.appendChild(stats);
 
                 card.appendChild(main);
@@ -5181,6 +5261,7 @@
             fillFarmBuildSelect();
             const ignoreResEl = document.getElementById('farmIgnoreRes');
             if (ignoreResEl) ignoreResEl.checked = farmOptions.ignoreRes;
+            syncModeRadios('farm', farmOptions.mode);
 
             // 页签四：刷怪收益排行选项
             loadProfitOptions();
@@ -5189,6 +5270,7 @@
             if (profitHoursEl) profitHoursEl.value = profitOptions.hours;
             const profitIgnoreEl = document.getElementById('profitIgnoreRes');
             if (profitIgnoreEl) profitIgnoreEl.checked = profitOptions.ignoreRes;
+            syncModeRadios('profit', profitOptions.mode);
             renderProfitRanking();
 
             await loadDefs();
