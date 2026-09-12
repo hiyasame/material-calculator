@@ -1295,7 +1295,7 @@
             grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
         }
 
-        /* ===== 戒指合成路线 ===== */
+        /* ===== 戒指合成路线（魔盒机制） ===== */
         .ring-quality-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -1345,7 +1345,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .ring-detail-head img {
@@ -1372,73 +1372,39 @@
         .ring-src-tag.forge { border-color: var(--accent); color: var(--accent); }
         .ring-src-tag.cube { border-color: var(--amber); color: var(--amber); }
 
-        .ring-mold-flow {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: stretch;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-
-        .ring-mold-node {
-            flex: 1 1 165px;
-            min-width: 150px;
+        .ring-route-card {
             border: 1px solid var(--line);
+            border-left: 3px solid var(--line-strong);
             border-radius: var(--radius);
             background: #fff;
-            padding: 8px 10px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
         }
 
-        .ring-mold-node.on {
-            border-color: var(--amber);
-            background: var(--amber-soft);
-        }
+        .ring-route-card.cube { border-left-color: var(--amber); }
+        .ring-route-card.forge { border-left-color: var(--accent); }
 
-        .ring-mold-node .mold-name {
-            font-size: 12.5px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: var(--ink);
-        }
-
-        .ring-mold-node.on .mold-name { color: var(--amber); }
-
-        .ring-mold-node .mold-recipe {
-            font-size: 11px;
-            color: var(--ink-soft);
-            line-height: 1.7;
-        }
-
-        .ring-mold-arrow {
-            align-self: center;
-            color: var(--ink-faint);
+        .ring-route-title {
             font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 6px;
         }
 
-        .ring-tree-wrap {
-            border: 1px solid var(--line);
-            border-radius: var(--radius);
-            background: #fff;
-            padding: 10px 12px;
-            margin-bottom: 18px;
+        .ring-route-line {
+            font-size: 12.5px;
+            color: var(--ink-soft);
+            line-height: 1.8;
         }
 
-        .ring-alt {
-            font-size: 11px;
+        .ring-route-line .k {
+            display: inline-block;
+            min-width: 62px;
             color: var(--ink-faint);
-            line-height: 1.7;
-            padding: 2px 0 2px 34px;
-        }
-
-        .ring-src-badge {
-            font-size: 10px;
-            padding: 1px 6px;
-            border-radius: 3px;
-            border: 1px solid var(--line-strong);
-            color: var(--ink-faint);
-            white-space: nowrap;
             margin-right: 6px;
         }
+
+        .ring-route-line b { color: var(--amber); }
 
         /* ===== 挂机页：配装估算 ===== */
         .farm-build-info {
@@ -1791,14 +1757,14 @@
                     <div class="control-group">
                         <label>目标数量</label>
                         <input type="number" id="ringCount" value="1" min="1" max="9999" step="1" onchange="renderRingRoute()">
-                        <span class="hint-inline">枚（材料树与原子材料统计按此数量展开）</span>
+                        <span class="hint-inline">枚（期望材料按此数量折算）</span>
                     </div>
                 </div>
                 <div class="control-row">
                     <span class="hint-inline">
-                        按品质查看每枚指环的完整合成路线：直接材料 → 铸模升级链 → 递归到原子材料。
-                        数量为「单次合成所需」（成功率为随机配方，需要多次时请按成功率自行折算期望）；
-                        材料树按首选路线展开，其余路线标注在节点下方。带「挂机」标记的原子材料可点击带入挂机时间计算。
+                        魔盒机制（据游戏客户端源码）：<b>锻造（转化）</b>每轮放入 3 份同品质配方材料（三个不同，或两份相同 + 一份不同）→ 50% 出其中一个，失败或材料不匹配即炸炉；
+                        <b>合成（三合一）</b>3 枚不同的同品质戒指（各 1）+ 对应绑定材料 → 必出该材料对应的戒指，100% 不炸炉。
+                        极品指环不在魔盒内，由工坊锻造。期望材料已按成功率与三份装填折算；铸模升级链可在「材料合成计算」页签递归展开。
                     </span>
                 </div>
             </div>
@@ -2991,11 +2957,18 @@
 
         // ------------------------------------------------------------------
         // ------------------------------------------------------------------
-        // 页签二：戒指合成路线
-        // 数据来源：锻造（FORGE_RECIPES，已并入 RECIPES）+ 魔盒（HORADRIC_RECIPES）
+        // 页签二：戒指合成路线（魔盒机制）
+        // 源码依据：游戏客户端 HoradricPanel（index-*.js）
+        //  · 魔盒·锻造（转化）：品质页签内放入 3 份配方材料
+        //    （三个不同，或两份相同 + 一份不同；不能三份全相同）→ 50% 出其中一个，
+        //    失败或材料不匹配 = 炸炉（材料全部消失）
+        //  · 魔盒·合成（三合一）：3 枚不同的同品质戒指（各 1；工坊可直接锻造的
+        //    镜像铁傀/古墓吞噬/侵染星辰/夜翼魔徽 不能当祭品）+ 对应绑定材料 →
+        //    必出该材料对应的戒指，100% 成功、不炸炉
+        //  · 极品指环不在魔盒内，由工坊锻造（极品铸模×3 + 材料）
         // ------------------------------------------------------------------
-        // 铸模升级链（游戏内从基础铸模一路升到极品铸模）
         const RING_MOLD_CHAIN = ['ringCastingMold', 'ringMoldOdd', 'ringMoldEssence', 'ringMoldRare', 'ringMoldEpic'];
+        const CUBE_FORGE_RATE = 0.5; // 魔盒锻造（转化）成功率
 
         // 某物品的全部配方：锻造/NPC兑换（RECIPES）+ 魔盒（HORADRIC_RECIPES）
         function allRecipesFor(itemId) {
@@ -3009,14 +2982,6 @@
             return out;
         }
 
-        function recipeSourceName(source) {
-            if (source === 'forge') return '锻造';
-            if (source === 'horadric') return '魔盒';
-            if (source === 'voidCaravan') return '虚空商队';
-            if (source === 'exchange') return 'NPC兑换';
-            return source || '配方';
-        }
-
         function recipeRateText(rate) {
             return rate ? `${Math.round(rate * 100)}%` : '必成';
         }
@@ -3026,6 +2991,25 @@
                 const info = ITEM_DEFS[id];
                 return `${info ? info.name : id}×${n}`;
             }).join(' + ');
+        }
+
+        // 按倍率展开材料文本（倍率可为小数，如 40% 成功率 → ×2.5）
+        function scaledCostText(cost, mult) {
+            return Object.entries(cost || {}).map(([id, n]) => {
+                const info = ITEM_DEFS[id];
+                const v = n * mult;
+                return `${info ? info.name : id}×${Number.isInteger(v) ? fmtInt(v) : fmtNum(v, 2)}`;
+            }).join(' + ');
+        }
+
+        // 戒指 id -> 品质（取自装备定义）
+        function ringQualityMap() {
+            const map = Object.create(null);
+            for (const [id, info] of Object.entries(ITEM_DEFS)) {
+                const eq = info && info.equip;
+                if (eq && eq.slot === 'ring' && eq.quality) map[id] = eq.quality;
+            }
+            return map;
         }
 
         // 可合成的指环：装备槽为 ring 且至少有一条配方（排除暴击戒指/泰坦戒指等无配方项）
@@ -3052,159 +3036,76 @@
             }));
         }
 
-        // 递归材料树：每个节点取首选配方展开，其余配方作为备选标注
-        function buildRingRouteTree(itemId, count, depth, path) {
-            const info = ITEM_DEFS[itemId] || { name: itemId, img: null };
-            const recipes = allRecipesFor(itemId);
-            const node = {
-                id: itemId, name: info.name, img: info.img, count: count,
-                depth: depth, recipes: recipes, children: [],
-                isAtomic: recipes.length === 0, truncated: false
-            };
-            if (!recipes.length) return node;
-            if (depth >= 14) { node.truncated = true; return node; }
-            const main = recipes[0];
-            const mult = Math.ceil(count / (main.resultCount || 1));
-            const nextPath = path.concat([itemId]);
-            for (const [matId, matCount] of Object.entries(main.cost || {})) {
-                if (path.includes(matId)) { node.truncated = true; continue; }
-                node.children.push(buildRingRouteTree(matId, matCount * mult, depth + 1, nextPath));
-            }
-            return node;
+        // 魔盒锻造（转化）配方：HORADRIC_RECIPES 中产该戒指的一条
+        //（buildData 已把 result 规范化为字符串 id）
+        function cubeForgingRecipeOf(ringId) {
+            return HORADRIC_RECIPES.find(r => r.result === ringId) || null;
         }
 
-        function renderRingTreeNode(node, container) {
-            const nodeDiv = document.createElement('div');
-            nodeDiv.className = 'tree-node';
-
-            const content = document.createElement('div');
-            content.className = 'tree-node-content ' + (node.isAtomic ? 'atomic' : 'craftable');
-            const hasChildren = node.children && node.children.length > 0;
-
-            if (hasChildren) {
-                const toggle = document.createElement('span');
-                toggle.className = 'tree-toggle expanded';
-                toggle.innerHTML = '▶';
-                toggle.onclick = (e) => {
-                    e.stopPropagation();
-                    const kids = nodeDiv.querySelector('.tree-children');
-                    if (kids) {
-                        const show = kids.style.display === 'none';
-                        kids.style.display = show ? 'block' : 'none';
-                        toggle.classList.toggle('expanded', show);
-                    }
-                };
-                content.appendChild(toggle);
-            } else {
-                const spacer = document.createElement('span');
-                spacer.style.width = '18px';
-                spacer.style.display = 'inline-block';
-                content.appendChild(spacer);
-            }
-
-            const icon = createItemImg(node.img, 'tree-node-icon');
-            if (icon) {
-                attachEquipTooltip(icon, node.id);
-                content.appendChild(icon);
-            }
-
-            const info = document.createElement('div');
-            info.className = 'tree-node-info';
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'tree-node-name';
-            nameDiv.textContent = node.name;
-            attachEquipTooltip(nameDiv, node.id);
-            info.appendChild(nameDiv);
-            const countDiv = document.createElement('div');
-            countDiv.className = 'tree-node-count';
-            countDiv.textContent = '×' + fmtInt(node.count);
-            info.appendChild(countDiv);
-            content.appendChild(info);
-
-            if (node.isAtomic) {
-                const badge = document.createElement('span');
-                badge.className = 'tree-node-badge badge-atomic';
-                badge.textContent = '原子材料';
-                content.appendChild(badge);
-            } else {
-                const main = node.recipes[0];
-                const srcBadge = document.createElement('span');
-                srcBadge.className = 'ring-src-badge';
-                srcBadge.textContent = recipeSourceName(main.source);
-                content.appendChild(srcBadge);
-                const badge = document.createElement('span');
-                if (main.rate) {
-                    badge.className = 'tree-node-badge badge-rate';
-                    badge.textContent = recipeRateText(main.rate);
-                } else {
-                    badge.className = 'tree-node-badge badge-craftable';
-                    badge.textContent = '必成';
-                }
-                content.appendChild(badge);
-            }
-            nodeDiv.appendChild(content);
-
-            // 备选路线
-            for (const alt of node.recipes.slice(1)) {
-                const altDiv = document.createElement('div');
-                altDiv.className = 'ring-alt';
-                altDiv.textContent = `备选（${recipeSourceName(alt.source)} ${recipeRateText(alt.rate)}）：${costText(alt.cost)}`;
-                nodeDiv.appendChild(altDiv);
-            }
-            if (node.truncated) {
-                const t = document.createElement('div');
-                t.className = 'ring-alt';
-                t.textContent = '（此分支已折叠：出现循环或层级过深）';
-                nodeDiv.appendChild(t);
-            }
-
-            if (hasChildren) {
-                const kids = document.createElement('div');
-                kids.className = 'tree-children';
-                for (const child of node.children) renderRingTreeNode(child, kids);
-                nodeDiv.appendChild(kids);
-            }
-
-            container.appendChild(nodeDiv);
+        // 配方所属品质页签（与客户端一致：按配方里的铸模判定）
+        function cubeQualityOfRecipe(recipe) {
+            const cost = (recipe && recipe.cost) || {};
+            if (Number(cost.ringMoldEssence) > 0) return 'essence';
+            if (Number(cost.ringMoldRare) > 0) return 'rare';
+            if (Number(cost.ringMoldEpic) > 0) return 'epic';
+            return 'odd';
         }
 
-        // 铸模升级链卡片：高亮当前指环需要的铸模等级
-        function renderRingMoldChain(requiredMoldId) {
-            const wrap = document.createElement('div');
-            wrap.className = 'ring-mold-flow';
-            RING_MOLD_CHAIN.forEach((moldId, idx) => {
-                if (idx > 0) {
-                    const arrow = document.createElement('span');
-                    arrow.className = 'ring-mold-arrow';
-                    arrow.textContent = '→';
-                    wrap.appendChild(arrow);
+        // 魔盒合成（三合一）规则：与客户端 tg 计算属性同一算法
+        // mats = 配方里「非铸模、非戒指」的绑定材料
+        function cubeSynthesisRules() {
+            const ringQ = ringQualityMap();
+            const rules = [];
+            for (const r of HORADRIC_RECIPES) {
+                const cost = r.cost || {};
+                const quality = cubeQualityOfRecipe(r);
+                const mats = {};
+                for (const [id, n] of Object.entries(cost)) {
+                    if (RING_MOLD_CHAIN.includes(id)) continue; // 铸模不算绑定材料
+                    if (ringQ[id]) continue;                    // 戒指是祭品位
+                    mats[id] = Number(n) || 0;
                 }
-                const info = ITEM_DEFS[moldId] || { name: moldId, img: null };
-                const node = document.createElement('div');
-                node.className = 'ring-mold-node' + (moldId === requiredMoldId ? ' on' : '');
+                const resultId = r.result;
+                if (!resultId || !Object.keys(mats).length) continue;
+                if (Object.keys(mats).length === Object.keys(cost).length) continue; // 没有铸模/戒指位 → 不构成三合一
+                rules.push({ id: r.id, name: r.name || resultId, quality, mats, result: resultId });
+            }
+            return rules;
+        }
 
-                const nameEl = document.createElement('div');
-                nameEl.className = 'mold-name';
-                nameEl.textContent = info.name || moldId;
-                node.appendChild(nameEl);
+        // 工坊可直接锻造的戒指（配方含基础铸模 ringCastingMold）→ 不能作为三合一祭品
+        function directForgeRingSet() {
+            const ringQ = ringQualityMap();
+            const set = Object.create(null);
+            for (const r of Object.values(RECIPES)) {
+                if (ringQ[r.result] && Number((r.cost || {}).ringCastingMold) > 0) set[r.result] = true;
+            }
+            return set;
+        }
 
-                const recs = allRecipesFor(moldId);
-                if (!recs.length) {
-                    const line = document.createElement('div');
-                    line.className = 'mold-recipe';
-                    line.textContent = '基础铸模';
-                    node.appendChild(line);
-                } else {
-                    for (const r of recs) {
-                        const line = document.createElement('div');
-                        line.className = 'mold-recipe';
-                        line.textContent = `${costText(r.cost)}（${recipeRateText(r.rate)}）`;
-                        node.appendChild(line);
-                    }
-                }
-                wrap.appendChild(node);
-            });
-            return wrap;
+        // 工坊配方（RECIPES 中产该戒指的配方，不含魔盒）
+        function workshopRecipesFor(ringId) {
+            return Object.values(RECIPES).filter(r => r.result === ringId);
+        }
+
+        // 卡片式小节
+        function ringSection(body, title, toast) {
+            const card = document.createElement('div');
+            card.className = 'ring-route-card' + (toast ? ' ' + toast : '');
+            const head = document.createElement('div');
+            head.className = 'ring-route-title';
+            head.textContent = title;
+            card.appendChild(head);
+            body.appendChild(card);
+            return card;
+        }
+
+        function ringLine(card, html) {
+            const line = document.createElement('div');
+            line.className = 'ring-route-line';
+            line.innerHTML = html;
+            card.appendChild(line);
+            return line;
         }
 
         function renderRingRoute() {
@@ -3266,11 +3167,16 @@
         function renderRingDetail(body, ringId) {
             const info = ITEM_DEFS[ringId];
             if (!info) return;
-            const recipes = allRecipesFor(ringId);
+            const quality = (info.equip && info.equip.quality) || '';
+            const qName = RING_QUALITY_NAMES[quality] || quality || '';
             const countEl = document.getElementById('ringCount');
             const count = Math.max(1, Math.min(9999, parseInt(countEl && countEl.value, 10) || 1));
 
-            // 标题：图标 + 名称 + 获取方式（锻造 / 魔盒 + 成功率）
+            const cubeRecipe = cubeForgingRecipeOf(ringId);
+            const rule = cubeSynthesisRules().find(r => r.result === ringId) || null;
+            const forgeRecipes = workshopRecipesFor(ringId);
+
+            // 标题：图标 + 名称 + 获取方式标签
             const head = document.createElement('div');
             head.className = 'ring-detail-head';
             const icon = createItemImg(info.img, '');
@@ -3278,64 +3184,82 @@
             const nameEl = document.createElement('div');
             nameEl.className = 'ring-detail-name';
             nameEl.textContent = info.name;
-            const qc = (QUALITY_DEFS[(info.equip && info.equip.quality) || ''] || {}).color;
+            const qc = (QUALITY_DEFS[quality] || {}).color;
             if (qc) nameEl.style.color = qc;
             head.appendChild(nameEl);
-            for (const r of recipes) {
-                const tag = document.createElement('span');
-                tag.className = 'ring-src-tag ' + (r.source === 'horadric' ? 'cube' : 'forge');
-                tag.textContent = `${recipeSourceName(r.source)} · ${recipeRateText(r.rate)}`;
-                head.appendChild(tag);
+            if (cubeRecipe) {
+                const t = document.createElement('span');
+                t.className = 'ring-src-tag cube';
+                t.textContent = `魔盒·锻造 ${Math.round(CUBE_FORGE_RATE * 100)}%`;
+                head.appendChild(t);
+            }
+            if (rule) {
+                const t = document.createElement('span');
+                t.className = 'ring-src-tag cube';
+                t.textContent = '魔盒·合成 100%';
+                head.appendChild(t);
+            }
+            if (!cubeRecipe && forgeRecipes.length) {
+                const t = document.createElement('span');
+                t.className = 'ring-src-tag forge';
+                t.textContent = `工坊锻造 ${forgeRecipes.map(r => recipeRateText(r.rate)).join(' / ')}`;
+                head.appendChild(t);
             }
             body.appendChild(head);
 
-            const direct = document.createElement('div');
-            direct.className = 'hint-inline';
-            direct.style.marginBottom = '16px';
-            direct.style.display = 'block';
-            direct.textContent = '直接材料：' + recipes.map(r =>
-                `${recipeSourceName(r.source)} → ${costText(r.cost)}`).join('　｜　');
-            body.appendChild(direct);
-
-            // 铸模升级链：高亮该指环主配方需要的铸模
-            const main = recipes[0];
-            let requiredMold = '';
-            for (const k of Object.keys(main.cost || {})) {
-                if (RING_MOLD_CHAIN.includes(k)) requiredMold = k;
-            }
-            if (requiredMold) {
-                const moldTitle = document.createElement('div');
-                moldTitle.className = 'panel-title';
-                moldTitle.innerHTML = '铸模升级链 <span class="hint">高亮的是本指环需要的铸模等级；括号内为成功率</span>';
-                body.appendChild(moldTitle);
-                body.appendChild(renderRingMoldChain(requiredMold));
+            // ── 魔盒 · 锻造（转化）──
+            if (cubeRecipe) {
+                const card = ringSection(body, '魔盒 · 锻造（转化）', 'cube');
+                ringLine(card, `<span class="k">单次配方</span>${costText(cubeRecipe.cost)}`);
+                ringLine(card, `<span class="k">每轮装填</span>3 份同品质配方材料（三个不同，或两份相同 + 一份不同；<b>不能三份全相同</b>）`);
+                ringLine(card, `<span class="k">成功率</span><b>${Math.round(CUBE_FORGE_RATE * 100)}%</b> 出其中一个；失败或材料不匹配 = 炸炉（材料全部消失）`);
+                const targetMult = 6 * count;   // 3 轮 × 2 份本配方
+                const fillerMult = 3 * count;   // 3 轮 × 1 份配平
+                ringLine(card, `<span class="k">定向装填</span>2 份本配方 + 1 份同品质其他配方 → 每轮出目标约 1/3，期望 3 轮/件`);
+                ringLine(card, `<span class="k">期望材料</span>${scaledCostText(cubeRecipe.cost, targetMult)}`);
+                ringLine(card, `<span class="k">另需配平</span>同品质其他配方 ×${fmtInt(fillerMult)} 轮份（成本取决于你放哪份配方）`);
             }
 
-            // 完整合成路线树
-            const treeTitle = document.createElement('div');
-            treeTitle.className = 'panel-title';
-            treeTitle.innerHTML = `完整合成路线 <span class="hint">${info.name} ×${count}（按首选配方展开）</span>`;
-            body.appendChild(treeTitle);
-            const treeWrap = document.createElement('div');
-            treeWrap.className = 'ring-tree-wrap';
-            const tree = buildRingRouteTree(ringId, count, 0, []);
-            renderRingTreeNode(tree, treeWrap);
-            body.appendChild(treeWrap);
-
-            // 原子材料统计（可点击带入挂机计算）
-            const sumTitle = document.createElement('div');
-            sumTitle.className = 'panel-title';
-            sumTitle.innerHTML = '原子材料统计 <span class="hint">点击带「挂机」标记的材料，可直接带入挂机时间计算估算刷取时长</span>';
-            body.appendChild(sumTitle);
-            const sumWrap = document.createElement('div');
-            sumWrap.id = 'ringMaterialSummary';
-            const materials = collectAtomicMaterials(tree, {});
-            if (Object.keys(materials).length) {
-                renderSummary(materials, sumWrap);
-            } else {
-                sumWrap.innerHTML = '<div class="hint-inline">该指环无需材料</div>';
+            // ── 魔盒 · 合成（三合一）──
+            if (rule) {
+                const card = ringSection(body, '魔盒 · 合成（三合一）', 'cube');
+                const excluded = Object.keys(directForgeRingSet())
+                    .filter(id => ringQualityMap()[id] === rule.quality)
+                    .map(id => (ITEM_DEFS[id] && ITEM_DEFS[id].name) || id);
+                ringLine(card, `<span class="k">祭品</span>3 枚不同${qName}戒指（各 1 枚）` +
+                    (excluded.length ? `；工坊可直接锻造的 ${excluded.join('、')} 不能当祭品` : ''));
+                ringLine(card, `<span class="k">绑定材料</span>${costText(rule.mats)}`);
+                ringLine(card, `<span class="k">成功率</span><b>100%</b> 必出 ${info.name}，不炸炉`);
+                ringLine(card, `<span class="k">期望材料</span>${qName}戒指 ×${fmtInt(3 * count)} + ${scaledCostText(rule.mats, count)}`);
             }
-            body.appendChild(sumWrap);
+
+            // ── 工坊锻造（非魔盒产线）──
+            if (forgeRecipes.length) {
+                const card = ringSection(body, '工坊锻造（非魔盒）', 'forge');
+                for (const r of forgeRecipes) {
+                    if (r.rate) {
+                        ringLine(card, `<span class="k">配方</span>${costText(r.cost)}`);
+                        ringLine(card, `<span class="k">成功率</span><b>${Math.round(r.rate * 100)}%</b>，期望 ${fmtNum(1 / r.rate, 2)} 次/件`);
+                        ringLine(card, `<span class="k">期望材料</span>${scaledCostText(r.cost, count / r.rate)}`);
+                    } else {
+                        ringLine(card, `<span class="k">配方</span>${costText(r.cost)}（必成，期望材料即上方配方）`);
+                    }
+                }
+            }
+
+            if (!cubeRecipe && !rule && !forgeRecipes.length) {
+                const card = ringSection(body, '暂无配方', 'forge');
+                ringLine(card, '该指环当前版本没有可计算的合成路线。');
+            }
+
+            // 铸模提示
+            if (cubeRecipe && Object.keys(cubeRecipe.cost).some(k => RING_MOLD_CHAIN.includes(k))) {
+                const note = document.createElement('div');
+                note.className = 'hint-inline';
+                note.style.marginTop = '10px';
+                note.textContent = '铸模本身由工坊铸模升级链产出（基础铸模 → 奇巧 → 精粹 → 稀有 → 极品），可在「材料合成计算」页签递归展开查看。';
+                body.appendChild(note);
+            }
         }
 
         // 页签三：挂机时间计算
