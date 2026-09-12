@@ -1248,6 +1248,53 @@
             object-fit: contain;
         }
 
+        /* 指环库：按品质分区（与游戏 ring-vault-groups 一致） */
+        .ring-vault-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ring-vault-group { padding-bottom: 6px; }
+
+        .ring-vault-group-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+            padding: 4px 2px 0;
+        }
+
+        .ring-vault-group-title em {
+            font-style: normal;
+            font-size: 11px;
+            color: var(--amber);
+            margin-left: 6px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .vault-set {
+            font-size: 12px;
+            color: var(--ink-soft);
+            text-align: center;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            margin: 8px 0 0;
+            padding: 8px 10px;
+        }
+
+        .vault-set.on {
+            border-color: var(--amber);
+            color: var(--amber);
+            background: var(--amber-soft);
+            font-weight: 600;
+        }
+
+        .ring-vault-grid {
+            margin-top: 8px;
+            grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+        }
+
         /* ===== 挂机页：配装估算 ===== */
         .farm-build-info {
             background: var(--accent-soft);
@@ -1671,7 +1718,7 @@
                         <div id="vaultTabs"></div>
                         <div id="vaultBody"></div>
                         <div class="hint-inline slot-note">
-                            内置数值提取自游戏服务器（2026-09-07）。游戏更新收藏室后，点击「⬇ 从游戏导入」粘贴最新的游戏 state JSON 即可刷新。
+                            内置数值提取自游戏真实数据（武器/盔甲/副手 2026-09-07，指环库 2026-09-12）。游戏更新收藏室后，点击「⬇ 从游戏导入」粘贴最新的游戏 state JSON 即可刷新。
                         </div>
                     </div>
 
@@ -3485,8 +3532,11 @@
         };
 
         // 收藏室（装备库）定义：数据结构与游戏 /api/game/state 下发的
-        // weaponVaultDefs / armorVaultDefs / offhandVaultDefs 完全一致。
-        // 默认值为 2026-09-07 从游戏服务器提取的真实数值；
+        // weaponVaultDefs / armorVaultDefs / offhandVaultDefs /
+        // ringVaultDefs / ringVaultSetBonuses 完全一致。
+        // 默认值为游戏真实数值：武器/盔甲/副手为 2026-09-07 提取自游戏服务器；
+        // 指环库（V2.12 新增）为 2026-09-12 提取自游戏客户端内置定义，
+        // 与 V2.12 更新日志的公告数值一致。
         // 游戏更新后可通过「从游戏导入」按钮粘贴最新 state 一键刷新。
         const VAULT_IMPORT_KEY = 'mc_vault_defs_v1';
         const VAULT_DEFAULTS = {
@@ -3527,10 +3577,65 @@
                 { id: 'sulfurFireTechBow', bonuses: [{ attr: 'rangedDmg', flat: 5 }] },
                 { id: 'darkChaser',        bonuses: [{ attr: 'rangedDmg', flat: 8 }] },
                 { id: 'voidArrow',         bonuses: [{ attr: 'rangedDmg', flat: 8 }] }
+            ],
+            // 指环库（V2.12）：按品质分区，入库即得对应加成，同品质全部入库再得集齐加成
+            ring: [
+                // 极品
+                { id: 'ancientCorpseKing', quality: 'epic',    bonuses: [{ attr: 'physDmg', flat: 10 }, { attr: 'armorPen', flat: 5 }] },
+                { id: 'glazedEmperor',     quality: 'epic',    bonuses: [{ attr: 'blockDmg', flat: 10 }, { attr: 'blockChance', flat: 5 }] },
+                { id: 'painSpider',        quality: 'epic',    bonuses: [{ attr: 'dodge', flat: 5 }, { attr: 'critChanceResist', flat: 5 }] },
+                // 稀有
+                { id: 'mirrorIronPuppet',  quality: 'rare',    bonuses: [{ attr: 'maxHp', flat: 1 }, { attr: 'physDmg', flat: 1 }] },
+                { id: 'infestedStarRing',  quality: 'rare',    bonuses: [{ attr: 'magicDmg', flat: 1 }] },
+                { id: 'vampireRing',       quality: 'rare',    bonuses: [{ attr: 'maxHp', flat: 1 }] },
+                { id: 'nightwingBadge',    quality: 'rare',    bonuses: [{ attr: 'maxHp', flat: 1 }, { attr: 'physDmg', flat: 1 }] },
+                { id: 'firstUnit',         quality: 'rare',    bonuses: [{ attr: 'physRes', flat: 1 }] },
+                { id: 'wailingDemonDirge', quality: 'rare',    bonuses: [{ attr: 'rangedDmg', flat: 1 }] },
+                { id: 'darkStarHunt',      quality: 'rare',    bonuses: [{ attr: 'physDmg', flat: 2 }] },
+                { id: 'grudgingGhost',     quality: 'rare',    bonuses: [{ attr: 'satRegen', flat: 1 }] },
+                // 精粹
+                { id: 'deepSeaGuard',      quality: 'essence', bonuses: [{ attr: 'blockDmg', flat: 2 }] },
+                { id: 'dirgeChapter',      quality: 'essence', bonuses: [{ attr: 'dodge', flat: 1 }] },
+                { id: 'vanguardFront',     quality: 'essence', bonuses: [{ attr: 'physDmg', flat: 2 }] },
+                { id: 'witheredBloodBody', quality: 'essence', bonuses: [{ attr: 'satRegen', flat: 1 }] },
+                // 奇巧
+                { id: 'steelGolem',        quality: 'odd',     bonuses: [{ attr: 'physRes', flat: 1 }] },
+                { id: 'piousCorpse',       quality: 'odd',     bonuses: [{ attr: 'physDmg', flat: 1 }] },
+                { id: 'starSkullMite',     quality: 'odd',     bonuses: [{ attr: 'magicRes', flat: 1 }] },
+                { id: 'nightDemonWing',    quality: 'odd',     bonuses: [{ attr: 'rangedDmg', flat: 1 }] },
+                { id: 'liuchiHunter',      quality: 'odd',     bonuses: [{ attr: 'blockChance', flat: 1 }] },
+                { id: 'wailingSkull',      quality: 'odd',     bonuses: [{ attr: 'dodge', flat: 1 }] },
+                { id: 'blazingFlameSoul',  quality: 'odd',     bonuses: [{ attr: 'maxHp', flat: 1 }] }
+            ],
+            // 指环库集齐加成：同一品质的指环全部入库后生效
+            // （游戏 state 的 ringVaultSetBonuses 只下发 quality + label，
+            //   实际属性由本表按品质对应；若上游带回 bonuses 则优先使用）
+            ringSets: [
+                { quality: 'epic',    label: '极品集齐 +5% 伤害减免',                  bonuses: [{ attr: 'dmgReducePct', flat: 5 }] },
+                { quality: 'rare',    label: '稀有集齐 +1 攻速',                       bonuses: [{ attr: 'attackSpeed', flat: 1 }] },
+                { quality: 'essence', label: '精粹集齐 +5 物理伤害',                   bonuses: [{ attr: 'physDmg', flat: 5 }] },
+                { quality: 'odd',     label: '奇巧集齐 +1 物理抗性 / +1 魔法抗性',      bonuses: [{ attr: 'physRes', flat: 1 }, { attr: 'magicRes', flat: 1 }] }
             ]
         };
 
-        let vaultDefs = null; // { weapon:[], armor:[], offhand:[] }，当前生效的收藏室定义
+        // 指环库品质显示名与分区顺序（与游戏 ring vault 一致）
+        const RING_QUALITY_NAMES = { epic: '极品', rare: '稀有', essence: '精粹', odd: '奇巧' };
+        const RING_QUALITY_ORDER = ['epic', 'rare', 'essence', 'odd'];
+
+        let vaultDefs = null; // { weapon, armor, offhand, ring, ringSets }，当前生效的收藏室定义
+
+        function cloneVaultDefaults() {
+            return JSON.parse(JSON.stringify(VAULT_DEFAULTS));
+        }
+
+        // 补齐缺失分区（旧版本导入缓存没有指环库 → 用内置指环库数据补上，
+        // 不丢弃用户已导入的武器/盔甲/副手数据）
+        function fillVaultSections(d) {
+            const def = VAULT_DEFAULTS;
+            if (!Array.isArray(d.ring) || !d.ring.length) d.ring = JSON.parse(JSON.stringify(def.ring));
+            if (!Array.isArray(d.ringSets) || !d.ringSets.length) d.ringSets = JSON.parse(JSON.stringify(def.ringSets));
+            return d;
+        }
 
         // 从 localStorage 恢复导入过的收藏室数据；无效则用内置默认值
         function loadVaultDefs() {
@@ -3539,12 +3644,12 @@
                 if (raw) {
                     const d = JSON.parse(raw);
                     if (d && Array.isArray(d.weapon) && Array.isArray(d.armor) && Array.isArray(d.offhand)) {
-                        vaultDefs = d;
+                        vaultDefs = fillVaultSections(d);
                         return;
                     }
                 }
             } catch (e) { /* 忽略损坏缓存 */ }
-            vaultDefs = JSON.parse(JSON.stringify(VAULT_DEFAULTS));
+            vaultDefs = cloneVaultDefaults();
         }
 
         function saveVaultDefs(d) {
@@ -3554,8 +3659,8 @@
             } catch (e) { /* 存储满了就放弃 */ }
         }
 
-        // 解析用户粘贴的游戏 state JSON（整份或只含三个数组的片段均可），
-        // 返回规范化的 { weapon, armor, offhand } 或 null
+        // 解析用户粘贴的游戏 state JSON（整份或只含各数组的片段均可），
+        // 返回规范化的 { weapon, armor, offhand, ring, ringSets } 或 null
         function parseVaultImport(text) {
             let obj;
             try {
@@ -3592,7 +3697,41 @@
                 };
             }).filter(s => s.id && s.pieceAttr && Object.keys(s.pieces).length);
             if (!weapon.length || !armor.length || !offhand.length) return null;
-            return { weapon, armor, offhand };
+
+            // 指环库：上游只下发 { id, quality, bonuses }，
+            // bonuses 缺失时按 id 回退内置数值；quality 缺失时按装备定义回退
+            const ringFallback = Object.create(null);
+            for (const r of VAULT_DEFAULTS.ring) ringFallback[r.id] = r;
+            const ringRaw = Array.isArray(root.ringVaultDefs) ? root.ringVaultDefs : [];
+            const ring = ringRaw.map(d => {
+                const fb = ringFallback[d.id];
+                const eq = ITEM_DEFS[d.id] && ITEM_DEFS[d.id].equip;
+                const src = (Array.isArray(d.bonuses) && d.bonuses.length) ? d.bonuses : (fb ? fb.bonuses : []);
+                return {
+                    id: d.id,
+                    quality: d.quality || (fb && fb.quality) || (eq && eq.quality) || '',
+                    bonuses: src.map(normBonus).filter(Boolean)
+                };
+            }).filter(d => d.id && d.bonuses.length);
+            // 上游没带指环库（老版本 state）时保留内置指环库数据
+            const ringFinal = ring.length ? ring : JSON.parse(JSON.stringify(VAULT_DEFAULTS.ring));
+
+            // 集齐加成：上游一般只给 quality + label，属性按品质回退内置表
+            const setFallback = Object.create(null);
+            for (const s of VAULT_DEFAULTS.ringSets) setFallback[s.quality] = s;
+            const setRaw = Array.isArray(root.ringVaultSetBonuses) ? root.ringVaultSetBonuses : [];
+            const ringSets = setRaw.filter(s => s && s.quality).map(s => {
+                const fb = setFallback[s.quality];
+                const src = (Array.isArray(s.bonuses) && s.bonuses.length) ? s.bonuses : (fb ? fb.bonuses : []);
+                return {
+                    quality: s.quality,
+                    label: s.label || (fb && fb.label) || '',
+                    bonuses: src.map(normBonus).filter(Boolean)
+                };
+            });
+            const ringSetsFinal = ringSets.length ? ringSets : JSON.parse(JSON.stringify(VAULT_DEFAULTS.ringSets));
+
+            return { weapon, armor, offhand, ring: ringFinal, ringSets: ringSetsFinal };
         }
 
         const STAT_UNIT_PCT = new Set(['critChance', 'critChanceResist', 'lifestealPct', 'dodge', 'blockChance', 'critDmgPct', 'armorPen', 'finalDmgPct', 'dmgReducePct']);
@@ -3997,9 +4136,32 @@
         }
 
         // ------------------------------------------------------------------
-        // 收藏室（装备库）：武器库 / 盔甲库 / 副手库，UI 对齐游戏装备库
+        // 收藏室（装备库）：武器库 / 盔甲库 / 副手库 / 指环库，UI 对齐游戏装备库
         // ------------------------------------------------------------------
         let vaultActiveTab = 'weapon';
+
+        // 指环库按品质分区（与游戏 ring vault 一致）
+        function ringGroups() {
+            if (!vaultDefs) loadVaultDefs();
+            const defs = vaultDefs.ring || [];
+            const present = [];
+            for (const d of defs) {
+                const q = d.quality || '';
+                if (!present.includes(q)) present.push(q);
+            }
+            const ordered = RING_QUALITY_ORDER.filter(q => present.includes(q))
+                .concat(present.filter(q => !RING_QUALITY_ORDER.includes(q)));
+            return ordered.map(q => ({
+                quality: q,
+                name: RING_QUALITY_NAMES[q] || q || '其他',
+                items: defs.filter(d => (d.quality || '') === q)
+            })).filter(g => g.items.length);
+        }
+
+        function ringSetOf(quality) {
+            if (!vaultDefs) loadVaultDefs();
+            return (vaultDefs.ringSets || []).find(s => s.quality === quality) || null;
+        }
 
         function vaultCountOf(tab) {
             if (!vaultDefs) loadVaultDefs();
@@ -4015,6 +4177,10 @@
                     on += ids.filter(id => stored[id]).length;
                 }
                 return { on, total };
+            }
+            if (tab === 'ring') {
+                const defs = vaultDefs.ring || [];
+                return { on: defs.filter(d => stored[d.id]).length, total: defs.length };
             }
             return { on: vaultDefs.offhand.filter(d => stored[d.id]).length, total: vaultDefs.offhand.length };
         }
@@ -4051,7 +4217,7 @@
         // 从游戏导入收藏室数据
         function importVaultFromGame() {
             const text = prompt(
-                '粘贴游戏 state JSON（含 weaponVaultDefs / armorVaultDefs / offhandVaultDefs）。\n\n' +
+                '粘贴游戏 state JSON（含 weaponVaultDefs / armorVaultDefs / offhandVaultDefs / ringVaultDefs / ringVaultSetBonuses）。\n\n' +
                 '获取方法：在已登录的游戏页面按 F12 打开控制台，运行：\n' +
                 'fetch("/api/game/state",{headers:{Authorization:"Bearer "+sessionStorage.getItem("game_token")}}).then(r=>r.json()).then(d=>copy(d))\n' +
                 '（copy 会自动复制到剪贴板），然后粘贴到这里。'
@@ -4067,17 +4233,50 @@
             validatePanelState();
             renderVaultUI();
             calcPanel();
-            const n = parsed.weapon.length + parsed.armor.length + parsed.offhand.length;
-            alert(`导入成功：武器库 ${parsed.weapon.length} 件 · 盔甲库 ${parsed.armor.length} 套 · 副手库 ${parsed.offhand.length} 件（共 ${n} 项）。`);
+            const n = parsed.weapon.length + parsed.armor.length + parsed.offhand.length + parsed.ring.length;
+            alert(`导入成功：武器库 ${parsed.weapon.length} 件 · 盔甲库 ${parsed.armor.length} 套 · 副手库 ${parsed.offhand.length} 件 · 指环库 ${parsed.ring.length} 枚（共 ${n} 项）。`);
         }
 
         function resetVaultDefs() {
-            if (!confirm('恢复内置的收藏室数值（2026-09-07 提取自游戏）？')) return;
+            if (!confirm('恢复内置的收藏室数值（武器/盔甲/副手 2026-09-07，指环库 2026-09-12 提取自游戏）？')) return;
             localStorage.removeItem(VAULT_IMPORT_KEY);
             loadVaultDefs();
             validatePanelState();
             renderVaultUI();
             calcPanel();
+        }
+
+        // 单个收藏卡片（武器库 / 副手库 / 指环库共用）
+        function buildVaultCard(def, stored) {
+            const info = ITEM_DEFS[def.id];
+            const card = document.createElement('div');
+            card.className = 'vault-card' + (stored[def.id] ? ' on' : '');
+            const qc = vaultQualityColor(def.id);
+            if (qc && stored[def.id]) card.style.borderColor = qc;
+            card.onclick = () => toggleVaultStored(def.id);
+
+            const pic = document.createElement('div');
+            pic.className = 'vault-pic';
+            if (info && info.img) {
+                const img = createItemImg(info.img, '');
+                if (img) {
+                    attachEquipTooltip(img, def.id);
+                    pic.appendChild(img);
+                }
+            }
+            card.appendChild(pic);
+
+            const name = document.createElement('div');
+            name.className = 'vault-name';
+            name.textContent = info ? info.name : def.id;
+            if (qc) name.style.color = qc;
+            attachEquipTooltip(name, def.id);
+            card.appendChild(name);
+
+            for (const b of def.bonuses || []) {
+                appendVaultBonusLine(card, b);
+            }
+            return card;
         }
 
         function renderVaultUI() {
@@ -4092,11 +4291,12 @@
                 return;
             }
 
-            // 页签（与游戏一致：武器库 N/M · 装备库 · 副手库 N/M）
+            // 页签（与游戏一致：武器库 N/M · 装备库 · 副手库 N/M · 指环库 N/M）
             const tabDefs = [
                 { key: 'weapon', label: '武器库' },
                 { key: 'armor', label: '装备库' },
-                { key: 'offhand', label: '副手库' }
+                { key: 'offhand', label: '副手库' },
+                { key: 'ring', label: '指环库' }
             ];
             for (const t of tabDefs) {
                 const btn = document.createElement('button');
@@ -4194,6 +4394,47 @@
                 return;
             }
 
+            if (vaultActiveTab === 'ring') {
+                // 指环库：按品质分区 + 集齐加成（与游戏 ring-vault-group 一致）
+                const hint = document.createElement('div');
+                hint.className = 'hint-inline';
+                hint.style.marginBottom = '10px';
+                hint.textContent = '按品质分区收藏：放入一枚拿一枚的属性，同一品质的指环全部放入再拿该品质的集齐加成，随时可以取回。';
+                body.appendChild(hint);
+
+                const groups = document.createElement('div');
+                groups.className = 'ring-vault-groups';
+                for (const g of ringGroups()) {
+                    const group = document.createElement('div');
+                    group.className = 'ring-vault-group';
+
+                    const on = g.items.filter(d => stored[d.id]).length;
+                    const title = document.createElement('div');
+                    title.className = 'ring-vault-group-title';
+                    title.innerHTML = `${g.name} <em>${on}/${g.items.length}</em>`;
+                    group.appendChild(title);
+
+                    const set = ringSetOf(g.quality);
+                    if (set && set.label) {
+                        const active = on >= g.items.length;
+                        const setEl = document.createElement('div');
+                        setEl.className = 'vault-set' + (active ? ' on' : '');
+                        setEl.textContent = set.label + (active ? '（已集齐）' : `（还差 ${g.items.length - on} 枚）`);
+                        group.appendChild(setEl);
+                    }
+
+                    const grid = document.createElement('div');
+                    grid.className = 'vault-grid ring-vault-grid';
+                    for (const def of g.items) {
+                        grid.appendChild(buildVaultCard(def, stored));
+                    }
+                    group.appendChild(grid);
+                    groups.appendChild(group);
+                }
+                body.appendChild(groups);
+                return;
+            }
+
             const defs = vaultActiveTab === 'weapon' ? vaultDefs.weapon : vaultDefs.offhand;
             const hint = document.createElement('div');
             hint.className = 'hint-inline';
@@ -4206,35 +4447,7 @@
             const grid = document.createElement('div');
             grid.className = 'vault-grid';
             for (const def of defs) {
-                const info = ITEM_DEFS[def.id];
-                const card = document.createElement('div');
-                card.className = 'vault-card' + (stored[def.id] ? ' on' : '');
-                const qc = vaultQualityColor(def.id);
-                if (qc && stored[def.id]) card.style.borderColor = qc;
-                card.onclick = () => toggleVaultStored(def.id);
-
-                const pic = document.createElement('div');
-                pic.className = 'vault-pic';
-                if (info && info.img) {
-                    const img = createItemImg(info.img, '');
-                    if (img) {
-                        attachEquipTooltip(img, def.id);
-                        pic.appendChild(img);
-                    }
-                }
-                card.appendChild(pic);
-
-                const name = document.createElement('div');
-                name.className = 'vault-name';
-                name.textContent = info ? info.name : def.id;
-                if (qc) name.style.color = qc;
-                attachEquipTooltip(name, def.id);
-                card.appendChild(name);
-
-                for (const b of def.bonuses) {
-                    appendVaultBonusLine(card, b);
-                }
-                grid.appendChild(card);
+                grid.appendChild(buildVaultCard(def, stored));
             }
             body.appendChild(grid);
         }
@@ -4305,7 +4518,8 @@
             return stats;
         }
 
-        // 收藏室 → 加成桶（武器库/盔甲库/副手库；盔甲套装每件一份、放满额外一份）
+        // 收藏室 → 加成桶（武器库/盔甲库/副手库/指环库；
+        // 盔甲套装每件一份、放满额外一份；指环库同品质集齐再得集齐加成）
         function computeVaultBonus(vault) {
             const v = vault || {};
             const stored = v.stored || {};
@@ -4331,6 +4545,17 @@
                 const n = pieceIds.filter(id => stored[id]).length;
                 if (!n) continue;
                 add(set.pieceAttr, set.pieceFlat * n + (n >= 4 ? set.setFlat : 0));
+            }
+            // 指环库：入库即得该指环加成；同品质全部入库再得集齐加成
+            for (const r of (vaultDefs.ring || [])) {
+                if (!stored[r.id]) continue;
+                for (const s of r.bonuses || []) add(s.attr, s.flat);
+            }
+            for (const g of ringGroups()) {
+                if (!g.items.every(d => stored[d.id])) continue;
+                const set = ringSetOf(g.quality);
+                if (!set) continue;
+                for (const s of set.bonuses || []) add(s.attr, s.flat);
             }
             return b;
         }
