@@ -6,3 +6,6 @@
 
 # Node
 node_modules/
+
+# 研究用临时文件（不入库）
+.scratch/

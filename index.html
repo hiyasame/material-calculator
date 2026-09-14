@@ -1590,6 +1590,290 @@
 
         .profit-stats b { color: var(--ink-soft); }
 
+        /* ===== 开拓农村（建厂 / 员工 / 羁绊） ===== */
+        /* 结构对齐游戏内「开拓农村」面板：左侧土地网格 + 右侧建筑详情 + 薪资/产出/羁绊统计。
+           配色沿用本工具纸张主题；员工品质色沿用游戏内 RARITY_COLORS。 */
+        .village-layout {
+            display: grid;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 968px) {
+            .village-layout { grid-template-columns: 1fr; }
+        }
+
+        .village-panel {
+            background: var(--paper-raised);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 20px;
+        }
+
+        .village-panel .panel-title { margin-bottom: 12px; padding-bottom: 10px; }
+
+        .village-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .village-grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .land-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 640px) {
+            .land-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .land-tile {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            min-height: 104px;
+            padding: 10px 6px;
+            border: 1px solid var(--line-strong);
+            border-radius: 10px;
+            background: #fff;
+            cursor: pointer;
+            text-align: center;
+            font-family: inherit;
+            transition: transform 0.12s, border-color 0.12s, background 0.12s;
+        }
+
+        .land-tile:hover { border-color: var(--accent); transform: translateY(-2px); }
+        .land-tile.building { border-color: var(--amber); background: var(--amber-soft); }
+        .land-tile.selected { outline: 2px solid var(--accent); outline-offset: 1px; }
+        .land-tile.empty { border-style: dashed; color: var(--ink-faint); }
+        .land-tile.nail { background: #fbf4e8; border-color: #d8b47a; }
+        .land-tile.super-nail { background: #faece6; border-color: #d99a80; }
+        .land-tile.add { border-style: dashed; color: var(--accent); background: var(--accent-soft); }
+
+        .land-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.06);
+            color: var(--ink-soft);
+            border: 1px solid var(--line);
+        }
+
+        .land-emoji { font-size: 28px; line-height: 1; }
+        .land-icon { width: 36px; height: 36px; object-fit: contain; }
+        .land-name { font-size: 13px; font-weight: 600; }
+        .land-sub { font-size: 11px; color: var(--ink-faint); }
+        .land-price { font-size: 10px; color: var(--amber); }
+
+        .b-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+        .b-head .big { font-size: 26px; }
+        .b-head-icon { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; }
+        .b-info { flex: 1; min-width: 0; }
+        .b-title { font-family: 'Noto Serif SC', serif; font-size: 16px; font-weight: 700; }
+        .b-sub { font-size: 12px; color: var(--ink-faint); }
+        .b-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .prod-compare { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+        .pc-row { display: grid; grid-template-columns: 1.6fr 1fr 1fr; font-size: 12px; padding: 5px 10px; border-bottom: 1px solid var(--line); }
+        .pc-row:last-child { border-bottom: none; }
+        .pc-head { background: #f4f1ea; color: var(--ink-soft); font-weight: 600; }
+        .pc-val { font-variant-numeric: tabular-nums; }
+
+        .emp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+        @media (max-width: 640px) {
+            .emp-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .emp-slot { min-height: 100px; }
+
+        .emp-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: center;
+            padding: 6px;
+            border: 1px solid var(--line-strong);
+            border-top-width: 3px;
+            border-radius: 8px;
+            background: #fff;
+            position: relative;
+        }
+
+        .emp-card.on-leave { opacity: 0.6; }
+        .emp-card.rar-common { border-top-color: #9a9a9a; }
+        .emp-card.rar-rare { border-top-color: #478eff; }
+        .emp-card.rar-epic { border-top-color: #ffa200; }
+        .emp-card.rar-special { border-top-color: #be5cff; }
+
+        .emp-empty {
+            height: 100%;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: 1px dashed var(--line-strong);
+            border-radius: 8px;
+            color: var(--ink-faint);
+            font-size: 12px;
+            padding: 6px;
+        }
+
+        .emp-empty.locked { background: #f7f5f0; border-style: solid; }
+        .emp-empty select { min-width: 0; width: 100%; font-size: 12px; padding: 5px 6px; }
+
+        .emp-rarity-tag { font-size: 10px; font-weight: 700; }
+        .emp-top { display: flex; align-items: center; justify-content: space-between; }
+        .emp-status-dot { font-size: 10px; color: var(--accent); }
+        .emp-status-dot.leave { color: var(--ink-faint); }
+        .emp-img { width: 38px; height: 38px; object-fit: cover; border-radius: 6px; margin: 1px auto; display: block; }
+        .emp-emoji { font-size: 26px; line-height: 1.1; }
+        .emp-name { font-size: 12px; font-weight: 600; }
+        .emp-sub { font-size: 11px; color: var(--ink-soft); line-height: 1.45; }
+        .emp-note { font-size: 10px; color: var(--ink-faint); min-height: 12px; }
+        .emp-note.warn { color: var(--red); }
+        .emp-actions { display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; margin-top: 2px; }
+
+        .pay-ctl { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 2px; }
+        .pay-val { font-size: 11px; color: var(--amber); font-variant-numeric: tabular-nums; min-width: 36px; }
+
+        .mini-btn {
+            padding: 1px 6px;
+            font-size: 11px;
+            line-height: 1.5;
+            border: 1px solid var(--line-strong);
+            border-radius: 4px;
+            background: #fff;
+            color: var(--ink-soft);
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .mini-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+        .bond-slots { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+        .bond-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            padding: 3px 8px;
+            border: 1px solid var(--accent-line);
+            background: var(--accent-soft);
+            border-radius: 12px;
+            color: var(--accent);
+            cursor: help;
+        }
+
+        .bond-chip.off { border-color: var(--line); background: #fff; color: var(--ink-faint); }
+
+        .est-line { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+        .est-line b { color: var(--amber); font-variant-numeric: tabular-nums; }
+        .est-line.neg b { color: var(--accent); }
+        .est-line.net { border-top: 1px dashed var(--line); margin-top: 4px; padding-top: 6px; font-weight: 600; }
+
+        .village-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .village-table th {
+            text-align: left;
+            font-weight: 600;
+            color: var(--ink-soft);
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--line);
+            background: #f8f6f1;
+            white-space: nowrap;
+        }
+        .village-table td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+        .village-table tr:last-child td { border-bottom: none; }
+        .village-table td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .village-table .mat-cell { display: flex; align-items: center; gap: 6px; }
+        .village-scroll { max-height: 340px; overflow-y: auto; }
+
+        .warn-banner {
+            font-size: 12px;
+            color: var(--red);
+            background: var(--red-soft);
+            border: 1px solid #eccfcb;
+            border-radius: var(--radius);
+            padding: 6px 10px;
+            margin-bottom: 10px;
+        }
+
+        /* ===== 开拓工厂（各级材料合成路线） ===== */
+        .tier-block { margin-bottom: 22px; }
+
+        .tier-head {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 7px 12px;
+            margin-bottom: 12px;
+            background: var(--amber-soft);
+            border-left: 3px solid var(--amber);
+            border-radius: 0 var(--radius) var(--radius) 0;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .tier-head .count { font-size: 12px; font-weight: 400; color: var(--ink-faint); }
+
+        .mat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+            gap: 12px;
+        }
+
+        .mat-card {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--paper-raised);
+            padding: 12px 14px;
+        }
+
+        .mat-card.raw { background: var(--accent-soft); border-color: var(--accent-line); }
+        .mat-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .mat-emoji { font-size: 20px; line-height: 1; }
+        .mat-name { font-weight: 600; font-size: 14px; }
+        .mat-tier-tag { font-size: 10px; color: var(--ink-faint); border: 1px solid var(--line); border-radius: 8px; padding: 0 6px; }
+        .recipe-line { font-size: 12px; color: var(--ink); line-height: 1.6; }
+        .recipe-line .arrow { color: var(--amber); margin: 0 4px; }
+        .mat-meta { font-size: 11px; color: var(--ink-soft); line-height: 1.6; margin-top: 4px; }
+        .mat-meta b { color: var(--amber); font-variant-numeric: tabular-nums; }
+        .raw-note { font-size: 11px; color: var(--ink-faint); line-height: 1.6; }
+
+        .route-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        .route-block { min-width: 0; }
+        .route-block .block-title { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 8px; }
+
+        .route-tree { font-size: 12px; line-height: 1.8; }
+        .route-node { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+        .route-node .qty { font-variant-numeric: tabular-nums; color: var(--amber); }
+        .route-node .rl { color: var(--ink-faint); font-size: 11px; }
+
         /* ===== 装备属性悬浮提示 ===== */
         .has-equip-tip { cursor: help; }
 
@@ -1699,7 +1983,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>开拓生存 · 材料计算器<span class="sub">材料合成 · 挂机时长 · 属性面板</span></h1>
+            <h1>开拓生存 · 材料计算器<span class="sub">材料合成 · 挂机时长 · 属性面板 · 开拓农村 · 开拓工厂</span></h1>
             <span class="data-status" id="dataStatusWrap">
                 <span id="dataStatus">正在从 kt.ikui.vip 拉取数据…</span>
                 <button class="refresh-btn" id="refreshBtn" type="button">刷新数据</button>
@@ -1712,6 +1996,8 @@
             <button class="tab-btn" data-tab="farm" type="button">挂机时间计算</button>
             <button class="tab-btn" data-tab="panel" type="button">属性面板计算</button>
             <button class="tab-btn" data-tab="profit" type="button">刷怪收益排行</button>
+            <button class="tab-btn" data-tab="village" type="button">开拓农村</button>
+            <button class="tab-btn" data-tab="factory" type="button">开拓工厂</button>
         </div>
 
         <!-- ==================== 页签一：材料合成计算 ==================== -->
@@ -1929,6 +2215,70 @@
                 </div>
             </div>
         </div>
+
+        <!-- ==================== 页签六：开拓农村（建厂 / 员工 / 羁绊效率） ==================== -->
+        <div class="tab-page" id="tab-village">
+            <div class="controls">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>规划名</label>
+                        <input type="text" id="villagePlanName" value="我的农村规划" style="min-width:180px" oninput="onVillageOptionChange()">
+                    </div>
+                    <div class="control-group">
+                        <label>每日加班加速</label>
+                        <input type="number" id="villageOverwork" value="0" min="0" max="10" step="1" onchange="onVillageOptionChange()">
+                        <span class="hint-inline">次（灰烬×100/次，立即结算 1 小时；本页据此把「每小时产出」换算成「每日产出」）</span>
+                    </div>
+                    <div class="control-group">
+                        <span class="hint-inline" id="villageOverworkHint"></span>
+                    </div>
+                </div>
+                <div class="control-row">
+                    <button class="btn ghost" type="button" onclick="villageAddBuilding()">＋ 新建建筑</button>
+                    <button class="btn ghost" type="button" onclick="villageResetPlan()">重置规划</button>
+                    <span class="hint-inline">
+                        建厂等级 <b>1～20 级</b>（游戏内 MaxLevel=20，等级从 1 起算，Lv.0 与 Lv.1 等效）；
+                        等级倍率 = 1+(等级−1)×0.2，即 Lv.20 为 4.8 倍；员工编制 = min(等级, 6)。
+                        产出与薪资口径取自游戏客户端 bundle（与游戏内「开拓农村」面板一致）。
+                    </span>
+                </div>
+            </div>
+
+            <div id="villagePlan"></div>
+        </div>
+
+        <!-- ==================== 页签七：开拓工厂（各级材料合成路线） ==================== -->
+        <div class="tab-page" id="tab-factory">
+            <div class="controls">
+                <div class="control-row">
+                    <div class="control-group">
+                        <label>目标产物</label>
+                        <select id="factoryTarget" onchange="renderFactory()"></select>
+                    </div>
+                    <div class="control-group">
+                        <label>目标数量</label>
+                        <input type="number" id="factoryCount" value="1" min="1" max="1000000" step="1" onchange="renderFactory()">
+                    </div>
+                    <div class="control-group">
+                        <label>燃料</label>
+                        <select id="factoryFuel" onchange="renderFactory()"></select>
+                    </div>
+                    <div class="control-group">
+                        <label>机器数量</label>
+                        <input type="number" id="factoryMachineCount" value="1" min="1" max="999" step="1" onchange="renderFactory()" title="每种机器按此数量计算产能">
+                    </div>
+                </div>
+                <div class="control-row">
+                    <span class="hint-inline">
+                        数据取自游戏客户端 bundle：<b>切削机 / 辊压机 / 热力辊压机 / 热力搅拌机 / 热力压块机</b> 加工材料，配方含单次耗时；
+                        <b>热力机器</b>需燃料，燃料值即「可支撑秒数」（木炭 60s / 焚晶 30s / 炽热核心 600s）；原料仓从农村仓库取原料，储物总仓把产物写回仓库。
+                        阶级（原料 / 一级～五级产物）由配方递归计算，与游戏内总仓库分列一致。
+                    </span>
+                </div>
+            </div>
+
+            <div id="factoryRoutes"></div>
+        </div>
     </div>
 
     <script>
@@ -1942,6 +2292,13 @@
         const API_PATH = '/api/data/defs';
         const CACHE_KEY = 'mc_defs_cache_v1';
         const REFRESH_INTERVAL = 30 * 60 * 1000; // 页面驻留时每 30 分钟自动刷新
+
+        /* ==FARM_FACTORY_DEFS_START== */
+        // 由 scripts/sync-farm-defs.mjs 自动生成，请勿手改。
+        // 数据来源：游戏客户端 bundle（开拓农村 / 开拓工厂 定义；游戏 /api/data/defs 不含这部分）。
+        // 游戏更新数值后重跑：node scripts/sync-farm-defs.mjs
+        const FARM_FACTORY_DEFS = {"_meta":{"source":"game-client-bundle","clientVersion":1789384608,"dataVersion":107738916957285,"extractedAt":"2026-09-14","note":"开拓农村/开拓工厂数值取自游戏客户端 bundle；游戏更新后重跑 scripts/sync-farm-defs.mjs"},"farm":{"baseOutput":10,"maxLevel":20,"maxStaff":6,"salaryUnit":10000,"landPrice":{"normal":100000,"nail":1000000,"superNail":2000000},"ashBuildCost":100,"talentResumeCost":100000,"talentResumeCount":10,"talentIdleRate":0.1,"talentPoolCap":12,"machineRepairCost":100000,"machineBuyCost":150000,"machineStackBreak":0.05,"internHours":75,"retireHours":75,"rarityColors":{"common":"#9a9a9a","rare":"#478eff","epic":"#ffa200","special":"#be5cff"},"rarityNames":{"common":"普通","rare":"稀有","epic":"史诗","special":"特殊"},"employees":{"robot":{"id":"robot","name":"智能计算猪","img":"https://source.ikui.vip/source/worker/智能计算猪.jpg","rarity":"special","eff":0.5,"salary":0,"runAway":0,"noRaise":true,"noLeave":true,"desc":"开局赠 1 只，猪才市场也可招募（全场最稀有）；效率50%，无薪，永不跑路，可待业、可拆除"},"normal":{"id":"normal","name":"护士小猪","img":"https://source.ikui.vip/source/worker/护士小猪.jpeg","rarity":"common","eff":0.8,"salary":1,"runAway":0,"noRaise":false,"noLeave":false,"desc":"基础主力，80%效率 · 100%薪资，稳定无风险"},"ox":{"id":"ox","name":"华尔街之猪","img":"https://source.ikui.vip/source/worker/华尔街之猪.png","rarity":"rare","eff":1.2,"salary":0.8,"runAway":0,"noRaise":false,"noLeave":false,"desc":"性价比主力，120%效率 · 80%薪资，无风险"},"king":{"id":"king","name":"加班猪","img":"https://source.ikui.vip/source/worker/加班猪.jpg","rarity":"epic","eff":1.6,"salary":0.7,"runAway":0,"noRaise":false,"noLeave":false,"desc":"全员工性价比之王，160%效率 · 70%薪资，无风险"},"summer":{"id":"summer","name":"暑假工","img":"https://source.ikui.vip/source/worker/暑假工.png","rarity":"epic","eff":2,"salary":0.5,"runAway":0.05,"noRaise":false,"noLeave":false,"desc":"极限爆发，200%效率 · 50%薪资，每小时5%概率跑路"},"exp":{"id":"exp","name":"黑客猪","img":"https://source.ikui.vip/source/worker/黑客猪.png","rarity":"special","eff":0.1,"salary":-0.2,"runAway":0.1,"noRaise":false,"noLeave":false,"desc":"反向盈利，10%效率 · 每小时给玩家2000金币，10%概率跑路"},"migrant":{"id":"migrant","name":"猪进厂","img":"https://source.ikui.vip/source/worker/猪进厂.jpg","rarity":"common","eff":1,"salary":1,"runAway":0,"noRaise":false,"noLeave":false,"desc":"兜底员工，100%效率 · 100%薪资，欠费不罢工但欠满10h掠夺产出"},"intern":{"id":"intern","name":"实习猪","img":"https://source.ikui.vip/source/worker/实习猪.png","rarity":"common","eff":0.85,"salary":0,"runAway":0,"noRaise":true,"noLeave":false,"desc":"实习无薪，效率85%，不能涨薪；满 75 小时出师成加班猪，有老猪厉则 24 小时出师"},"elder":{"id":"elder","name":"老猪厉","img":"https://source.ikui.vip/source/worker/老猪历.jpg","rarity":"rare","eff":0.55,"salary":0.9,"runAway":0,"noRaise":false,"noLeave":false,"desc":"自己效率55%（帮别人忙），带着全队提效"},"machine":{"id":"machine","name":"机器猪","img":"https://source.ikui.vip/source/worker/机器猪.png","rarity":"special","eff":1.5,"salary":0,"runAway":0,"noRaise":true,"noLeave":true,"desc":"效率150%无薪不能涨薪；每小时 5% 损坏，多一台再 +25% 效率与 +5% 损坏"}},"bonds":[{"id":"summer_crowd","name":"暑假工扎堆","emoji":"🌞","need":{"summer":2},"effect":{"type":"runaway_bonus","target":"summer","amount":0.05},"effects":null,"desc":"建筑内每多 1 个暑假工，全体暑假工跑路概率 +5%"},{"id":"hacker_infiltrate","name":"黑客猪渗透","emoji":"💻","need":{"exp":1},"effect":{"type":"runaway_all_bonus","target":"*","amount":0.02},"effects":null,"desc":"建筑内全体员工跑路概率 +2%"},{"id":"nurse_care","name":"护士照护","emoji":"💊","need":{"normal":2},"effect":{"type":"runaway_reduce","target":"*","amount":0.03},"effects":null,"desc":"2 名护士小猪在场，建筑内全体员工跑路概率 -3%"},{"id":"migrant_union","name":"工友互助","emoji":"🤝","need":{"migrant":2},"effect":{"type":"salary_bonus","target":"migrant","amount":0.8},"effects":null,"desc":"2 名猪进厂抱团，猪进厂薪资需求 -20%"},{"id":"canteen_deal","name":"食堂协议","emoji":"🍚","need":{"normal":1,"summer":1},"effect":{"type":"salary_bonus","target":"summer","amount":0.85},"effects":null,"desc":"护士小猪管饭，暑假工薪资需求 -15%"},{"id":"overtime_culture","name":"加班文化","emoji":"🔥","need":{"king":2},"effect":{"type":"salary_bonus","target":"king","amount":0.9},"effects":null,"desc":"2 名加班猪互相卷，加班猪薪资需求 -10%"},{"id":"wallstreet_greed","name":"资本联姻","emoji":"💰","need":{"ox":2,"king":1},"effect":{"type":"eff_bonus","target":"ox","amount":0.1},"effects":null,"desc":"2 华尔街 + 1 加班猪，全体华尔街之猪效率 +10%"},{"id":"robot_foreman","name":"机器人监工","emoji":"🤖","need":{"robot":1,"migrant":1},"effect":{"type":"eff_bonus","target":"migrant","amount":0.25},"effects":null,"desc":"智能计算猪盯着，猪进厂效率 +25%"},{"id":"hacker_boost","name":"黑客特训","emoji":"🕶️","need":{"exp":1,"summer":1},"effect":null,"effects":[{"type":"eff_bonus","target":"summer","amount":0.2},{"type":"runaway_self_bonus","target":"summer","amount":0.05}],"desc":"黑客猪带飞，暑假工效率 +20%（但跑路概率 +5%）"},{"id":"mentor_lead","name":"传帮带","emoji":"🧓","need":{"elder":1},"effect":{"type":"eff_all_others","target":"elder","amount":0.15},"effects":null,"desc":"老猪厉在场，除自己外全员效率 +15%"},{"id":"lineage","name":"一脉相承","emoji":"📜","need":{"elder":1,"intern":1},"effect":{"type":"intern_fast","target":"intern","amount":24},"effects":null,"desc":"老猪厉带实习猪，24 小时出师成加班猪（否则 75 小时）"},{"id":"cluster_overload","name":"集群过载","emoji":"⚙️","need":{"machine":2},"effect":{"type":"machine_stack","target":"machine","amount":0.25},"effects":null,"desc":"每多一台机器猪，效率 +25%、损坏概率 +5%"},{"id":"auto_ops","name":"自动运维","emoji":"🛠️","need":{"robot":1,"machine":1},"effect":{"type":"auto_repair","target":"machine","amount":0.5},"effects":null,"desc":"智能计算猪在场，机器猪损坏时自动花 5 万金币修复"},{"id":"overclock","name":"超频入侵","emoji":"⚡","need":{"exp":1,"machine":1},"effect":null,"effects":[{"type":"eff_mult","target":"machine","amount":2},{"type":"break_mult","target":"machine","amount":2}],"desc":"黑客猪让机器猪效率翻倍，损坏概率也独立翻倍"},{"id":"strict_master","name":"严师出高徒","emoji":"🥋","need":{"elder":1,"king":1},"effect":{"type":"eff_bonus","target":"king","amount":0.1},"effects":null,"desc":"老猪厉带着加班猪，加班猪效率 +10%"}],"materials":[{"id":"oakWood","name":"橡木","emoji":"🪵"},{"id":"birchWood","name":"白桦木","emoji":"🌲"},{"id":"darkOakWood","name":"深色橡木","emoji":"🪵"},{"id":"jungleWood","name":"丛林木","emoji":"🌴"},{"id":"cobblestone","name":"圆石","emoji":"🪨"},{"id":"stone","name":"石头","emoji":"🪨"},{"id":"andesite","name":"安山岩","emoji":"⛰️"},{"id":"charcoal","name":"木炭","emoji":"🔥"},{"id":"apple","name":"苹果","emoji":"🍎"},{"id":"vine","name":"藤蔓","emoji":"🌿"}],"buildings":{"oak":{"id":"oak","name":"橡木厂","cat":"tree","emoji":"🌳","img":"https://source.ikui.vip/source/items/橡木厂.webp","main":"oakWood","by":"apple","byChance":0.5,"needsInput":false,"buildGold":500000,"buildMat":{"cobblestone":20},"upMat":"cobblestone","ops":false},"birch":{"id":"birch","name":"白桦木厂","cat":"tree","emoji":"🌲","img":"https://source.ikui.vip/source/items/白桦木厂.webp","main":"birchWood","by":"apple","byChance":0.5,"needsInput":false,"buildGold":500000,"buildMat":{"cobblestone":20},"upMat":"cobblestone","ops":false},"darkOak":{"id":"darkOak","name":"深色橡木厂","cat":"tree","emoji":"🪵","img":"https://source.ikui.vip/source/items/深色橡木厂.webp","main":"darkOakWood","by":"apple","byChance":0.5,"needsInput":false,"buildGold":500000,"buildMat":{"cobblestone":20},"upMat":"cobblestone","ops":false},"jungle":{"id":"jungle","name":"丛林木厂","cat":"tree","emoji":"🌴","img":"https://source.ikui.vip/source/items/丛林木厂.webp","main":"jungleWood","by":"vine","byChance":1,"needsInput":false,"buildGold":500000,"buildMat":{"cobblestone":20},"upMat":"cobblestone","ops":false},"cobble":{"id":"cobble","name":"圆石采石场","cat":"quarry","emoji":"⛰️","img":"https://source.ikui.vip/source/items/圆石采石场.png","main":"cobblestone","by":null,"byChance":0,"needsInput":false,"buildGold":500000,"buildMat":{"oakWood":20},"upMat":"oakWood","ops":false},"stone":{"id":"stone","name":"石头采石场","cat":"quarry","emoji":"🪨","img":"https://source.ikui.vip/source/items/石头采石场.png","main":"stone","by":null,"byChance":0,"needsInput":false,"buildGold":500000,"buildMat":{"oakWood":20},"upMat":"oakWood","ops":false},"andesite":{"id":"andesite","name":"安山岩采石场","cat":"quarry","emoji":"🗻","img":"https://source.ikui.vip/source/items/安山岩采石场.png","main":"andesite","by":null,"byChance":0,"needsInput":false,"buildGold":500000,"buildMat":{"oakWood":20},"upMat":"oakWood","ops":false},"charcoal":{"id":"charcoal","name":"烧炭厂","cat":"charcoal","emoji":"🔥","img":"https://source.ikui.vip/source/items/烧谈厂.png","main":"charcoal","by":null,"byChance":0,"needsInput":true,"buildGold":1000000,"buildMat":{"stone":20,"oakWood":20},"upMat":"stone","ops":false},"pigOps":{"id":"pigOps","name":"猪特勤处","cat":"ops","emoji":"🐷","img":"","main":null,"by":null,"byChance":0,"needsInput":false,"buildGold":0,"buildMat":{"oakWood":1000,"birchWood":1000,"darkOakWood":1000,"jungleWood":1000,"cobblestone":1000,"stone":1000,"andesite":1000,"apple":1000},"upMat":"","ops":true}}},"factory":{"machines":{"cutter":{"id":"cutter","name":"切削机","short":"切","color":"#2a8f86","accent":"#7ee0d6","processor":true,"needsFuel":false},"roller":{"id":"roller","name":"辊压机","short":"辊","color":"#3b6ea8","accent":"#9ec4ef","processor":true,"needsFuel":false},"thermal_roller":{"id":"thermal_roller","name":"热力辊压机","short":"热辊","color":"#b5522a","accent":"#ffb089","processor":true,"needsFuel":true},"thermal_mixer":{"id":"thermal_mixer","name":"热力搅拌机","short":"热搅","color":"#a33b2a","accent":"#ff9a86","processor":true,"needsFuel":true},"thermal_press":{"id":"thermal_press","name":"热力压块机","short":"压块","color":"#7a3a1c","accent":"#f0c07a","processor":true,"needsFuel":true},"source":{"id":"source","name":"原料仓","short":"原","color":"#3d7a3a","accent":"#b6e0a4","processor":false,"needsFuel":false},"storage":{"id":"storage","name":"储物仓","short":"仓","color":"#8a6a2a","accent":"#efd089","processor":false,"needsFuel":false},"hub":{"id":"hub","name":"储物总仓","short":"总","color":"#c4a24a","accent":"#ffe08a","processor":false,"needsFuel":false}},"materials":{"stone":{"id":"stone","name":"石头","emoji":"🪨","color":"#8b8d88","raw":true,"fuelValue":0},"cobblestone":{"id":"cobblestone","name":"圆石","emoji":"🪨","color":"#6e6e6a","raw":true,"fuelValue":0},"oakWood":{"id":"oakWood","name":"橡木","emoji":"🪵","color":"#b57a3c","raw":true,"fuelValue":0},"darkOakWood":{"id":"darkOakWood","name":"深色橡木","emoji":"🪵","color":"#4a2f1c","raw":true,"fuelValue":0},"jungleWood":{"id":"jungleWood","name":"丛林木","emoji":"🌴","color":"#9a5a2a","raw":true,"fuelValue":0},"birchWood":{"id":"birchWood","name":"白桦木","emoji":"🌲","color":"#d9c9a0","raw":true,"fuelValue":0},"charcoal":{"id":"charcoal","name":"木炭","emoji":"🔥","color":"#2b2b2b","raw":true,"fuelValue":60},"andesite":{"id":"andesite","name":"安山岩","emoji":"⛰️","color":"#9a9a94","raw":true,"fuelValue":0},"vine":{"id":"vine","name":"藤蔓","emoji":"🌿","color":"#3d7a32","raw":true,"fuelValue":0},"blackIronIngot":{"id":"blackIronIngot","name":"玄铁锭","emoji":"🔩","color":"#2a3038","raw":true,"fuelValue":0},"burnCrystal":{"id":"burnCrystal","name":"焚晶","emoji":"🔶","color":"#c45a28","raw":true,"fuelValue":30},"blazingCore":{"id":"blazingCore","name":"炽热核心","emoji":"☀️","color":"#e25a20","raw":true,"fuelValue":600},"oakPlank":{"id":"oakPlank","name":"橡木板","emoji":"🪵","color":"#c4894a","raw":false,"fuelValue":0},"birchPlank":{"id":"birchPlank","name":"白桦木板","emoji":"🌲","color":"#ead9b0","raw":false,"fuelValue":0},"junglePlank":{"id":"junglePlank","name":"丛林木板","emoji":"🌴","color":"#b86b34","raw":false,"fuelValue":0},"darkOakPlank":{"id":"darkOakPlank","name":"深色橡木板","emoji":"🪵","color":"#5c3a24","raw":false,"fuelValue":0},"lightPressPlank":{"id":"lightPressPlank","name":"淡色压缩薄木板","emoji":"📄","color":"#e6d2a8","raw":false,"fuelValue":0},"darkPressPlank":{"id":"darkPressPlank","name":"深色压缩薄木板","emoji":"📑","color":"#6b3e24","raw":false,"fuelValue":0},"lightPressMix":{"id":"lightPressMix","name":"淡色压缩混合木","emoji":"🟨","color":"#d9c08a","raw":false,"fuelValue":0},"darkPressMix":{"id":"darkPressMix","name":"深色压缩混合木","emoji":"🟫","color":"#4a2a18","raw":false,"fuelValue":0},"lightWoodBlock":{"id":"lightWoodBlock","name":"淡色压缩木方","emoji":"◻️","color":"#cbb07a","raw":false,"fuelValue":0},"darkWoodBlock":{"id":"darkWoodBlock","name":"深色压缩木方","emoji":"◼️","color":"#3a2214","raw":false,"fuelValue":0},"pulpPressMix":{"id":"pulpPressMix","name":"木浆压缩混合木","emoji":"📦","color":"#8a6238","raw":false,"fuelValue":0},"mossClump":{"id":"mossClump","name":"粗糙苔草块","emoji":"🌱","color":"#5a7a38","raw":false,"fuelValue":0},"mossStone":{"id":"mossStone","name":"粗糙苔草石","emoji":"🪨","color":"#4a6a40","raw":false,"fuelValue":0},"andesiteAlloy":{"id":"andesiteAlloy","name":"安山合金","emoji":"⚙️","color":"#7a8480","raw":false,"fuelValue":0},"hardStone":{"id":"hardStone","name":"磨制硬石","emoji":"🗿","color":"#6e7270","raw":false,"fuelValue":0},"hardStoneBlock":{"id":"hardStoneBlock","name":"磨制硬石块","emoji":"⬛","color":"#5c605c","raw":false,"fuelValue":0},"mossBrickCrude":{"id":"mossBrickCrude","name":"粗制苔草砖","emoji":"🧱","color":"#5a6e48","raw":false,"fuelValue":0},"mossBrick":{"id":"mossBrick","name":"磨制苔草砖","emoji":"🧱","color":"#4e6a48","raw":false,"fuelValue":0}},"buildOrder":["source","storage","hub","cutter","roller","thermal_roller","thermal_press","thermal_mixer"],"tierMap":{"stone":0,"cobblestone":0,"oakWood":0,"darkOakWood":0,"jungleWood":0,"birchWood":0,"charcoal":0,"andesite":0,"vine":0,"blackIronIngot":0,"burnCrystal":0,"blazingCore":0,"oakPlank":1,"birchPlank":1,"junglePlank":1,"darkOakPlank":1,"lightPressPlank":2,"darkPressPlank":2,"lightPressMix":3,"darkPressMix":3,"lightWoodBlock":4,"darkWoodBlock":4,"pulpPressMix":5,"mossClump":1,"mossStone":2,"andesiteAlloy":1,"hardStone":2,"hardStoneBlock":3,"mossBrickCrude":4,"mossBrick":5},"tierLabels":["原料","一级产物","二级产物","三级产物","四级产物","五级产物","六级产物"],"recipes":[{"id":"oak_to_plank","machine":"cutter","name":"橡木 → 橡木板 ×4","inputs":[{"item":"oakWood","count":1}],"output":{"item":"oakPlank","count":4},"duration":3},{"id":"birch_to_plank","machine":"cutter","name":"白桦木 → 白桦木板 ×4","inputs":[{"item":"birchWood","count":1}],"output":{"item":"birchPlank","count":4},"duration":3},{"id":"jungle_to_plank","machine":"cutter","name":"丛林木 → 丛林木板 ×4","inputs":[{"item":"jungleWood","count":1}],"output":{"item":"junglePlank","count":4},"duration":3},{"id":"dark_oak_to_plank","machine":"cutter","name":"深色橡木 → 深色橡木板 ×4","inputs":[{"item":"darkOakWood","count":1}],"output":{"item":"darkOakPlank","count":4},"duration":3},{"id":"lightPressPlank","machine":"roller","name":"橡木板8 + 白桦木板8 → 淡色压缩薄木板","inputs":[{"item":"oakPlank","count":8},{"item":"birchPlank","count":8}],"output":{"item":"lightPressPlank","count":1},"duration":5},{"id":"darkPressPlank","machine":"roller","name":"深色橡木板8 + 丛林木板8 → 深色压缩薄木板","inputs":[{"item":"darkOakPlank","count":8},{"item":"junglePlank","count":8}],"output":{"item":"darkPressPlank","count":1},"duration":5},{"id":"lightPressMix","machine":"thermal_roller","name":"淡色压缩薄木板32 → 淡色压缩混合木","inputs":[{"item":"lightPressPlank","count":32}],"output":{"item":"lightPressMix","count":1},"duration":12},{"id":"darkPressMix","machine":"thermal_roller","name":"深色压缩薄木板32 → 深色压缩混合木","inputs":[{"item":"darkPressPlank","count":32}],"output":{"item":"darkPressMix","count":1},"duration":12},{"id":"lightWoodBlock","machine":"thermal_press","name":"淡色压缩混合木16 → 淡色压缩木方","inputs":[{"item":"lightPressMix","count":16}],"output":{"item":"lightWoodBlock","count":1},"duration":10},{"id":"darkWoodBlock","machine":"thermal_press","name":"深色压缩混合木16 → 深色压缩木方","inputs":[{"item":"darkPressMix","count":16}],"output":{"item":"darkWoodBlock","count":1},"duration":10},{"id":"pulpPressMix","machine":"thermal_mixer","name":"淡色压缩木方32 + 深色压缩木方32 → 木浆压缩混合木","inputs":[{"item":"lightWoodBlock","count":32},{"item":"darkWoodBlock","count":32}],"output":{"item":"pulpPressMix","count":1},"duration":16},{"id":"mossClump","machine":"roller","name":"藤蔓16 + 圆石32 → 粗糙苔草块","inputs":[{"item":"vine","count":16},{"item":"cobblestone","count":32}],"output":{"item":"mossClump","count":1},"duration":8},{"id":"mossStone","machine":"thermal_press","name":"粗糙苔草块16 → 粗糙苔草石","inputs":[{"item":"mossClump","count":16}],"output":{"item":"mossStone","count":1},"duration":10},{"id":"andesiteAlloy","machine":"thermal_mixer","name":"安山岩2 + 玄铁锭2 → 安山合金","inputs":[{"item":"andesite","count":2},{"item":"blackIronIngot","count":2}],"output":{"item":"andesiteAlloy","count":1},"duration":8},{"id":"hardStone","machine":"roller","name":"安山合金16 + 石头32 → 磨制硬石","inputs":[{"item":"andesiteAlloy","count":16},{"item":"stone","count":32}],"output":{"item":"hardStone","count":1},"duration":8},{"id":"hardStoneBlock","machine":"thermal_press","name":"磨制硬石16 → 磨制硬石块","inputs":[{"item":"hardStone","count":16}],"output":{"item":"hardStoneBlock","count":1},"duration":10},{"id":"mossBrickCrude","machine":"roller","name":"粗糙苔草石32 + 磨制硬石块16 → 粗制苔草砖","inputs":[{"item":"mossStone","count":32},{"item":"hardStoneBlock","count":16}],"output":{"item":"mossBrickCrude","count":1},"duration":10},{"id":"mossBrick","machine":"thermal_press","name":"粗制苔草砖 → 磨制苔草砖","inputs":[{"item":"mossBrickCrude","count":1}],"output":{"item":"mossBrick","count":1},"duration":10}]}};
+        /* ==FARM_FACTORY_DEFS_END== */
 
         let ITEM_DEFS = {};   // id -> { name, img, cat }
         let RECIPES = {};     // key -> { result, resultCount, cost, rate, cat, source }
@@ -5800,6 +6157,8 @@
                 p.classList.toggle('active', p.id === 'tab-' + tab);
             });
             if (tab === 'ring') renderRingRoute();
+            if (tab === 'village') renderVillage();
+            if (tab === 'factory') renderFactory();
         }
 
         // ------------------------------------------------------------------
@@ -5937,6 +6296,1195 @@
             renderRingRoute();
         }
 
+        // ====================================================================
+        // 页签六：开拓农村 — 建厂模拟（1~20 级）/ 员工选择（加薪 · 羁绊）/ 产出与每小时资金消耗
+        //
+        // 数值口径对齐游戏客户端 bundle（与游戏内「开拓农村」面板同源，已独立校验 2 万组随机状态 0 误差）：
+        //   等级倍率 levelMult = 1 + (等级−1) × 0.2                   （Lv.20 → 4.8）
+        //   员工编制 staffSlots = min(max(等级,1), 6)
+        //   产出/时 = BASE_OUTPUT(10) × 效率 × 等级倍率，按在岗员工求和
+        //   效率   = 基础效率 × 加薪倍率 × 羁绊加成（实习猪/机器猪不吃加薪；损坏/休假为 0）
+        //   时薪   = 基础薪资 × 加薪倍率 × 10000 × 羁绊折扣
+        //            （机器人/实习猪/机器猪无薪；黑客猪薪资为负 = 反向创收）
+        //   烧炭厂 = 原料 → 木炭 1:1；「原料上限」逐个员工截断后再求和（与客户端 jc/Hc 一致）
+        //   待业   = 猪才市场每小时支付期望薪资的 10%（负薪资按 0 计）
+        //   升级   = 每级 50000×(L+1) 金币 + 20×(L+1) 升级材料 + 100×(L+1) 灰烬
+        // ====================================================================
+        const VD = (FARM_FACTORY_DEFS && FARM_FACTORY_DEFS.farm) || {};
+        const FD = (FARM_FACTORY_DEFS && FARM_FACTORY_DEFS.factory) || {};
+        const VILLAGE_KEY = 'mc_village_plan_v1';
+        const FACTORY_KEY = 'mc_factory_options_v1';
+        const PAY_STEP = 0.1;   // 游戏内「涨薪」按钮在 payMult>=2 时禁用；每次 +10%（客户端未暴露步长，可手工微调）
+        const PAY_MAX = 2;
+        const LAND_TYPES = [
+            { id: 'normal', name: '普通土地', priceKey: 'normal' },
+            { id: 'nail', name: '钉子户', priceKey: 'nail' },
+            { id: 'superNail', name: '超级钉子户', priceKey: 'superNail' },
+        ];
+
+        let villagePlan = null;
+        let villageSelectedUid = null;
+        let villageUidSeed = 1;
+        let factoryOptions = null;
+
+        function vEsc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+        }
+
+        function villageEmpDef(typeId) { return VD.employees ? VD.employees[typeId] : null; }
+        function villageBuildingDef(defId) { return VD.buildings ? VD.buildings[defId] : null; }
+
+        function villageMatName(id) {
+            const m = (VD.materials || []).find((x) => x.id === id);
+            if (m) return m.name;
+            const f = FD.materials && FD.materials[id];
+            if (f) return f.name;
+            return (ITEM_DEFS[id] && ITEM_DEFS[id].name) || id;
+        }
+
+        function villageMatEmoji(id) {
+            const m = (VD.materials || []).find((x) => x.id === id);
+            if (m && m.emoji) return m.emoji;
+            const f = FD.materials && FD.materials[id];
+            return (f && f.emoji) || '';
+        }
+
+        function villageLevelMult(level) { return 1 + ((level || 1) - 1) * 0.2; }
+        function villageStaffSlots(level) {
+            return Math.min(Math.max(level || 1, 1), VD.maxStaff || 6);
+        }
+
+        function villageBondEffects(bond) { return bond.effects || (bond.effect ? [bond.effect] : []); }
+
+        function villageBondActive(staffed, bond) {
+            const have = {};
+            (staffed || []).forEach((e) => { have[e.typeId] = (have[e.typeId] || 0) + 1; });
+            return Object.entries(bond.need || {}).every(([k, v]) => (have[k] || 0) >= v);
+        }
+
+        function villageActiveBonds(staffed) {
+            return (VD.bonds || []).filter((b) => villageBondActive(staffed, b));
+        }
+
+        // 羁绊效率加成（客户端 Ec）：eff_bonus / eff_all_others 叠乘 1+n，eff_mult 额外相乘
+        function villageEffBonus(staffed, typeId) {
+            let n = 1;
+            (VD.bonds || []).forEach((b) => {
+                if (!villageBondActive(staffed, b)) return;
+                villageBondEffects(b).forEach((e) => {
+                    if ((e.type === 'eff_bonus' && e.target === typeId) ||
+                        (e.type === 'eff_all_others' && typeId !== e.target)) n += e.amount;
+                    else if (e.type === 'eff_mult' && e.target === typeId) n *= e.amount;
+                });
+            });
+            return n;
+        }
+
+        // 羁绊薪资折扣（客户端 Dc）
+        function villageSalaryBonus(staffed, typeId) {
+            let n = 1;
+            (VD.bonds || []).forEach((b) => {
+                if (!villageBondActive(staffed, b)) return;
+                villageBondEffects(b).forEach((e) => {
+                    if (e.type === 'salary_bonus' && e.target === typeId) n *= e.amount;
+                });
+            });
+            return n;
+        }
+
+        // 员工效率（客户端 vc）：损坏为 0；实习猪/机器猪不吃加薪；机器猪效率随同建筑机器数量递增
+        function villageEfficiency(emp, staffed) {
+            const def = villageEmpDef(emp.typeId);
+            if (!def || emp.broken) return 0;
+            let r = def.eff;
+            if (emp.typeId !== 'intern' && emp.typeId !== 'machine') r *= (emp.payMult || 1);
+            if (emp.typeId === 'migrant') {
+                if ((emp.oweHours || 0) > 0) r *= Math.max(0.2, 1 - 0.05 * emp.oweHours);
+                if (emp.penalty) r *= emp.penalty;
+            }
+            if (emp.typeId === 'machine') {
+                const n = Math.max(1, (staffed || []).filter((e) => e.typeId === 'machine' && !e.broken).length);
+                r = 1.5 + 0.25 * (n - 1);
+            }
+            return r * villageEffBonus(staffed, emp.typeId);
+        }
+
+        function villageEffDetail(emp, staffed) {
+            const def = villageEmpDef(emp.typeId);
+            const base = def ? def.eff : 0;
+            const payMult = (emp.typeId !== 'intern' && emp.typeId !== 'machine') ? (emp.payMult || 1) : 1;
+            let machine = null;
+            if (emp.typeId === 'machine') {
+                const n = Math.max(1, (staffed || []).filter((e) => e.typeId === 'machine' && !e.broken).length);
+                machine = 1.5 + 0.25 * (n - 1);
+            }
+            return { base, payMult, bondMult: villageEffBonus(staffed, emp.typeId), machine, final: villageEfficiency(emp, staffed) };
+        }
+
+        // 时薪（客户端 pc）：机器人/实习猪/机器猪 0；其余 = 基础薪资 × 加薪倍率 × 10000 × 羁绊折扣
+        function villageSalaryRate(emp, staffed) {
+            if (!emp || emp.typeId === 'robot' || emp.typeId === 'intern' || emp.typeId === 'machine') return 0;
+            const def = villageEmpDef(emp.typeId);
+            if (!def) return 0;
+            let n = def.salary * (emp.payMult || 1) * (VD.salaryUnit || 10000);
+            if (staffed) n *= villageSalaryBonus(staffed, emp.typeId);
+            return n;
+        }
+
+        // 待业时薪（客户端 hc）：max(0, 时薪) × 10%
+        function villageIdleSalary(emp) {
+            return Math.max(0, villageSalaryRate(emp, null)) * (VD.talentIdleRate || 0.1);
+        }
+
+        // 跑路概率（客户端 Tc）
+        function villageRunawayChance(emp, staffed) {
+            const def = villageEmpDef(emp.typeId);
+            let base = (def && def.runAway) || 0;
+            let delta = 0;
+            (VD.bonds || []).forEach((b) => {
+                if (!villageBondActive(staffed, b)) return;
+                villageBondEffects(b).forEach((e) => {
+                    if (e.type === 'runaway_bonus' && e.target === emp.typeId) {
+                        const extra = Math.max(0, (staffed || []).filter((x) => x.typeId === e.target).length - (b.need[e.target] || 0));
+                        delta += e.amount * (1 + extra);
+                    } else if (e.type === 'runaway_all_bonus' && e.target === '*') delta += e.amount;
+                    else if (e.type === 'runaway_reduce' && e.target === '*') delta -= e.amount;
+                    else if (e.type === 'runaway_self_bonus' && e.target === emp.typeId) delta += e.amount;
+                });
+            });
+            return Math.max(0, Math.min(0.9, base + delta));
+        }
+
+        // 机器损坏概率（客户端 yc）：每多一台 +5%，overclock 的 break_mult 翻倍
+        function villageBreakChance(staffed) {
+            const machines = (staffed || []).filter((e) => e.typeId === 'machine' && !e.broken);
+            if (!machines.length) return 0;
+            let n = (VD.machineStackBreak || 0.05) + (VD.machineStackBreak || 0.05) * (Math.max(1, machines.length) - 1);
+            (VD.bonds || []).forEach((b) => {
+                if (!villageBondActive(staffed, b)) return;
+                villageBondEffects(b).forEach((e) => {
+                    if (e.type === 'break_mult' && e.target === 'machine') n *= e.amount;
+                });
+            });
+            return Math.max(0, Math.min(0.9, n));
+        }
+
+        function villageUpgradeTotals(level) {
+            const L = Math.max(1, Math.min(level || 1, VD.maxLevel || 20));
+            let gold = 0, ash = 0, mat = 0;
+            for (let k = 1; k < L; k++) {
+                gold += 50000 * (k + 1);
+                ash += (VD.ashBuildCost || 100) * (k + 1);
+                mat += 20 * (k + 1);
+            }
+            return { gold, ash, mat };
+        }
+
+        // 建筑每小时产出：主产物 + 副产物（客户端 jc / Hc）
+        function villageBuildingOutput(b) {
+            const def = villageBuildingDef(b.defId);
+            if (!def || !def.main) return null;
+            const slots = villageStaffSlots(b.level);
+            const staffed = (b.employees || []).slice(0, slots);
+            const working = staffed.filter((e) => !e.onLeave);
+            const mult = villageLevelMult(b.level);
+            const stockRaw = b.inputStock;
+            const stock = (def.needsInput && stockRaw != null && stockRaw !== '') ? Math.max(0, Number(stockRaw) || 0) : null;
+
+            let mainAmt = 0;
+            let potential = 0;
+            let sumEff = 0;
+            let capped = false;
+            working.forEach((e) => {
+                const eff = villageEfficiency(e, staffed);
+                sumEff += eff;
+                let s = (VD.baseOutput || 10) * eff * mult;
+                potential += s;
+                // 客户端把原料上限逐个员工截断后再求和（N 人最多可报 N×库存）
+                if (def.needsInput && stock != null) {
+                    const c = Math.min(stock, s);
+                    if (c < s) capped = true;
+                    s = c;
+                }
+                mainAmt += s;
+            });
+
+            const rows = [{
+                kind: 'main', id: def.main, name: villageMatName(def.main), emoji: villageMatEmoji(def.main), amount: mainAmt,
+            }];
+            if (def.by && def.byChance > 0) {
+                rows.push({
+                    kind: 'by', id: def.by, name: villageMatName(def.by), emoji: villageMatEmoji(def.by), amount: mainAmt * def.byChance,
+                });
+            }
+            return {
+                def, slots, staffed, working, mult, sumEff, mainAmt, potential, capped, rows,
+                inputItem: def.needsInput ? (b.charcoalInput || 'oakWood') : null,
+                inputNeed: def.needsInput ? mainAmt : 0,
+            };
+        }
+
+        // 全规划汇总：材料产出、每小时薪资、一次性建厂与升级成本
+        function villageAggregate() {
+            const matMap = {};
+            const add = (id, amt) => { matMap[id] = (matMap[id] || 0) + amt; };
+            const salary = { positive: 0, negative: 0, idle: 0, net: 0 };
+            const cost = { land: 0, gold: 0, ash: 0, mats: {} };
+            const warnings = [];
+
+            (villagePlan.buildings || []).forEach((b) => {
+                const def = villageBuildingDef(b.defId);
+                if (!def) return;
+                const out = villageBuildingOutput(b);
+                if (out) {
+                    out.rows.forEach((r) => add(r.id, r.amount));
+                    if (out.inputItem && out.inputNeed > 0) add(out.inputItem, -out.inputNeed);
+                    if ((b.employees || []).length > out.slots) {
+                        warnings.push(`${def.name}：#${b.uid} 员工 ${b.employees.length} 人超过当前等级编制 ${out.slots} 人，超编员工未计入统计`);
+                    }
+                }
+                // 薪资按「该等级编制内」的员工统计（与产出口径一致；pigOps 无产物但有编制，也要计入）
+                const staffedAll = (b.employees || []).slice(0, villageStaffSlots(b.level));
+                staffedAll.forEach((e) => {
+                    if (e.onLeave) return;
+                    const s = villageSalaryRate(e, staffedAll);
+                    if (s > 0) salary.positive += s;
+                    else if (s < 0) salary.negative += -s;
+                });
+
+                const landPrice = (VD.landPrice && VD.landPrice[b.landType || 'normal']) || 0;
+                const up = villageUpgradeTotals(b.level);
+                cost.land += landPrice;
+                cost.gold += (def.buildGold || 0) + up.gold;
+                cost.ash += (VD.ashBuildCost || 100) + up.ash;
+                Object.entries(def.buildMat || {}).forEach(([k, v]) => { cost.mats[k] = (cost.mats[k] || 0) + v; });
+                if (!def.ops && def.upMat && up.mat > 0) cost.mats[def.upMat] = (cost.mats[def.upMat] || 0) + up.mat;
+            });
+
+            (villagePlan.idlePool || []).forEach((e) => { salary.idle += villageIdleSalary(e); });
+            salary.net = salary.positive + salary.idle - salary.negative;
+
+            const materials = Object.entries(matMap)
+                .filter(([, v]) => Math.abs(v) > 1e-9)
+                .map(([id, amount]) => ({ id, amount, name: villageMatName(id), emoji: villageMatEmoji(id) }))
+                .sort((a, b) => b.amount - a.amount);
+
+            return { materials, salary, cost, warnings };
+        }
+
+        // ---------- 规划状态 ----------
+        function villageNewBuilding(defId, level) {
+            return {
+                uid: villageUidSeed++,
+                defId: defId || 'oak',
+                level: Math.max(1, Math.min(level || 1, VD.maxLevel || 20)),
+                landType: 'normal',
+                charcoalInput: 'oakWood',
+                inputStock: '',
+                employees: [],
+            };
+        }
+
+        function villageDefaultPlan() {
+            const b = villageNewBuilding('oak', 1);
+            b.employees.push({ uid: villageUidSeed++, typeId: 'normal', payMult: 1, onLeave: false, broken: false });
+            return { name: '我的农村规划', overwork: 0, buildings: [b], idlePool: [] };
+        }
+
+        function villageSave() {
+            try {
+                localStorage.setItem(VILLAGE_KEY, JSON.stringify({ plan: villagePlan, selected: villageSelectedUid, uid: villageUidSeed }));
+            } catch (e) { /* 隐私模式下忽略 */ }
+        }
+
+        function villageLoad() {
+            let loaded = null;
+            try {
+                const raw = localStorage.getItem(VILLAGE_KEY);
+                if (raw) {
+                    const obj = JSON.parse(raw);
+                    if (obj && obj.plan && Array.isArray(obj.plan.buildings)) loaded = obj;
+                }
+            } catch (e) { loaded = null; }
+            if (loaded) {
+                villagePlan = loaded.plan;
+                villageUidSeed = Math.max(1, Number(loaded.uid) || 1);
+                // 补齐旧版本可能缺失的字段
+                villagePlan.buildings.forEach((b) => {
+                    if (b.uid == null) b.uid = villageUidSeed++;
+                    if (!b.landType) b.landType = 'normal';
+                    if (b.charcoalInput == null) b.charcoalInput = 'oakWood';
+                    if (b.inputStock == null) b.inputStock = '';
+                    (b.employees || []).forEach((e) => { if (e.uid == null) e.uid = villageUidSeed++; });
+                });
+                if (villagePlan.idlePool == null) villagePlan.idlePool = [];
+                if (villagePlan.overwork == null) villagePlan.overwork = 0;
+                villageSelectedUid = loaded.selected != null ? loaded.selected : (villagePlan.buildings[0] && villagePlan.buildings[0].uid);
+            } else {
+                villagePlan = villageDefaultPlan();
+                villageSelectedUid = villagePlan.buildings[0].uid;
+            }
+            // 选中项失效时回退到第一座建筑
+            if (!villagePlan.buildings.some((b) => b.uid === villageSelectedUid)) {
+                villageSelectedUid = villagePlan.buildings[0] ? villagePlan.buildings[0].uid : null;
+            }
+        }
+
+        function villageFind(uid) { return (villagePlan.buildings || []).find((b) => b.uid === uid) || null; }
+
+        function onVillageOptionChange() {
+            if (!villagePlan) return;
+            villagePlan.name = document.getElementById('villagePlanName').value || '我的农村规划';
+            villagePlan.overwork = Math.max(0, Math.min(10, Number(document.getElementById('villageOverwork').value) || 0));
+            villageSave();
+            renderVillage();
+        }
+
+        function villageAddBuilding() {
+            const b = villageNewBuilding('oak', 1);
+            villagePlan.buildings.push(b);
+            villageSelectedUid = b.uid;
+            villageSave();
+            renderVillage();
+        }
+
+        function villageResetPlan() {
+            if (!window.confirm('重置农村规划？当前建筑、员工与待业安排都会清空。')) return;
+            villagePlan = villageDefaultPlan();
+            villageSelectedUid = villagePlan.buildings[0].uid;
+            villageSave();
+            syncVillageControls();
+            renderVillage();
+        }
+
+        function villageSelectBuilding(uid) {
+            villageSelectedUid = uid;
+            villageSave();
+            renderVillage();
+        }
+
+        function villageRemoveBuilding(uid) {
+            const b = villageFind(uid);
+            if (!b) return;
+            const def = villageBuildingDef(b.defId);
+            if (!window.confirm(`拆除「${def ? def.name : b.defId}」？拆除后该建筑与员工安排都会移除。`)) return;
+            villagePlan.buildings = villagePlan.buildings.filter((x) => x.uid !== uid);
+            if (villageSelectedUid === uid) {
+                villageSelectedUid = villagePlan.buildings[0] ? villagePlan.buildings[0].uid : null;
+            }
+            villageSave();
+            renderVillage();
+        }
+
+        function villageSetBuildingDef(uid, defId) {
+            const b = villageFind(uid);
+            if (!b) return;
+            b.defId = defId;
+            b.inputStock = '';
+            villageSave();
+            renderVillage();
+        }
+
+        function villageSetLevel(uid, level) {
+            const b = villageFind(uid);
+            if (!b) return;
+            b.level = Math.max(1, Math.min(Number(level) || 1, VD.maxLevel || 20));
+            villageSave();
+            renderVillage();
+        }
+
+        function villageLevelStep(uid, delta) {
+            const b = villageFind(uid);
+            if (!b) return;
+            villageSetLevel(uid, (b.level || 1) + delta);
+        }
+
+        function villageSetLand(uid, type) {
+            const b = villageFind(uid);
+            if (!b) return;
+            b.landType = type;
+            villageSave();
+            renderVillage();
+        }
+
+        function villageSetCharcoalInput(uid, matId) {
+            const b = villageFind(uid);
+            if (!b) return;
+            b.charcoalInput = matId;
+            villageSave();
+            renderVillage();
+        }
+
+        function villageSetInputStock(uid, val) {
+            const b = villageFind(uid);
+            if (!b) return;
+            b.inputStock = val === '' ? '' : Math.max(0, Number(val) || 0);
+            villageSave();
+            renderVillage();
+        }
+
+        function villageSetEmployee(uid, idx, typeId) {
+            const b = villageFind(uid);
+            if (!b) return;
+            b.employees = b.employees || [];
+            if (!typeId) {
+                b.employees.splice(idx, 1);
+            } else {
+                const emp = { uid: villageUidSeed++, typeId: typeId, payMult: 1, onLeave: false, broken: false };
+                if (idx < b.employees.length) b.employees[idx] = emp;
+                else b.employees.push(emp);
+            }
+            villageSave();
+            renderVillage();
+        }
+
+        function villagePayStep(uid, idx, delta) {
+            const b = villageFind(uid);
+            if (!b || !b.employees[idx]) return;
+            const e = b.employees[idx];
+            e.payMult = Math.max(1, Math.min(PAY_MAX, Math.round(((e.payMult || 1) + delta * PAY_STEP) * 100) / 100));
+            villageSave();
+            renderVillage();
+        }
+
+        function villageSetPayMult(uid, idx, val) {
+            const b = villageFind(uid);
+            if (!b || !b.employees[idx]) return;
+            b.employees[idx].payMult = Math.max(1, Math.min(PAY_MAX, Number(val) || 1));
+            villageSave();
+            renderVillage();
+        }
+
+        function villageToggleLeave(uid, idx) {
+            const b = villageFind(uid);
+            if (!b || !b.employees[idx]) return;
+            b.employees[idx].onLeave = !b.employees[idx].onLeave;
+            villageSave();
+            renderVillage();
+        }
+
+        function villageToggleBroken(uid, idx) {
+            const b = villageFind(uid);
+            if (!b || !b.employees[idx]) return;
+            b.employees[idx].broken = !b.employees[idx].broken;
+            villageSave();
+            renderVillage();
+        }
+
+        function villageAddIdle(typeId) {
+            if (!typeId) return;
+            (villagePlan.idlePool = villagePlan.idlePool || []).push({ uid: villageUidSeed++, typeId: typeId });
+            villageSave();
+            renderVillage();
+        }
+
+        function villageRemoveIdle(uid) {
+            villagePlan.idlePool = (villagePlan.idlePool || []).filter((e) => e.uid !== uid);
+            villageSave();
+            renderVillage();
+        }
+
+        // ---------- 渲染 ----------
+        function villageSalaryText(typeId, staffed, payMult) {
+            const def = villageEmpDef(typeId);
+            if (!def) return '—';
+            if (typeId === 'robot') return '买断（无时薪）';
+            if (typeId === 'intern') return '实习（无薪）';
+            if (typeId === 'machine') return '机器（无薪）';
+            const s = def.salary * (payMult == null ? 1 : payMult) * (VD.salaryUnit || 10000) * (staffed ? villageSalaryBonus(staffed, typeId) : 1);
+            if (s < 0) return `+${fmtInt(-s)} 金币/时`;
+            if (s === 0) return '0 金币/时';
+            return `${fmtInt(s)} 金币/时`;
+        }
+
+        function villageEmpOptionsHtml(selectedId) {
+            const order = ['special', 'epic', 'rare', 'common'];
+            let html = `<option value=""${!selectedId ? ' selected' : ''}>＋ 选择员工…</option>`;
+            order.forEach((r) => {
+                const list = Object.values(VD.employees || {}).filter((e) => e.rarity === r);
+                if (!list.length) return;
+                html += `<optgroup label="${vEsc((VD.rarityNames || {})[r] || r)}">`;
+                list.forEach((e) => {
+                    html += `<option value="${e.id}"${selectedId === e.id ? ' selected' : ''}>${vEsc(e.emoji || '')} ${vEsc(e.name)} · 效率${Math.round(e.eff * 100)}% · ${vEsc(villageSalaryText(e.id, null, 1))}</option>`;
+                });
+                html += '</optgroup>';
+            });
+            return html;
+        }
+
+        function villageEmpCardHtml(b, idx, emp) {
+            const def = villageEmpDef(emp.typeId);
+            if (!def) return '';
+            const slots = villageStaffSlots(b.level);
+            const staffed = (b.employees || []).slice(0, slots);
+            const detail = villageEffDetail(emp, staffed);
+            const isMachine = emp.typeId === 'machine';
+            const rarity = (VD.rarityColors || {})[def.rarity] || '#9a9a9a';
+            const rarityName = (VD.rarityNames || {})[def.rarity] || def.rarity;
+            const salary = villageSalaryText(emp.typeId, staffed, emp.payMult || 1);
+
+            let note = '';
+            if (emp.broken) note = '<span class="emp-note warn">⚙️ 已损坏 · 效率 0（维修 10 万金币）</span>';
+            else if (isMachine) note = `<span class="emp-note">损坏概率 ${Math.round(villageBreakChance(staffed) * 100)}%/时</span>`;
+            else {
+                const ra = villageRunawayChance(emp, staffed);
+                if (ra > 0) note = `<span class="emp-note">跑路 ${Math.round(ra * 100)}%/时</span>`;
+            }
+            const effPct = Math.round(detail.final * 100);
+            const bondPct = Math.round((detail.bondMult - 1) * 100);
+
+            const canRaise = !def.noRaise && emp.typeId !== 'robot';
+            const payCtl = canRaise ? `
+                        <div class="pay-ctl" title="加薪：效率与时薪同步 ×倍率（实习猪/机器猪不吃加薪）">
+                            <button class="mini-btn" type="button" onclick="villagePayStep(${b.uid},${idx},-1)">−</button>
+                            <span class="pay-val">×${fmtNum(detail.payMult, 1)}</span>
+                            <button class="mini-btn" type="button" onclick="villagePayStep(${b.uid},${idx},1)" ${(emp.payMult || 1) >= PAY_MAX ? 'disabled' : ''}>＋</button>
+                        </div>` : '<div class="pay-ctl"><span class="emp-note">不可加薪</span></div>';
+
+            const leaveBtn = def.noLeave ? '' :
+                `<button class="mini-btn" type="button" onclick="villageToggleLeave(${b.uid},${idx})">${emp.onLeave ? '🟢 上工' : '🛋 休假'}</button>`;
+            const brokenBtn = isMachine ? `<button class="mini-btn" type="button" onclick="villageToggleBroken(${b.uid},${idx})">${emp.broken ? '🔧 修好' : '💥 损坏'}</button>` : '';
+
+            return `
+                <div class="emp-card rar-${vEsc(def.rarity)}${emp.onLeave ? ' on-leave' : ''}">
+                    <div class="emp-top">
+                        <span class="emp-rarity-tag" style="color:${rarity}">${vEsc(rarityName)}</span>
+                        <span class="emp-status-dot${emp.onLeave ? ' leave' : ''}" title="${emp.onLeave ? '休假中（不产出、无薪资）' : '在岗'}">●</span>
+                    </div>
+                    ${def.img ? `<img class="emp-img" src="${vEsc(def.img)}" alt="${vEsc(def.name)}" loading="lazy">` : '<div class="emp-emoji">🏖️</div>'}
+                    <div class="emp-name">${vEsc(def.name)}</div>
+                    <div class="emp-sub">效率 ${effPct}%<br>${vEsc(salary)}</div>
+                    ${note}
+                    ${bondPct !== 0 ? `<div class="emp-note">羁绊 ${bondPct > 0 ? '+' : ''}${bondPct}%</div>` : '<div class="emp-note"></div>'}
+                    ${payCtl}
+                    <div class="emp-actions">
+                        ${brokenBtn}
+                        ${leaveBtn}
+                        <button class="mini-btn danger" type="button" onclick="villageSetEmployee(${b.uid},${idx},'')">✖ 移除</button>
+                    </div>
+                </div>`;
+        }
+
+        function villageEmpSlotHtml(b, idx) {
+            const slots = villageStaffSlots(b.level);
+            const emps = b.employees || [];
+            if (idx >= slots) {
+                return `<div class="emp-slot"><div class="emp-empty locked">🔒 Lv.${idx + 1} 开启</div></div>`;
+            }
+            if (idx < emps.length) return `<div class="emp-slot">${villageEmpCardHtml(b, idx, emps[idx])}</div>`;
+            return `<div class="emp-slot"><div class="emp-empty">
+                <div>＋ 空位</div>
+                <select onchange="villageSetEmployee(${b.uid},${idx},this.value)">${villageEmpOptionsHtml('')}</select>
+            </div></div>`;
+        }
+
+        function villageBuildingDetailHtml(b) {
+            if (!b) return '<div class="empty-state"><div class="empty-state-icon">🏗</div><div>还没有建筑，点左侧「＋ 新建建筑」开始规划</div></div>';
+            const def = villageBuildingDef(b.defId);
+            if (!def) return '<div class="empty-state"><div>请选择建筑</div></div>';
+            const out = villageBuildingOutput(b);
+            const slots = villageStaffSlots(b.level);
+            const level = b.level || 1;
+            const nextMult = villageLevelMult(level + 1);
+            const curMult = villageLevelMult(level);
+            const up = villageUpgradeTotals(level);
+            const atMax = level >= (VD.maxLevel || 20);
+
+            // 产出对比：当前等级 / 下一等级（下一等级原料上限沿用当前值）
+            let prodRows = '';
+            if (out) {
+                const rowsFor = (mult) => {
+                    let amt = 0;
+                    out.working.forEach((e) => {
+                        let s = (VD.baseOutput || 10) * villageEfficiency(e, out.staffed) * mult;
+                        if (def.needsInput && b.inputStock !== '' && b.inputStock != null) s = Math.min(Number(b.inputStock) || 0, s);
+                        amt += s;
+                    });
+                    return amt;
+                };
+                const lv1Main = rowsFor(curMult);
+                const lv2Main = atMax ? null : rowsFor(nextMult);
+                const byMain = (def.by && def.byChance > 0);
+                prodRows += `<div class="pc-row pc-head"><span>产出</span><span>Lv.${level}</span><span>${atMax ? '已满级' : 'Lv.' + (level + 1)}</span></div>`;
+                prodRows += `<div class="pc-row"><span>主产物 ${vEsc(villageMatEmoji(def.main) + ' ' + villageMatName(def.main))}</span><span class="pc-val">${fmtNum(lv1Main, 1)}</span><span class="pc-val">${lv2Main == null ? '—' : fmtNum(lv2Main, 1)}</span></div>`;
+                if (byMain) {
+                    prodRows += `<div class="pc-row"><span>副产物 ${vEsc(villageMatEmoji(def.by) + ' ' + villageMatName(def.by))}（${Math.round(def.byChance * 100)}%）</span><span class="pc-val">${fmtNum(lv1Main * def.byChance, 1)}</span><span class="pc-val">${lv2Main == null ? '—' : fmtNum(lv2Main * def.byChance, 1)}</span></div>`;
+                }
+            }
+
+            const bonds = villageActiveBonds(out ? out.staffed : []);
+            const bondChips = (VD.bonds || []).map((bd) => {
+                const on = villageBondActive(out ? out.staffed : [], bd);
+                const needTxt = Object.entries(bd.need || {}).map(([k, v]) => `${(villageEmpDef(k) || {}).name || k}×${v}`).join(' + ');
+                return `<span class="bond-chip${on ? '' : ' off'}" title="${vEsc(bd.name)}：需 ${vEsc(needTxt)} —— ${vEsc(bd.desc || '')}">${vEsc(bd.emoji || '🔗')} ${vEsc(bd.name)}</span>`;
+            }).join('');
+
+            const buildOpts = Object.values(VD.buildings || {}).map((x) =>
+                `<option value="${x.id}"${x.id === b.defId ? ' selected' : ''}>${vEsc(x.emoji || '')} ${vEsc(x.name)}</option>`).join('');
+            const landOpts = LAND_TYPES.map((t) => {
+                const price = (VD.landPrice || {})[t.priceKey] || 0;
+                return `<option value="${t.id}"${b.landType === t.id ? ' selected' : ''}>${t.name}（地价 ${fmtInt(price)}）</option>`;
+            }).join('');
+
+            const charcoalBlock = def.needsInput ? `
+                <div class="section" style="margin-top:12px">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">🔥 选择烧炭原料（原料 → 木炭 1:1）</div>
+                    <div class="control-group" style="flex-wrap:wrap">
+                        <select onchange="villageSetCharcoalInput(${b.uid},this.value)">
+                            ${(VD.materials || []).filter((m) => m.id.endsWith('Wood')).map((m) =>
+                                `<option value="${m.id}"${(b.charcoalInput || 'oakWood') === m.id ? ' selected' : ''}>${vEsc(m.emoji + ' ' + m.name)}</option>`).join('')}
+                        </select>
+                        <label>可用原料</label>
+                        <input type="number" min="0" step="1" style="min-width:auto" value="${b.inputStock === '' ? '' : b.inputStock}"
+                            placeholder="不限" onchange="villageSetInputStock(${b.uid},this.value)">
+                        <span class="hint-inline">留空=不限量；填 X 时每个在岗员工最多按 X 截断（与客户端一致）</span>
+                    </div>
+                </div>` : '';
+
+            return `
+                <div class="b-head">
+                    ${def.img ? `<img class="b-head-icon" src="${vEsc(def.img)}" alt="${vEsc(def.name)}" loading="lazy">` : `<span class="big">${vEsc(def.emoji || '🏭')}</span>`}
+                    <div class="b-info">
+                        <div class="b-title">${vEsc(def.name)}</div>
+                        <div class="b-sub">Lv.${level} · 岗位 ${Math.min((b.employees || []).length, slots)}/${slots}${def.ops ? ' · 一场上 1 人' : ''} · 等级倍率 ×${fmtNum(curMult, 1)}</div>
+                    </div>
+                    <div class="b-actions">
+                        <button class="mini-btn" type="button" onclick="villageLevelStep(${b.uid},-1)" ${level <= 1 ? 'disabled' : ''}>⬇️ 降级</button>
+                        <button class="mini-btn" type="button" onclick="villageLevelStep(${b.uid},1)" ${atMax ? 'disabled' : ''}>⬆️ 升级</button>
+                        <button class="mini-btn danger" type="button" onclick="villageRemoveBuilding(${b.uid})">💥 拆除</button>
+                    </div>
+                </div>
+
+                <div class="control-row" style="padding:0 0 10px">
+                    <div class="control-group">
+                        <label>建筑</label>
+                        <select onchange="villageSetBuildingDef(${b.uid},this.value)" style="min-width:150px">${buildOpts}</select>
+                    </div>
+                    <div class="control-group">
+                        <label>等级</label>
+                        <input type="number" min="1" max="${VD.maxLevel || 20}" step="1" value="${level}" onchange="villageSetLevel(${b.uid},this.value)">
+                    </div>
+                    <div class="control-group">
+                        <label>地块</label>
+                        <select onchange="villageSetLand(${b.uid},this.value)" style="min-width:150px">${landOpts}</select>
+                    </div>
+                </div>
+
+                ${prodRows ? `<div class="prod-compare">${prodRows}</div>` : ''}
+
+                <div class="est-line"><span>当前总效率</span><b>${fmtNum(out ? out.sumEff : 0, 2)}（在岗 ${out ? out.working.length : 0} 人）</b></div>
+                <div class="est-line"><span>主产物产出</span><b>${out ? fmtNum(out.mainAmt, 1) : '0'} /时</b></div>
+                ${out && out.inputItem ? `<div class="est-line"><span>消耗 ${vEsc(villageMatName(out.inputItem))}</span><b>${fmtNum(out.inputNeed, 1)} /时</b></div>` : ''}
+                ${out && out.capped ? '<div class="warn-banner" style="margin:8px 0 0">⚠ 原料不足，实际产出被「可用原料」截断</div>' : ''}
+
+                ${charcoalBlock}
+
+                <div class="section" style="margin-top:14px">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">🔗 羁绊（${bonds.length} 组激活）</div>
+                    <div class="bond-slots">${bondChips}</div>
+                </div>
+
+                <div class="section" style="margin-top:14px">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">👥 员工（${Math.min((b.employees || []).length, slots)}/${slots}）　<span style="font-weight:400;color:var(--ink-faint)">点击空位可从猪才市场安置员工</span></div>
+                    <div class="emp-grid">
+                        ${Array.from({ length: slots }, (_, i) => villageEmpSlotHtml(b, i)).join('')}
+                    </div>
+                </div>
+
+                <div class="section" style="margin-top:14px">
+                    <div style="font-size:12px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">⬆️ 升级到 Lv.${Math.min(level + 1, VD.maxLevel || 20)} 需要</div>
+                    ${atMax ? '<div class="raw-note">已是最高等级（Lv.' + (VD.maxLevel || 20) + '）</div>' : `
+                        <div class="est-line"><span>金币</span><b>${fmtInt(50000 * (level + 1))}</b></div>
+                        ${def.ops ? '' : `<div class="est-line"><span>${vEsc(villageMatEmoji(def.upMat) + ' ' + villageMatName(def.upMat))}</span><b>${fmtInt(20 * (level + 1))}</b></div>`}
+                        <div class="est-line"><span>🔥 灰烬</span><b>${fmtInt((VD.ashBuildCost || 100) * (level + 1))}</b></div>
+                        <div class="est-line"><span>已投入升级（Lv.1 → Lv.${level}）</span><b>${fmtInt(up.gold)} 金币 · ${fmtInt(up.mat)} 材料 · ${fmtInt(up.ash)} 灰烬</b></div>`}
+                </div>`;
+        }
+
+        function villageLandTileHtml(b) {
+            const def = villageBuildingDef(b.defId);
+            const slots = villageStaffSlots(b.level);
+            const nm = (b.employees || []).length;
+            const cls = ['land-tile', 'building'];
+            if (villageSelectedUid === b.uid) cls.push('selected');
+            if (b.landType === 'nail') cls.push('nail');
+            if (b.landType === 'superNail') cls.push('super-nail');
+            const land = LAND_TYPES.find((t) => t.id === b.landType);
+            return `
+                <div class="${cls.join(' ')}" onclick="villageSelectBuilding(${b.uid})" title="点击查看/编辑该建筑">
+                    ${b.landType !== 'normal' ? `<span class="land-badge">${land ? land.name : b.landType}</span>` : ''}
+                    ${def && def.img ? `<img class="land-icon" src="${vEsc(def.img)}" alt="" loading="lazy">` : `<span class="land-emoji">${vEsc((def && def.emoji) || '🏭')}</span>`}
+                    <span class="land-name">${vEsc(def ? def.name : b.defId)}</span>
+                    <span class="land-sub">Lv.${b.level} · ${nm}/${slots} 员工</span>
+                    <span class="land-price">地价 ${land ? fmtInt((VD.landPrice || {})[land.priceKey] || 0) : ''}</span>
+                </div>`;
+        }
+
+        function renderVillage() {
+            const root = document.getElementById('villagePlan');
+            if (!root) return;
+            if (!villagePlan) villageLoad();
+
+            const agg = villageAggregate();
+            const ow = Number(villagePlan.overwork) || 0;
+            const dayHours = 24 + ow;
+            const hint = document.getElementById('villageOverworkHint');
+            if (hint) hint.textContent = ow > 0
+                ? `每日按 ${dayHours} 小时产出结算，灰烬消耗 ${fmtInt(ow * 100)}/日`
+                : '未使用加班加速';
+
+            const tiles = (villagePlan.buildings || []).map(villageLandTileHtml).join('');
+            const addTile = `<button class="land-tile add" type="button" onclick="villageAddBuilding()"><span class="land-emoji">＋</span><span class="land-name">新建建筑</span><span class="land-sub">选择建筑类型</span></button>`;
+            const selected = villageFind(villageSelectedUid);
+
+            const salaryHtml = `
+                <div class="panel-title">💰 每小时净薪资</div>
+                <div class="est-line"><span>应付薪资（正支出）</span><b>-${fmtInt(agg.salary.positive)}</b></div>
+                ${agg.salary.idle > 0 ? `<div class="est-line"><span>待业薪资（猪才市场）</span><b>-${fmtInt(agg.salary.idle)}</b></div>` : ''}
+                <div class="est-line neg"><span>反向创收（黑客猪）</span><b>+${fmtInt(agg.salary.negative)}</b></div>
+                <div class="est-line net"><span>净支出</span><b>${fmtInt(agg.salary.net)} 金币/时</b></div>
+                <div class="est-line"><span>每日净支出（${dayHours} 小时）</span><b>${fmtInt(agg.salary.net * dayHours)} 金币</b></div>
+                ${ow > 0 ? `<div class="est-line"><span>加班加速消耗</span><b>🔥 灰烬×${fmtInt(ow * 100)}/日</b></div>` : ''}`;
+
+            const outHtml = `
+                <div class="panel-title">📦 材料产出效率
+                    <span class="hint">各材料每小时产出（与游戏内「每小时产出预览」同口径）；烧炭厂消耗的原料以负数计入；「/${dayHours}时」按每日小时数（24 + 加班加速）折算</span>
+                </div>
+                ${agg.materials.length ? `<div class="village-scroll"><table class="village-table">
+                    <thead><tr><th>材料</th><th style="text-align:right">/时</th><th style="text-align:right">/${dayHours}时</th></tr></thead>
+                    <tbody>${agg.materials.map((m) => `
+                        <tr>
+                            <td><span class="mat-cell">${vEsc(m.emoji)} ${vEsc(m.name)}</span></td>
+                            <td class="num" style="color:${m.amount < 0 ? 'var(--red)' : 'var(--amber)'}">${m.amount > 0 ? '+' : ''}${fmtNum(m.amount, 1)}</td>
+                            <td class="num" style="color:${m.amount < 0 ? 'var(--red)' : 'var(--ink-soft)'}">${m.amount > 0 ? '+' : ''}${fmtNum(m.amount * dayHours, 1)}</td>
+                        </tr>`).join('')}</tbody>
+                </table></div>` : '<div class="raw-note">暂无产出：请先建厂并安排员工。</div>'}`;
+
+            const costRows = Object.entries(agg.cost.mats).sort((a, b) => b[1] - a[1]).map(([id, v]) =>
+                `<tr><td><span class="mat-cell">${vEsc(villageMatEmoji(id))} ${vEsc(villageMatName(id))}</span></td><td class="num">${fmtInt(v)}</td></tr>`).join('');
+            const costHtml = `
+                <div class="panel-title">🎯 建厂与升级一次性成本
+                    <span class="hint">按当前规划的建筑与等级计算：地价 + 建造费 + 从 Lv.1 升到当前等级的全部升级消耗；未含原料采购成本</span>
+                </div>
+                <div class="est-line"><span>占地（${(villagePlan.buildings || []).length} 块）</span><b>${fmtInt(agg.cost.land)} 金币</b></div>
+                <div class="est-line"><span>建厂 + 升级金币</span><b>${fmtInt(agg.cost.gold)} 金币</b></div>
+                <div class="est-line"><span>🔥 灰烬（建造 100/座 + 升级）</span><b>${fmtInt(agg.cost.ash)}</b></div>
+                <div class="est-line net"><span>金币合计</span><b>${fmtInt(agg.cost.land + agg.cost.gold)} 金币</b></div>
+                ${costRows ? `<div class="village-scroll" style="margin-top:10px"><table class="village-table">
+                    <thead><tr><th>升级/建造材料</th><th style="text-align:right">数量</th></tr></thead>
+                    <tbody>${costRows}</tbody></table></div>` : ''}
+                <div class="est-line" style="margin-top:8px"><span>一次性投入 ÷ 每小时净支出</span><b>${agg.salary.net > 0 ? fmtNum((agg.cost.land + agg.cost.gold) / agg.salary.net, 1) + ' 小时' : '净支出为 0，不适用'}</b></div>`;
+
+            // 员工效率明细
+            const detailRows = [];
+            (villagePlan.buildings || []).forEach((b) => {
+                const def = villageBuildingDef(b.defId);
+                const slots = villageStaffSlots(b.level);
+                const staffed = (b.employees || []).slice(0, slots);
+                const mult = villageLevelMult(b.level);
+                staffed.forEach((e) => {
+                    const d = villageEffDetail(e, staffed);
+                    const edef = villageEmpDef(e.typeId);
+                    const perHour = (VD.baseOutput || 10) * d.final * mult * (e.onLeave ? 0 : 1);
+                    detailRows.push(`<tr>
+                        <td>${vEsc(def ? def.name : b.defId)} <span class="land-sub">Lv.${b.level}</span></td>
+                        <td><span class="mat-cell">${edef && edef.img ? `<img class="emp-img" style="width:20px;height:20px;margin:0" src="${vEsc(edef.img)}" alt="">` : ''}${vEsc(edef ? edef.name : e.typeId)}</span>${e.onLeave ? ' <span class="land-sub">休假</span>' : ''}${e.broken ? ' <span class="land-sub" style="color:var(--red)">损坏</span>' : ''}</td>
+                        <td class="num">${Math.round(d.base * 100)}%</td>
+                        <td class="num">×${fmtNum(d.payMult, 1)}</td>
+                        <td class="num">${d.bondMult === 1 ? '—' : '×' + fmtNum(d.bondMult, 2)}</td>
+                        <td class="num"><b>${Math.round(d.final * 100)}%</b></td>
+                        <td class="num">${vEsc(villageSalaryText(e.typeId, staffed, e.payMult || 1))}</td>
+                        <td class="num">${fmtNum(perHour, 1)} /时</td>
+                    </tr>`);
+                });
+            });
+
+            const detailHtml = `
+                <div class="panel-title">📊 员工效率统计
+                    <span class="hint">最终效率 = 基础效率 × 加薪倍率 × 羁绊加成（机器猪效率随同建筑机器数量另行计算）；产出 = 10 × 最终效率 × 等级倍率</span>
+                </div>
+                ${detailRows.length ? `<div class="village-scroll"><table class="village-table">
+                    <thead><tr><th>建筑</th><th>员工</th><th style="text-align:right">基础</th><th style="text-align:right">加薪</th><th style="text-align:right">羁绊</th><th style="text-align:right">最终效率</th><th style="text-align:right">时薪</th><th style="text-align:right">产出</th></tr></thead>
+                    <tbody>${detailRows.join('')}</tbody>
+                </table></div>` : '<div class="raw-note">还没有在岗员工。</div>'}`;
+
+            // 羁绊全表
+            const bondRows = (VD.bonds || []).map((bd) => {
+                const hit = [];
+                (villagePlan.buildings || []).forEach((b) => {
+                    const slots = villageStaffSlots(b.level);
+                    const staffed = (b.employees || []).slice(0, slots);
+                    if (villageBondActive(staffed, bd)) hit.push((villageBuildingDef(b.defId) || {}).name || b.defId);
+                });
+                const needTxt = Object.entries(bd.need || {}).map(([k, v]) => `${(villageEmpDef(k) || {}).name || k}×${v}`).join(' + ');
+                const displayOnly = villageBondEffects(bd).some((e) => e.type === 'machine_stack' || e.type === 'auto_repair');
+                return `<tr>
+                    <td>${vEsc(bd.emoji || '🔗')} ${vEsc(bd.name)}${displayOnly ? ' <span class="land-sub">（客户端已硬编码，羁绊本身不再额外加成）</span>' : ''}</td>
+                    <td>${vEsc(needTxt)}</td>
+                    <td>${vEsc(bd.desc || '')}</td>
+                    <td>${hit.length ? '<span style="color:var(--accent)">' + vEsc(hit.join('、')) + '</span>' : '<span class="land-sub">未激活</span>'}</td>
+                </tr>`;
+            }).join('');
+            const bondHtml = `
+                <div class="panel-title">🔗 羁绊统计（${(VD.bonds || []).length} 组）
+                    <span class="hint">羁绊按「同一建筑内」的员工组合生效；效率/薪资/跑路加成会实时计入上方统计（已独立校验与客户端一致）</span>
+                </div>
+                <div class="village-scroll"><table class="village-table">
+                    <thead><tr><th>羁绊</th><th>需求</th><th>效果</th><th>当前激活于</th></tr></thead>
+                    <tbody>${bondRows}</tbody>
+                </table></div>`;
+
+            // 待业（猪才市场）
+            const idle = villagePlan.idlePool || [];
+            const idleChips = idle.map((e) => {
+                const d = villageEmpDef(e.typeId);
+                const idlePay = villageIdleSalary(e);
+                return `<span class="bond-chip off" style="cursor:default">${vEsc(d ? d.name : e.typeId)} · ${idlePay > 0 ? vEsc(fmtInt(idlePay)) + '/时' : '无薪'}
+                    <button class="mini-btn danger" type="button" onclick="villageRemoveIdle(${e.uid})">✖</button></span>`;
+            }).join('');
+            const idleHtml = `
+                <div class="panel-title">🧳 待业（猪才市场）
+                    <span class="hint">待业每小时支付期望薪资的 ${Math.round((VD.talentIdleRate || 0.1) * 100)}%；负薪资员工按 0 计。简历费 ${fmtInt(VD.talentResumeCost || 100000)}/次（每次 ${VD.talentResumeCount || 10} 份），待业上限 ${VD.talentPoolCap || 12}</span>
+                </div>
+                <div class="control-group">
+                    <select id="villageIdleSelect">${villageEmpOptionsHtml('')}</select>
+                    <button class="btn ghost" type="button" onclick="villageAddIdleFromSelect()">＋ 加入待业</button>
+                </div>
+                <div class="bond-slots" style="margin-top:10px">${idleChips || '<span class="raw-note">暂无待业员工。</span>'}</div>
+                <div class="est-line"><span>待业合计</span><b>${fmtInt(agg.salary.idle)} 金币/时</b></div>`;
+
+            root.innerHTML = `
+                ${agg.warnings.length ? `<div class="warn-banner">⚠ ${agg.warnings.map(vEsc).join('　·　')}</div>` : ''}
+                <div class="village-layout">
+                    <div>
+                        <div class="village-panel">
+                            <div class="panel-title">🗺️ 土地（${(villagePlan.buildings || []).length} 块 · 每块仅可建 1 座建筑）
+                                <span class="hint">点击地块查看/编辑建筑；等级 1～${VD.maxLevel || 20} 级，编制 = min(等级, ${VD.maxStaff || 6})</span>
+                            </div>
+                            <div class="land-grid">${tiles}${addTile}</div>
+                        </div>
+                        <div class="village-grid-2">
+                            <div class="village-panel" style="margin-bottom:0">${salaryHtml}</div>
+                            <div class="village-panel" style="margin-bottom:0">${outHtml}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="village-panel">${villageBuildingDetailHtml(selected)}</div>
+                    </div>
+                </div>
+
+                <div class="village-panel">${costHtml}</div>
+                <div class="village-panel">${detailHtml}</div>
+                <div class="village-panel">${bondHtml}</div>
+                <div class="village-panel">${idleHtml}</div>`;
+        }
+
+        function villageAddIdleFromSelect() {
+            const sel = document.getElementById('villageIdleSelect');
+            if (sel && sel.value) villageAddIdle(sel.value);
+        }
+
+        function syncVillageControls() {
+            const nameEl = document.getElementById('villagePlanName');
+            const owEl = document.getElementById('villageOverwork');
+            if (nameEl && villagePlan) nameEl.value = villagePlan.name || '我的农村规划';
+            if (owEl && villagePlan) owEl.value = Number(villagePlan.overwork) || 0;
+        }
+
+        // ====================================================================
+        // 页签七：开拓工厂 — 各级材料合成路线
+        //
+        // 数据取自游戏客户端 bundle：机器表、材料表（raw / fuelValue）、18 条配方（含单次耗时）。
+        // 阶级由配方递归计算（原料 = 0；产物 = 1 + max(输入阶级)），与游戏内总仓库「原料 / 一级～五级产物」分列一致。
+        // 单台产率 = 产出数量 ÷ 耗时 × 3600（连续运行）。
+        // 燃料值 = 每个燃料可支撑的秒数（木炭 60 / 焚晶 30 / 炽热核心 600），热力机器满载按此消耗。
+        // ====================================================================
+        function factoryMat(id) { return (FD.materials && FD.materials[id]) || null; }
+        function factoryMachine(id) { return (FD.machines && FD.machines[id]) || null; }
+        function factoryRecipeOf(itemId) {
+            return (FD.recipes || []).find((r) => r.output && r.output.item === itemId) || null;
+        }
+        function factoryTierOf(id) { return (FD.tierMap && FD.tierMap[id] != null) ? FD.tierMap[id] : 0; }
+        function factoryTierLabel(t) { return (FD.tierLabels && FD.tierLabels[t]) || `阶级 ${t}`; }
+        function factoryName(id) { const m = factoryMat(id); return m ? m.name : id; }
+        function factoryEmoji(id) { const m = factoryMat(id); return (m && m.emoji) || ''; }
+        function factorySellPrice(id) {
+            const p = SHOP_PRICES[id];
+            return (p && p.sell >= 0) ? p.sell : null;
+        }
+
+        function factoryDefaultOptions() {
+            const products = Object.values(FD.materials || {}).filter((m) => !m.raw);
+            let target = '';
+            let best = -1;
+            products.forEach((m) => {
+                const t = factoryTierOf(m.id);
+                if (t > best) { best = t; target = m.id; }
+            });
+            return { target: target, count: 1, fuel: 'charcoal', machines: 1 };
+        }
+
+        function factorySave() {
+            try { localStorage.setItem(FACTORY_KEY, JSON.stringify(factoryOptions)); } catch (e) { /* 忽略 */ }
+        }
+
+        function factoryLoad() {
+            let loaded = null;
+            try {
+                const raw = localStorage.getItem(FACTORY_KEY);
+                if (raw) loaded = JSON.parse(raw);
+            } catch (e) { loaded = null; }
+            const def = factoryDefaultOptions();
+            factoryOptions = {
+                target: (loaded && factoryMat(loaded.target)) ? loaded.target : def.target,
+                count: loaded && loaded.count > 0 ? Number(loaded.count) : 1,
+                fuel: (loaded && factoryMat(loaded.fuel) && factoryMat(loaded.fuel).fuelValue > 0) ? loaded.fuel : def.fuel,
+                machines: loaded && loaded.machines > 0 ? Number(loaded.machines) : 1,
+            };
+        }
+
+        function fillFactoryControls() {
+            const targetEl = document.getElementById('factoryTarget');
+            const fuelEl = document.getElementById('factoryFuel');
+            if (!targetEl || !fuelEl) return;
+            const mats = Object.values(FD.materials || {});
+            const byTier = {};
+            mats.forEach((m) => { const t = factoryTierOf(m.id); (byTier[t] = byTier[t] || []).push(m); });
+            let html = '';
+            Object.keys(byTier).map(Number).sort((a, b) => b - a).forEach((t) => {
+                html += `<optgroup label="${vEsc(factoryTierLabel(t))}">`;
+                byTier[t].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN')).forEach((m) => {
+                    html += `<option value="${m.id}"${factoryOptions.target === m.id ? ' selected' : ''}>${vEsc(m.emoji + ' ' + m.name)}</option>`;
+                });
+                html += '</optgroup>';
+            });
+            targetEl.innerHTML = html;
+
+            fuelEl.innerHTML = mats.filter((m) => m.fuelValue > 0)
+                .sort((a, b) => b.fuelValue - a.fuelValue)
+                .map((m) => {
+                    const p = factorySellPrice(m.id);
+                    return `<option value="${m.id}"${factoryOptions.fuel === m.id ? ' selected' : ''}>${vEsc(m.emoji + ' ' + m.name)}（${m.fuelValue}s/个${p != null ? ' · 出售 ' + fmtInt(p) : ''}）</option>`;
+                }).join('');
+
+            const countEl = document.getElementById('factoryCount');
+            const macEl = document.getElementById('factoryMachineCount');
+            if (countEl) countEl.value = factoryOptions.count;
+            if (macEl) macEl.value = factoryOptions.machines;
+        }
+
+        function onFactoryOptionChange() {
+            const targetEl = document.getElementById('factoryTarget');
+            const fuelEl = document.getElementById('factoryFuel');
+            const countEl = document.getElementById('factoryCount');
+            const macEl = document.getElementById('factoryMachineCount');
+            if (targetEl && targetEl.value) factoryOptions.target = targetEl.value;
+            if (fuelEl && fuelEl.value) factoryOptions.fuel = fuelEl.value;
+            if (countEl) factoryOptions.count = Math.max(1, Number(countEl.value) || 1);
+            if (macEl) factoryOptions.machines = Math.max(1, Number(macEl.value) || 1);
+            factorySave();
+            renderFactory();
+        }
+
+        // 展开一条合成路线：累计原料、机器工时、批次数
+        function factoryExplode(itemId, qty, acc) {
+            const rec = factoryRecipeOf(itemId);
+            if (!rec) { acc.raw[itemId] = (acc.raw[itemId] || 0) + qty; return; }
+            const batches = qty / (rec.output.count || 1);
+            acc.machineSec[rec.machine] = (acc.machineSec[rec.machine] || 0) + batches * rec.duration;
+            acc.batches[rec.machine] = (acc.batches[rec.machine] || 0) + batches;
+            (rec.inputs || []).forEach((inp) => factoryExplode(inp.item, batches * inp.count, acc));
+        }
+
+        function factoryRouteTreeHtml(itemId, qty, depth) {
+            const m = factoryMat(itemId);
+            const rec = factoryRecipeOf(itemId);
+            const mac = rec ? factoryMachine(rec.machine) : null;
+            let html = `<div class="route-node" style="padding-left:${Math.min(depth, 8) * 16}px">
+                <span>${vEsc((m && m.emoji) || '')}</span><span>${vEsc(factoryName(itemId))}</span>
+                <span class="qty">×${fmtNum(qty, qty < 100 ? 2 : 0)}</span>
+                ${rec
+                    ? `<span class="rl">${vEsc(mac ? mac.name : rec.machine)} · ${rec.duration}s/次 · 每批出 ${rec.output.count}</span>`
+                    : '<span class="rl">原料</span>'}
+            </div>`;
+            if (rec) {
+                const batches = qty / (rec.output.count || 1);
+                (rec.inputs || []).forEach((inp) => {
+                    html += factoryRouteTreeHtml(inp.item, batches * inp.count, depth + 1);
+                });
+            }
+            return html;
+        }
+
+        function factoryMaterialCardHtml(id) {
+            const m = factoryMat(id);
+            if (!m) return '';
+            const tier = factoryTierOf(id);
+            const rec = factoryRecipeOf(id);
+            const head = `<div class="mat-head">
+                <span class="mat-emoji">${vEsc(m.emoji || '')}</span>
+                <span class="mat-name">${vEsc(m.name)}</span>
+                <span class="mat-tier-tag">${vEsc(factoryTierLabel(tier))}</span>
+            </div>`;
+
+            if (!rec) {
+                const producedBy = Object.values(VD.buildings || {})
+                    .filter((b) => b.main === id || b.by === id)
+                    .map((b) => b.name);
+                const p = factorySellPrice(id);
+                return `<div class="mat-card raw">${head}
+                    <div class="raw-note">
+                        ${producedBy.length ? `农村产出：${vEsc(producedBy.join('、'))}` : '游戏内产出/掉落获得'}
+                        ${m.fuelValue > 0 ? `<br>燃料值 ${m.fuelValue} 秒/个（${fmtNum(3600 / m.fuelValue, 1)} 个/时满载）` : ''}
+                        ${p != null ? `<br>商店出售价 ${fmtInt(p)} 金币` : ''}
+                    </div>
+                </div>`;
+            }
+
+            const mac = factoryMachine(rec.machine);
+            const inTxt = (rec.inputs || []).map((x) => `${factoryEmoji(x.item)}${factoryName(x.item)}×${x.count}`).join(' + ');
+            const perHour = rec.duration > 0 ? (rec.output.count / rec.duration) * 3600 : 0;
+            // 热力机器满载运行时，燃料按「可支撑秒数」消耗：个/时 = 3600 ÷ 燃料值
+            const fuelPerHour = (mac && mac.needsFuel)
+                ? 3600 / ((factoryMat(factoryOptions.fuel) || { fuelValue: 1 }).fuelValue || 1)
+                : 0;
+            const fuelTxt = (mac && mac.needsFuel)
+                ? `<br>燃料：<b>${fmtNum(fuelPerHour, 2)}</b> 个/时·台（${vEsc(factoryName(factoryOptions.fuel))}，满载运行）`
+                : '';
+
+            const rawAcc = { raw: {}, machineSec: {}, batches: {} };
+            factoryExplode(id, 1, rawAcc);
+            const rawTxt = Object.entries(rawAcc.raw)
+                .sort((a, b) => b[1] - a[1])
+                .map(([rid, q]) => `${factoryEmoji(rid)}${factoryName(rid)}×${fmtNum(q, 2)}`)
+                .join(' + ');
+
+            return `<div class="mat-card">${head}
+                <div class="recipe-line">${inTxt}<span class="arrow">→</span>${factoryEmoji(rec.output.item)}${factoryName(rec.output.item)}×${rec.output.count}</div>
+                <div class="mat-meta">
+                    ${vEsc(mac ? mac.name : rec.machine)} · 单次 ${rec.duration}s · <b>${fmtNum(perHour, 1)}</b> /时·台${fuelTxt}
+                    <br>折算原料：${rawTxt}
+                </div>
+            </div>`;
+        }
+
+        function renderFactory() {
+            const root = document.getElementById('factoryRoutes');
+            if (!root) return;
+            if (!factoryOptions) factoryLoad();
+            const target = factoryOptions.target;
+            if (!factoryMat(target)) { root.innerHTML = '<div class="empty-state"><div>工厂数据不可用</div></div>'; return; }
+
+            const count = Math.max(1, factoryOptions.count || 1);
+            const machines = Math.max(1, factoryOptions.machines || 1);
+            const acc = { raw: {}, machineSec: {}, batches: {} };
+            factoryExplode(target, count, acc);
+
+            // 原料汇总
+            const rawRows = Object.entries(acc.raw).sort((a, b) => b[1] - a[1]).map(([id, q]) => {
+                const p = factorySellPrice(id);
+                return `<tr>
+                    <td><span class="mat-cell">${vEsc(factoryEmoji(id))} ${vEsc(factoryName(id))}</span></td>
+                    <td class="num">${fmtNum(q, q < 100 ? 2 : 0)}</td>
+                    <td class="num">${p != null ? fmtInt(q * p) : '—'}</td>
+                </tr>`;
+            }).join('');
+            const rawCost = Object.entries(acc.raw).reduce((sum, [id, q]) => {
+                const p = factorySellPrice(id);
+                return sum + (p != null ? q * p : 0);
+            }, 0);
+
+            // 机器工时
+            let bottleneck = null;
+            const machineRows = Object.entries(acc.machineSec).sort((a, b) => b[1] - a[1]).map(([mid, sec]) => {
+                const mac = factoryMachine(mid);
+                const hours = sec / machines / 3600;
+                if (!bottleneck || hours > bottleneck.hours) bottleneck = { id: mid, hours, mac };
+                return `<tr>
+                    <td>${vEsc(mac ? mac.name : mid)}${mac && mac.needsFuel ? ' <span class="land-sub">需燃料</span>' : ''}</td>
+                    <td class="num">${fmtNum(acc.batches[mid], 1)}</td>
+                    <td class="num">${fmtNum(sec, 0)}</td>
+                    <td class="num"><b>${fmtNum(hours, 2)}</b></td>
+                </tr>`;
+            }).join('');
+
+            // 燃料
+            let fuelSec = 0;
+            Object.entries(acc.machineSec).forEach(([mid, sec]) => {
+                const mac = factoryMachine(mid);
+                if (mac && mac.needsFuel) fuelSec += sec;
+            });
+            const fuelMat = factoryMat(factoryOptions.fuel) || { fuelValue: 1, name: factoryOptions.fuel };
+            const fuelUnits = fuelMat.fuelValue ? fuelSec / fuelMat.fuelValue : 0;
+            const fuelPrice = factorySellPrice(factoryOptions.fuel);
+            const fuelCost = fuelPrice != null ? fuelUnits * fuelPrice : null;
+
+            const summaryHtml = `
+                <div class="route-summary">
+                    <div class="route-block">
+                        <div class="block-title">🧱 需要原料（合计 ${Object.keys(acc.raw).length} 种）</div>
+                        ${rawRows ? `<table class="village-table">
+                            <thead><tr><th>原料</th><th style="text-align:right">数量</th><th style="text-align:right">折价</th></tr></thead>
+                            <tbody>${rawRows}</tbody></table>
+                            ${rawCost > 0 ? `<div class="est-line net"><span>原料折价合计</span><b>${fmtInt(rawCost)} 金币</b></div>` : ''}
+                            ${Object.entries(acc.raw).some(([id]) => factorySellPrice(id) == null) ? '<div class="raw-note">无商店价的原料已按「—」列出，不计入折价</div>' : ''}`
+                            : '<div class="raw-note">该产物本身就是原料</div>'}
+                    </div>
+                    <div class="route-block">
+                        <div class="block-title">⚙️ 机器工时（每种 ${machines} 台并行）</div>
+                        ${machineRows ? `<table class="village-table">
+                            <thead><tr><th>机器</th><th style="text-align:right">批次</th><th style="text-align:right">秒</th><th style="text-align:right">小时</th></tr></thead>
+                            <tbody>${machineRows}</tbody></table>
+                            ${bottleneck ? `<div class="est-line net"><span>瓶颈机器</span><b>${vEsc(bottleneck.mac ? bottleneck.mac.name : bottleneck.id)} · ${fmtNum(bottleneck.hours, 2)} 小时</b></div>` : ''}`
+                            : '<div class="raw-note">无需机器（原料）</div>'}
+                    </div>
+                    <div class="route-block">
+                        <div class="block-title">🔥 燃料（${vEsc(fuelMat.name)}：${fuelMat.fuelValue}s/个）</div>
+                        <div class="est-line"><span>热力机器工时</span><b>${fmtNum(fuelSec, 0)} 秒</b></div>
+                        <div class="est-line"><span>需要燃料</span><b>${fmtNum(fuelUnits, 2)} 个</b></div>
+                        <div class="est-line net"><span>燃料折价</span><b>${fuelCost != null ? fmtInt(fuelCost) + ' 金币' : '无商店价'}</b></div>
+                        <div class="raw-note">木炭可由农村「烧炭厂」以原料 1:1 产出；焚晶 / 炽热核心无商店售价时按「无商店价」显示。</div>
+                    </div>
+                </div>`;
+
+            // 合成路线树
+            const treeHtml = `<div class="route-tree">${factoryRouteTreeHtml(target, count, 0)}</div>`;
+
+            // 各级材料总览
+            const byTier = {};
+            Object.values(FD.materials).forEach((m) => {
+                const t = factoryTierOf(m.id);
+                (byTier[t] = byTier[t] || []).push(m.id);
+            });
+            const tierHtml = Object.keys(byTier).map(Number).sort((a, b) => a - b).map((t) => {
+                const ids = byTier[t].sort((a, b) => factoryName(a).localeCompare(factoryName(b), 'zh-CN'));
+                return `<div class="tier-block">
+                    <div class="tier-head">${vEsc(factoryTierLabel(t))}<span class="count">${ids.length} 种${t === 0 ? ' · 由农村产出或直接获得' : ''}</span></div>
+                    <div class="mat-grid">${ids.map(factoryMaterialCardHtml).join('')}</div>
+                </div>`;
+            }).join('');
+
+            root.innerHTML = `
+                <div class="village-panel">
+                    <div class="panel-title">🔧 合成路线：${vEsc(factoryEmoji(target))} ${vEsc(factoryName(target))} × ${fmtInt(count)}
+                        <span class="hint">按配方递归展开到原料；机器工时为单次耗时 × 批次数（已按每种 ${machines} 台并行折算小时）</span>
+                    </div>
+                    ${summaryHtml}
+                    <div style="margin-top:20px">
+                        <div class="block-title" style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:8px">🌳 逐层展开</div>
+                        ${treeHtml}
+                    </div>
+                </div>
+                <div class="village-panel">
+                    <div class="panel-title">🏭 各级材料合成路线
+                        <span class="hint">阶级由配方递归推导（原料 = 0，产物 = 1 + 输入最高阶级）；产率为单台机器连续运行；热力机器额外标出燃料消耗</span>
+                    </div>
+                    ${tierHtml}
+                </div>`;
+        }
+
         // 初始化
         async function init() {
             document.getElementById('refreshBtn').onclick = () => loadDefs(true);
@@ -5986,7 +7534,17 @@
             syncModeRadios('profit', profitOptions.mode);
             renderProfitRanking();
 
+            // 页签六 / 七：开拓农村与开拓工厂
+            // 数据来自内嵌的「游戏客户端 bundle 提取结果」（FARM_FACTORY_DEFS），不依赖 /api/data/defs；
+            // 工厂页的商店折价依赖 defs，故在 loadDefs 之后再渲染一次。
+            villageLoad();
+            syncVillageControls();
+            renderVillage();
+            factoryLoad();
+            fillFactoryControls();
+
             await loadDefs();
+            renderFactory();
 
             // 页面驻留时定期自动刷新（仅前台标签页）
             setInterval(() => {
