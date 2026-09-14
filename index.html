@@ -2250,22 +2250,21 @@
         <!-- ==================== 页签七：开拓工厂（各级材料合成路线） ==================== -->
         <div class="tab-page" id="tab-factory">
             <div class="controls">
+                <div id="factoryTargetRows"></div>
+                <div class="control-row actions">
+                    <button class="btn ghost" type="button" onclick="factoryAddTarget()">＋ 添加目标产物</button>
+                    <button class="btn" type="button" onclick="renderFactory()">计算合成路线</button>
+                    <span class="hint-inline">可同时规划多个目标：所需原料、机器工时与燃料按全部目标合计</span>
+                </div>
                 <div class="control-row">
                     <div class="control-group">
-                        <label>目标产物</label>
-                        <select id="factoryTarget" onchange="renderFactory()"></select>
-                    </div>
-                    <div class="control-group">
-                        <label>目标数量</label>
-                        <input type="number" id="factoryCount" value="1" min="1" max="1000000" step="1" onchange="renderFactory()">
-                    </div>
-                    <div class="control-group">
                         <label>燃料</label>
-                        <select id="factoryFuel" onchange="renderFactory()"></select>
+                        <select id="factoryFuel" onchange="onFactoryOptionChange()"></select>
                     </div>
                     <div class="control-group">
                         <label>机器数量</label>
-                        <input type="number" id="factoryMachineCount" value="1" min="1" max="999" step="1" onchange="renderFactory()" title="每种机器按此数量计算产能">
+                        <input type="number" id="factoryMachineCount" value="1" min="1" max="999" step="1" onchange="onFactoryOptionChange()" title="每种机器按此数量计算产能">
+                        <span class="hint-inline">每种机器的并行台数，用于把「机器工时」折算成小时</span>
                     </div>
                 </div>
                 <div class="control-row">
@@ -6326,6 +6325,7 @@
         let villageSelectedUid = null;
         let villageUidSeed = 1;
         let factoryOptions = null;
+        let factoryUidSeed = 1;
 
         function vEsc(s) {
             return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
@@ -7215,15 +7215,33 @@
             return (p && p.sell >= 0) ? p.sell : null;
         }
 
-        function factoryDefaultOptions() {
-            const products = Object.values(FD.materials || {}).filter((m) => !m.raw);
-            let target = '';
-            let best = -1;
-            products.forEach((m) => {
+        // 目标产物行（支持多个目标，合计原料 / 机器工时 / 燃料）
+        function factoryNewTarget(itemId, count) {
+            if (!itemId || !factoryMat(itemId)) {
+                let best = -1;
+                Object.values(FD.materials || {}).filter((m) => !m.raw).forEach((m) => {
+                    const t = factoryTierOf(m.id);
+                    if (t > best) { best = t; itemId = m.id; }
+                });
+            }
+            return { uid: factoryUidSeed++, itemId: itemId, count: Math.max(1, Number(count) || 1) };
+        }
+
+        function factoryTargetOptionsHtml(selectedId) {
+            const byTier = {};
+            Object.values(FD.materials || {}).forEach((m) => {
                 const t = factoryTierOf(m.id);
-                if (t > best) { best = t; target = m.id; }
+                (byTier[t] = byTier[t] || []).push(m);
             });
-            return { target: target, count: 1, fuel: 'charcoal', machines: 1 };
+            let html = '';
+            Object.keys(byTier).map(Number).sort((a, b) => b - a).forEach((t) => {
+                html += `<optgroup label="${vEsc(factoryTierLabel(t))}">`;
+                byTier[t].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN')).forEach((m) => {
+                    html += `<option value="${m.id}"${selectedId === m.id ? ' selected' : ''}>${vEsc(m.emoji + ' ' + m.name)}</option>`;
+                });
+                html += '</optgroup>';
+            });
+            return html;
         }
 
         function factorySave() {
@@ -7236,54 +7254,125 @@
                 const raw = localStorage.getItem(FACTORY_KEY);
                 if (raw) loaded = JSON.parse(raw);
             } catch (e) { loaded = null; }
-            const def = factoryDefaultOptions();
+
+            const targets = [];
+            if (loaded && Array.isArray(loaded.targets)) {
+                loaded.targets.forEach((t) => {
+                    if (t && factoryMat(t.itemId)) targets.push(factoryNewTarget(t.itemId, t.count));
+                });
+            } else if (loaded && factoryMat(loaded.target)) {
+                // 兼容旧的单目标存储格式
+                targets.push(factoryNewTarget(loaded.target, loaded.count));
+            }
+            if (!targets.length) targets.push(factoryNewTarget());
+
             factoryOptions = {
-                target: (loaded && factoryMat(loaded.target)) ? loaded.target : def.target,
-                count: loaded && loaded.count > 0 ? Number(loaded.count) : 1,
-                fuel: (loaded && factoryMat(loaded.fuel) && factoryMat(loaded.fuel).fuelValue > 0) ? loaded.fuel : def.fuel,
+                targets: targets,
+                fuel: (loaded && factoryMat(loaded.fuel) && factoryMat(loaded.fuel).fuelValue > 0) ? loaded.fuel : 'charcoal',
                 machines: loaded && loaded.machines > 0 ? Number(loaded.machines) : 1,
             };
         }
 
+        // 填充「燃料」下拉与机器数量（目标行由 renderFactoryTargetRows 单独渲染）
         function fillFactoryControls() {
-            const targetEl = document.getElementById('factoryTarget');
             const fuelEl = document.getElementById('factoryFuel');
-            if (!targetEl || !fuelEl) return;
+            if (!fuelEl) return;
             const mats = Object.values(FD.materials || {});
-            const byTier = {};
-            mats.forEach((m) => { const t = factoryTierOf(m.id); (byTier[t] = byTier[t] || []).push(m); });
-            let html = '';
-            Object.keys(byTier).map(Number).sort((a, b) => b - a).forEach((t) => {
-                html += `<optgroup label="${vEsc(factoryTierLabel(t))}">`;
-                byTier[t].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN')).forEach((m) => {
-                    html += `<option value="${m.id}"${factoryOptions.target === m.id ? ' selected' : ''}>${vEsc(m.emoji + ' ' + m.name)}</option>`;
-                });
-                html += '</optgroup>';
-            });
-            targetEl.innerHTML = html;
-
             fuelEl.innerHTML = mats.filter((m) => m.fuelValue > 0)
                 .sort((a, b) => b.fuelValue - a.fuelValue)
                 .map((m) => {
                     const p = factorySellPrice(m.id);
                     return `<option value="${m.id}"${factoryOptions.fuel === m.id ? ' selected' : ''}>${vEsc(m.emoji + ' ' + m.name)}（${m.fuelValue}s/个${p != null ? ' · 出售 ' + fmtInt(p) : ''}）</option>`;
                 }).join('');
-
-            const countEl = document.getElementById('factoryCount');
             const macEl = document.getElementById('factoryMachineCount');
-            if (countEl) countEl.value = factoryOptions.count;
             if (macEl) macEl.value = factoryOptions.machines;
+            renderFactoryTargetRows();
+        }
+
+        function renderFactoryTargetRows() {
+            const wrap = document.getElementById('factoryTargetRows');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+            const rows = factoryOptions.targets || [];
+            rows.forEach((row) => {
+                const div = document.createElement('div');
+                div.className = 'control-row';
+
+                const selLabel = document.createElement('label');
+                selLabel.textContent = '目标产物';
+                div.appendChild(selLabel);
+
+                const sel = document.createElement('select');
+                sel.className = 'target-select';
+                sel.innerHTML = factoryTargetOptionsHtml(row.itemId);
+                sel.value = row.itemId;
+                sel.onchange = () => factorySetTarget(row.uid, sel.value);
+                div.appendChild(sel);
+
+                const grp = document.createElement('div');
+                grp.className = 'control-group';
+                const cntLabel = document.createElement('label');
+                cntLabel.textContent = '数量';
+                grp.appendChild(cntLabel);
+                const cnt = document.createElement('input');
+                cnt.type = 'number';
+                cnt.min = 1;
+                cnt.max = 1000000;
+                cnt.step = 1;
+                cnt.value = row.count;
+                cnt.onchange = () => factorySetCount(row.uid, cnt.value);
+                grp.appendChild(cnt);
+                div.appendChild(grp);
+
+                if (rows.length > 1) {
+                    const rm = document.createElement('button');
+                    rm.className = 'row-remove';
+                    rm.type = 'button';
+                    rm.textContent = '×';
+                    rm.title = '移除该目标';
+                    rm.onclick = () => factoryRemoveTarget(row.uid);
+                    div.appendChild(rm);
+                }
+                wrap.appendChild(div);
+            });
+        }
+
+        function factoryAddTarget() {
+            factoryOptions.targets.push(factoryNewTarget());
+            factorySave();
+            renderFactoryTargetRows();
+            renderFactory();
+        }
+
+        function factoryRemoveTarget(uid) {
+            factoryOptions.targets = (factoryOptions.targets || []).filter((t) => t.uid !== uid);
+            if (!factoryOptions.targets.length) factoryOptions.targets.push(factoryNewTarget());
+            factorySave();
+            renderFactoryTargetRows();
+            renderFactory();
+        }
+
+        function factorySetTarget(uid, itemId) {
+            const row = (factoryOptions.targets || []).find((t) => t.uid === uid);
+            if (!row || !factoryMat(itemId)) return;
+            row.itemId = itemId;
+            factorySave();
+            renderFactory();
+        }
+
+        function factorySetCount(uid, value) {
+            const row = (factoryOptions.targets || []).find((t) => t.uid === uid);
+            if (!row) return;
+            row.count = Math.max(1, Math.min(1000000, Number(value) || 1));
+            factorySave();
+            renderFactory();
         }
 
         function onFactoryOptionChange() {
-            const targetEl = document.getElementById('factoryTarget');
             const fuelEl = document.getElementById('factoryFuel');
-            const countEl = document.getElementById('factoryCount');
             const macEl = document.getElementById('factoryMachineCount');
-            if (targetEl && targetEl.value) factoryOptions.target = targetEl.value;
             if (fuelEl && fuelEl.value) factoryOptions.fuel = fuelEl.value;
-            if (countEl) factoryOptions.count = Math.max(1, Number(countEl.value) || 1);
-            if (macEl) factoryOptions.machines = Math.max(1, Number(macEl.value) || 1);
+            if (macEl) factoryOptions.machines = Math.max(1, Math.min(999, Number(macEl.value) || 1));
             factorySave();
             renderFactory();
         }
@@ -7374,16 +7463,31 @@
             const root = document.getElementById('factoryRoutes');
             if (!root) return;
             if (!factoryOptions) factoryLoad();
-            const target = factoryOptions.target;
-            if (!factoryMat(target)) { root.innerHTML = '<div class="empty-state"><div>工厂数据不可用</div></div>'; return; }
+            if (!FD.materials) { root.innerHTML = '<div class="empty-state"><div>工厂数据不可用</div></div>'; return; }
 
-            const count = Math.max(1, factoryOptions.count || 1);
             const machines = Math.max(1, factoryOptions.machines || 1);
-            const acc = { raw: {}, machineSec: {}, batches: {} };
-            factoryExplode(target, count, acc);
+            const rows = (factoryOptions.targets || []).filter((t) => factoryMat(t.itemId));
+            if (!rows.length) {
+                root.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏭</div><div>请添加至少一个目标产物</div></div>';
+                return;
+            }
+
+            // 每个目标单独展开，同时合并成总计（原料 / 机器工时 / 燃料）
+            const mergeInto = (dst, src) => {
+                Object.entries(src.raw).forEach(([id, q]) => { dst.raw[id] = (dst.raw[id] || 0) + q; });
+                Object.entries(src.machineSec).forEach(([mid, sec]) => { dst.machineSec[mid] = (dst.machineSec[mid] || 0) + sec; });
+                Object.entries(src.batches).forEach(([mid, n]) => { dst.batches[mid] = (dst.batches[mid] || 0) + n; });
+            };
+            const total = { raw: {}, machineSec: {}, batches: {} };
+            const perTarget = rows.map((t) => {
+                const acc = { raw: {}, machineSec: {}, batches: {} };
+                factoryExplode(t.itemId, t.count, acc);
+                mergeInto(total, acc);
+                return { itemId: t.itemId, count: t.count, acc: acc };
+            });
 
             // 原料汇总
-            const rawRows = Object.entries(acc.raw).sort((a, b) => b[1] - a[1]).map(([id, q]) => {
+            const rawRows = Object.entries(total.raw).sort((a, b) => b[1] - a[1]).map(([id, q]) => {
                 const p = factorySellPrice(id);
                 return `<tr>
                     <td><span class="mat-cell">${vEsc(factoryEmoji(id))} ${vEsc(factoryName(id))}</span></td>
@@ -7391,20 +7495,20 @@
                     <td class="num">${p != null ? fmtInt(q * p) : '—'}</td>
                 </tr>`;
             }).join('');
-            const rawCost = Object.entries(acc.raw).reduce((sum, [id, q]) => {
+            const rawCost = Object.entries(total.raw).reduce((sum, [id, q]) => {
                 const p = factorySellPrice(id);
                 return sum + (p != null ? q * p : 0);
             }, 0);
 
             // 机器工时
             let bottleneck = null;
-            const machineRows = Object.entries(acc.machineSec).sort((a, b) => b[1] - a[1]).map(([mid, sec]) => {
+            const machineRows = Object.entries(total.machineSec).sort((a, b) => b[1] - a[1]).map(([mid, sec]) => {
                 const mac = factoryMachine(mid);
                 const hours = sec / machines / 3600;
                 if (!bottleneck || hours > bottleneck.hours) bottleneck = { id: mid, hours, mac };
                 return `<tr>
                     <td>${vEsc(mac ? mac.name : mid)}${mac && mac.needsFuel ? ' <span class="land-sub">需燃料</span>' : ''}</td>
-                    <td class="num">${fmtNum(acc.batches[mid], 1)}</td>
+                    <td class="num">${fmtNum(total.batches[mid], 1)}</td>
                     <td class="num">${fmtNum(sec, 0)}</td>
                     <td class="num"><b>${fmtNum(hours, 2)}</b></td>
                 </tr>`;
@@ -7412,7 +7516,7 @@
 
             // 燃料
             let fuelSec = 0;
-            Object.entries(acc.machineSec).forEach(([mid, sec]) => {
+            Object.entries(total.machineSec).forEach(([mid, sec]) => {
                 const mac = factoryMachine(mid);
                 if (mac && mac.needsFuel) fuelSec += sec;
             });
@@ -7421,16 +7525,17 @@
             const fuelPrice = factorySellPrice(factoryOptions.fuel);
             const fuelCost = fuelPrice != null ? fuelUnits * fuelPrice : null;
 
+            const rawKinds = Object.keys(total.raw).length;
             const summaryHtml = `
                 <div class="route-summary">
                     <div class="route-block">
-                        <div class="block-title">🧱 需要原料（合计 ${Object.keys(acc.raw).length} 种）</div>
+                        <div class="block-title">🧱 需要原料（合计 ${rawKinds} 种）</div>
                         ${rawRows ? `<table class="village-table">
                             <thead><tr><th>原料</th><th style="text-align:right">数量</th><th style="text-align:right">折价</th></tr></thead>
                             <tbody>${rawRows}</tbody></table>
                             ${rawCost > 0 ? `<div class="est-line net"><span>原料折价合计</span><b>${fmtInt(rawCost)} 金币</b></div>` : ''}
-                            ${Object.entries(acc.raw).some(([id]) => factorySellPrice(id) == null) ? '<div class="raw-note">无商店价的原料已按「—」列出，不计入折价</div>' : ''}`
-                            : '<div class="raw-note">该产物本身就是原料</div>'}
+                            ${Object.entries(total.raw).some(([id]) => factorySellPrice(id) == null) ? '<div class="raw-note">无商店价的原料已按「—」列出，不计入折价</div>' : ''}`
+                            : '<div class="raw-note">目标产物本身就是原料</div>'}
                     </div>
                     <div class="route-block">
                         <div class="block-title">⚙️ 机器工时（每种 ${machines} 台并行）</div>
@@ -7449,8 +7554,14 @@
                     </div>
                 </div>`;
 
-            // 合成路线树
-            const treeHtml = `<div class="route-tree">${factoryRouteTreeHtml(target, count, 0)}</div>`;
+            // 合成路线树（每个目标一段）
+            const treeHtml = perTarget.map((t) => `
+                <div style="margin-bottom:14px">
+                    <div class="block-title" style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:6px">
+                        ${vEsc(factoryEmoji(t.itemId))} ${vEsc(factoryName(t.itemId))} × ${fmtInt(t.count)}
+                    </div>
+                    <div class="route-tree">${factoryRouteTreeHtml(t.itemId, t.count, 0)}</div>
+                </div>`).join('');
 
             // 各级材料总览
             const byTier = {};
@@ -7466,10 +7577,12 @@
                 </div>`;
             }).join('');
 
+            const headTxt = perTarget.map((t) => `${factoryEmoji(t.itemId)} ${factoryName(t.itemId)} ×${fmtInt(t.count)}`).join(' ＋ ');
+
             root.innerHTML = `
                 <div class="village-panel">
-                    <div class="panel-title">🔧 合成路线：${vEsc(factoryEmoji(target))} ${vEsc(factoryName(target))} × ${fmtInt(count)}
-                        <span class="hint">按配方递归展开到原料；机器工时为单次耗时 × 批次数（已按每种 ${machines} 台并行折算小时）</span>
+                    <div class="panel-title">🔧 合成路线：${headTxt}
+                        <span class="hint">${perTarget.length} 个目标按配方递归展开到原料，原料 / 机器工时 / 燃料为合计值；机器工时已按每种 ${machines} 台并行折算小时</span>
                     </div>
                     ${summaryHtml}
                     <div style="margin-top:20px">
