@@ -196,6 +196,23 @@ owEl.onchange();
 ok('overwork onchange applies', run('villagePlan.overwork') === 10);
 scan('overwork render', 'null');
 
+// 加班猪 / 猪特勤处不参与加班加速那一小时：/日 必须低于 /时 × 小时数，且薪资同口径
+run(`
+  villagePlan = { name: 'accel-ui', overwork: 6, buildings: [
+    { uid: 901, defId: 'oak', level: 2, landType: 'normal', inputStock: '', charcoalInput: 'oakWood', employees: [
+      { uid: 902, typeId: 'normal', payMult: 1, onLeave: false, broken: false },
+      { uid: 903, typeId: 'king', payMult: 1, onLeave: false, broken: false },
+    ] },
+  ], idlePool: [] };
+  globalThis.dailyUi = villageDailyTotals();
+  renderVillage();
+`);
+ok('加班猪不计入加速产出（仅护士 9.6/时）', run('dailyUi.materials.find(m=>m.id==="oakWood").accelPerHour') === 9.6);
+ok('oak /日 低于 /时 × 小时数', run('dailyUi.materials.find(m=>m.id==="oakWood").perDay') < run('dailyUi.materials.find(m=>m.id==="oakWood").amount') * run('dailyUi.hours'));
+ok('每日净支出低于 净时薪 × 小时数', run('dailyUi.salary.perDay') < run('villageAggregate().salary.net') * run('dailyUi.hours'));
+ok('渲染出「加班加速 N 小时」明细行', htmlOf('renderVillage()').includes('其中加班加速 6 小时'));
+scan('accel render', 'null');
+
 console.log('\n== 工厂：全部目标逐个渲染 ==');
 const targets = run('Object.keys(FD.materials)');
 let factoryThrew = 0;

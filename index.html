@@ -2143,7 +2143,7 @@
                         <div id="vaultTabs"></div>
                         <div id="vaultBody"></div>
                         <div class="hint-inline slot-note">
-                            内置数值提取自游戏真实数据（武器/盔甲/副手 2026-09-07，指环库 2026-09-12）。游戏更新收藏室后，点击「⬇ 从游戏导入」粘贴最新的游戏 state JSON 即可刷新。
+                            收藏室数值跟随游戏数据接口自动更新（内置值 2026-09-20 对齐官方数据，仅作接口不可用时的离线兜底）；接口数据异常时，可点「⬇ 从游戏导入」粘贴游戏 state JSON 手动覆盖。
                         </div>
                     </div>
 
@@ -2227,7 +2227,7 @@
                     <div class="control-group">
                         <label>每日加班加速</label>
                         <input type="number" id="villageOverwork" value="0" min="0" max="10" step="1" onchange="onVillageOptionChange()">
-                        <span class="hint-inline">次（灰烬×100/次，立即结算 1 小时；本页据此把「每小时产出」换算成「每日产出」）</span>
+                        <span class="hint-inline">次（灰烬×100/次，立即结算 1 小时；游戏内提示「加班猪与猪特勤处不参与」，本页按同口径折算每日产出与薪资）</span>
                     </div>
                     <div class="control-group">
                         <span class="hint-inline" id="villageOverworkHint"></span>
@@ -2309,6 +2309,7 @@
         let DROPPABLE = {};   // itemId -> [monsterId...]（按期望掉落降序）
         let dataReady = false;
         let lastFetchAt = null;
+        let latestDefs = null; // 最近一次拉到的游戏数据（「恢复默认收藏室数值」时复用，避免重新联网）
         let currentTrees = []; // 页签一的当前计算结果
         let HORADRIC_RECIPES = []; // 赫拉迪姆魔盒配方（规范化：{result, resultCount, cost, rate, source}）
         let ringActiveQuality = 'epic'; // 页签二：当前品质分区
@@ -3000,6 +3001,10 @@
             blockChance:      { name: '格挡几率', pct: true },
             dodge:            { name: '闪避' },   // 值为 {pct} 形态，展示时自带 %
             satRegen:         { name: '饱食回复' },
+            // 收藏室武器库（庇护剑）带来的不是面板词条，而是游戏 Buff「抗性提升」的等级
+            // （每级 −20% 最终物理伤害）。这里仅用于收藏卡片文案，实际效果由 computePanel
+            // 合并进装备 Buff 展示，不参与面板数值（本页没有受伤模型）。
+            resistance:       { name: '抗性提升' },
         };
 
         const SPECIAL_NAMES = {
@@ -4354,23 +4359,31 @@
         // 收藏室（装备库）定义：数据结构与游戏 /api/game/state 下发的
         // weaponVaultDefs / armorVaultDefs / offhandVaultDefs /
         // ringVaultDefs / ringVaultSetBonuses 完全一致。
-        // 默认值为游戏真实数值：武器/盔甲/副手为 2026-09-07 提取自游戏服务器；
-        // 指环库（V2.12 新增）为 2026-09-12 提取自游戏客户端内置定义，
-        // 与 V2.12 更新日志的公告数值一致。
-        // 游戏更新后可通过「从游戏导入」按钮粘贴最新 state 一键刷新。
+        // 默认值为游戏真实数值：2026-09-20 用与「从游戏导入」完全一致的口径
+        // （scripts/check-vault-defs.mjs）对齐游戏 /api/game/state 下发的最新数据，
+        // 本次相对 2026-09-07 版新增武器「菱念-皇切」「庇护剑」与副手「冥河」。
+        // 游戏更新后可通过「从游戏导入」按钮粘贴最新 state 一键刷新，
+        // 或跑 scripts/check-vault-defs.mjs 比对内置值与线上差异。
         const VAULT_IMPORT_KEY = 'mc_vault_defs_v1';
         const VAULT_DEFAULTS = {
+            // 顺序对齐游戏 weaponVaultDefs；其中 fateSaintUnknownA/B 是游戏尚未公布的
+            // 「？？？」占位项（bonuses 为空、不产生加成），与「从游戏导入」的过滤规则一致，
+            // 内置值同样不收录。
             weapon: [
                 { id: 'blackIronSword',          bonuses: [{ attr: 'physDmg', flat: 3 }] },
                 { id: 'moonSlash',               bonuses: [{ attr: 'physDmg', flat: 5 }] },
-                { id: 'nightDemonSword',         bonuses: [{ attr: 'magicDmg', flat: 2 }] },
                 { id: 'blackIronSwordVX',        bonuses: [{ attr: 'armorPen', flat: 10 }] },
-                { id: 'voidSword',               bonuses: [{ attr: 'magicDmg', flat: 10 }] },
-                { id: 'sanctionBlade',           bonuses: [{ attr: 'trueDmg', flat: 3 }] },
                 { id: 'bloodDrinkingSword',      bonuses: [{ attr: 'lifestealFlat', flat: 1 }] },
                 { id: 'trueBloodDrinkingSword',  bonuses: [{ attr: 'lifestealFlat', flat: 2 }] },
                 { id: 'weepingBloodBlade',       bonuses: [{ attr: 'lifestealFlat', flat: 4 }] },
+                { id: 'voidSword',               bonuses: [{ attr: 'magicDmg', flat: 10 }] },
+                { id: 'sanctionBlade',           bonuses: [{ attr: 'trueDmg', flat: 3 }] },
                 { id: 'huangqieZhanlingSword',   bonuses: [{ attr: 'critChance', flat: 3 }] },
+                // resistance 在游戏里是「抗性提升」Buff 等级（每级 −20% 最终物理伤害），
+                // 由 computePanel 合并进面板的装备 Buff，而不是当作面板词条。
+                { id: 'lingnianHuangqie',        bonuses: [{ attr: 'blockChance', flat: 5 }, { attr: 'blockDmg', flat: 10 }] },
+                { id: 'shelterSword',            bonuses: [{ attr: 'resistance', flat: 2 }] },
+                { id: 'nightDemonSword',         bonuses: [{ attr: 'magicDmg', flat: 2 }] },
                 { id: 'darkTideFollower',        bonuses: [{ attr: 'physRes', flat: 5 }, { attr: 'magicRes', flat: 5 }] }
             ],
             // 盔甲库：每件 pieceFlat(pieceAttr)，四件放满再 +setFlat
@@ -4396,7 +4409,8 @@
                 { id: 'glazedBow',         bonuses: [{ attr: 'rangedDmg', flat: 6 }] },
                 { id: 'sulfurFireTechBow', bonuses: [{ attr: 'rangedDmg', flat: 5 }] },
                 { id: 'darkChaser',        bonuses: [{ attr: 'rangedDmg', flat: 8 }] },
-                { id: 'voidArrow',         bonuses: [{ attr: 'rangedDmg', flat: 8 }] }
+                { id: 'voidArrow',         bonuses: [{ attr: 'rangedDmg', flat: 8 }] },
+                { id: 'mingheBow',         bonuses: [{ attr: 'multishot', flat: 1 }] }
             ],
             // 指环库（V2.12）：按品质分区，入库即得对应加成，同品质全部入库再得集齐加成
             ring: [
@@ -4489,6 +4503,13 @@
                 return null;
             }
             const root = (obj && obj.state && typeof obj.state === 'object') ? obj.state : obj;
+            return parseVaultDefsFromRoot(root);
+        }
+
+        // 规范化收藏室定义：游戏 state 与 /api/data/defs 里的表结构同源，
+        // 因此「从游戏导入」与「接口自动更新」共用这一份解析口径。
+        function parseVaultDefsFromRoot(root) {
+            if (!root || typeof root !== 'object') return null;
             const w = root.weaponVaultDefs, a = root.armorVaultDefs, o = root.offhandVaultDefs;
             if (!Array.isArray(w) || !Array.isArray(a) || !Array.isArray(o)) return null;
 
@@ -4552,6 +4573,35 @@
             const ringSetsFinal = ringSets.length ? ringSets : JSON.parse(JSON.stringify(VAULT_DEFAULTS.ringSets));
 
             return { weapon, armor, offhand, ring: ringFinal, ringSets: ringSetsFinal };
+        }
+
+        // 游戏主数据接口 /api/data/defs 也下发整套收藏室定义（每次访问都是最新的 5 分钟缓存数据）。
+        // 收藏室数据源优先级：用户「⬇ 从游戏导入」的 localStorage > 接口下发 > 内置 VAULT_DEFAULTS。
+        // 接口里没有这些表（老版本 / 结构异常）时返回 null，调用方保留当前值。
+        function vaultDefsFromGameData(defs) {
+            if (!defs) return null;
+            return parseVaultDefsFromRoot({
+                weaponVaultDefs: defs.WEAPON_VAULT_DEFS,
+                armorVaultDefs: defs.ARMOR_VAULT_DEFS,
+                offhandVaultDefs: defs.OFFHAND_VAULT_DEFS,
+                ringVaultDefs: defs.RING_VAULT_DEFS,
+                ringVaultSetBonuses: defs.RING_VAULT_SET_BONUSES
+            });
+        }
+
+        function hasImportedVaultDefs() {
+            try { return !!localStorage.getItem(VAULT_IMPORT_KEY); } catch (e) { return false; }
+        }
+
+        // 每次拉到游戏数据后调用：用户没手动导入过时，用接口下发的最新收藏室数值
+        // （这样游戏新增武器/副手/指环后，页面无需发版即可跟上；内置值只作离线兜底）
+        function applyVaultDefsFromGameData(defs) {
+            if (hasImportedVaultDefs()) return false;
+            let d = null;
+            try { d = vaultDefsFromGameData(defs); } catch (e) { d = null; }
+            if (!d) return false;
+            vaultDefs = fillVaultSections(d);
+            return true;
         }
 
         const STAT_UNIT_PCT = new Set(['critChance', 'critChanceResist', 'lifestealPct', 'dodge', 'blockChance', 'critDmgPct', 'armorPen', 'finalDmgPct', 'dmgReducePct']);
@@ -5058,9 +5108,10 @@
         }
 
         function resetVaultDefs() {
-            if (!confirm('恢复内置的收藏室数值（武器/盔甲/副手 2026-09-07，指环库 2026-09-12 提取自游戏）？')) return;
+            if (!confirm('清除手动导入的收藏室数值，改用游戏数据接口下发的最新数据（接口不可用时用内置值）？')) return;
             localStorage.removeItem(VAULT_IMPORT_KEY);
-            loadVaultDefs();
+            // 优先回到接口下发的最新定义；没有可用数据时才退回内置值
+            if (!applyVaultDefsFromGameData(latestDefs)) loadVaultDefs();
             validatePanelState();
             renderVaultUI();
             calcPanel();
@@ -5139,7 +5190,7 @@
             importBtn.type = 'button';
             importBtn.className = 'vault-tab';
             importBtn.textContent = '⬇ 从游戏导入';
-            importBtn.title = '粘贴游戏 state JSON，用最新真实数值替换内置收藏室数据';
+            importBtn.title = '粘贴游戏 state JSON，用手动数据覆盖接口/内置的收藏室定义';
             importBtn.onclick = importVaultFromGame;
             tabsWrap.appendChild(importBtn);
             const isImported = !!localStorage.getItem(VAULT_IMPORT_KEY);
@@ -5147,8 +5198,8 @@
                 const resetBtn = document.createElement('button');
                 resetBtn.type = 'button';
                 resetBtn.className = 'vault-tab';
-                resetBtn.textContent = '↺ 恢复内置';
-                resetBtn.title = '清除导入的数据，恢复内置数值';
+                resetBtn.textContent = '↺ 恢复默认';
+                resetBtn.title = '清除导入的数据，改用游戏数据接口下发的最新收藏室数值';
                 resetBtn.onclick = resetVaultDefs;
                 tabsWrap.appendChild(resetBtn);
             }
@@ -5423,6 +5474,10 @@
                     buffs[k] = Math.max(buffs[k] || 0, Number(lv) || 0);
                 }
             }
+            // 收藏室里的「抗性提升」（武器库 庇护剑 = resistance 2）在游戏里同样是 Buff 等级，
+            // 按同一规则合并（同名取最高等级）——否则会作为未映射词条被静默丢弃。
+            const vaultResistLv = (vaultBonus.resistance && vaultBonus.resistance.flat) || 0;
+            if (vaultResistLv) buffs.resistance = Math.max(buffs.resistance || 0, vaultResistLv);
 
             const playerBaseHp = GAME_CONFIG.PLAYER_BASE_HP ?? 20;
             const speedCap = GAME_CONFIG.ATTACK_SPEED_CAP ?? 30;
@@ -6238,6 +6293,9 @@
             BUFF_EFFECT_DATA = defs.BUFF_EFFECT || {};
             EQUIP_SLOTS_RAW = Array.isArray(defs.EQUIP_SLOTS) ? defs.EQUIP_SLOTS : [];
             EQUIP_BY_SLOT = buildEquipSlotIndex();
+            latestDefs = defs;
+            // 收藏室：未手动导入 state 时，跟随接口下发的最新定义（内置值只作离线兜底）
+            applyVaultDefsFromGameData(defs);
 
             dataReady = true;
             if (live) {
@@ -6483,7 +6541,10 @@
         }
 
         // 建筑每小时产出：主产物 + 副产物（客户端 jc / Hc）
-        function villageBuildingOutput(b) {
+        // opts.skipKing = true 只跳过「加班猪」本人的产出，用于「加班加速」那一小时：
+        // 游戏内提示「加班猪与猪特勤处不参与」，但羁绊判定仍按全员在岗（猪还在厂里）。
+        function villageBuildingOutput(b, opts) {
+            const skipKing = !!(opts && opts.skipKing);
             const def = villageBuildingDef(b.defId);
             if (!def || !def.main) return null;
             const slots = villageStaffSlots(b.level);
@@ -6498,6 +6559,7 @@
             let sumEff = 0;
             let capped = false;
             working.forEach((e) => {
+                if (skipKing && e.typeId === 'king') return;
                 const eff = villageEfficiency(e, staffed);
                 sumEff += eff;
                 let s = (VD.baseOutput || 10) * eff * mult;
@@ -6526,11 +6588,31 @@
             };
         }
 
+        // 加班加速那一小时的材料产出（每小时口径）：
+        // 游戏内「⏩ 加班加速」提示「加班猪与猪特勤处不参与」——
+        //   · 加班猪：本人不产出（同建筑其他员工照常，羁绊照常判定）
+        //   · 猪特勤处：整座建筑不参与（它本来也没有产物）
+        function villageAccelMaterials() {
+            const matMap = {};
+            const add = (id, amt) => { matMap[id] = (matMap[id] || 0) + amt; };
+            (villagePlan.buildings || []).forEach((b) => {
+                const def = villageBuildingDef(b.defId);
+                if (!def || def.ops) return; // 猪特勤处不参与加班加速
+                const out = villageBuildingOutput(b, { skipKing: true });
+                if (!out) return;
+                out.rows.forEach((r) => add(r.id, r.amount));
+                if (out.inputItem && out.inputNeed > 0) add(out.inputItem, -out.inputNeed);
+            });
+            return matMap;
+        }
+
         // 全规划汇总：材料产出、每小时薪资、一次性建厂与升级成本
+        // 产出 / 薪资都给两套每小时口径：全员（净时薪、游戏内「每小时产出预览」）
+        // 与「加班加速参与者」（不含加班猪与猪特勤处那一小时）。
         function villageAggregate() {
             const matMap = {};
             const add = (id, amt) => { matMap[id] = (matMap[id] || 0) + amt; };
-            const salary = { positive: 0, negative: 0, idle: 0, net: 0 };
+            const salary = { positive: 0, negative: 0, idle: 0, net: 0, accelPositive: 0, accelNegative: 0, accelNet: 0 };
             const cost = { land: 0, gold: 0, ash: 0, mats: {} };
             const warnings = [];
 
@@ -6547,11 +6629,17 @@
                 }
                 // 薪资按「该等级编制内」的员工统计（与产出口径一致；pigOps 无产物但有编制，也要计入）
                 const staffedAll = (b.employees || []).slice(0, villageStaffSlots(b.level));
+                const joinsAccel = !def.ops; // 猪特勤处不参与加班加速
                 staffedAll.forEach((e) => {
                     if (e.onLeave) return;
                     const s = villageSalaryRate(e, staffedAll);
                     if (s > 0) salary.positive += s;
                     else if (s < 0) salary.negative += -s;
+                    // 加班加速那一小时：加班猪 / 猪特勤处既不出产也不拿薪资（同口径）
+                    if (joinsAccel && e.typeId !== 'king') {
+                        if (s > 0) salary.accelPositive += s;
+                        else if (s < 0) salary.accelNegative += -s;
+                    }
                 });
 
                 const landPrice = (VD.landPrice && VD.landPrice[b.landType || 'normal']) || 0;
@@ -6565,13 +6653,39 @@
 
             (villagePlan.idlePool || []).forEach((e) => { salary.idle += villageIdleSalary(e); });
             salary.net = salary.positive + salary.idle - salary.negative;
+            salary.accelNet = salary.accelPositive - salary.accelNegative;
 
             const materials = Object.entries(matMap)
                 .filter(([, v]) => Math.abs(v) > 1e-9)
                 .map(([id, amount]) => ({ id, amount, name: villageMatName(id), emoji: villageMatEmoji(id) }))
                 .sort((a, b) => b.amount - a.amount);
 
-            return { materials, salary, cost, warnings };
+            return { materials, salary, cost, warnings, accelMaterials: villageAccelMaterials() };
+        }
+
+        // 每日结算 = 24 小时全员 + 加班加速 N 小时（仅参与者；游戏内提示「加班猪与猪特勤处不参与」）
+        // 材料：/日 = /时 × 24 + 参与者/时 × N；薪资：待业薪资（猪才市场）不随时间加速变化，仍按 24+N 小时计。
+        function villageDailyTotals(agg) {
+            const a = agg || villageAggregate();
+            const ow = Math.max(0, Math.min(10, Math.round(Number(villagePlan.overwork) || 0)));
+            const accel = a.accelMaterials || {};
+            const materials = a.materials.map((m) => {
+                const accelPerHour = accel[m.id] || 0;
+                return Object.assign({}, m, {
+                    accelPerHour,
+                    accelAmount: accelPerHour * ow,
+                    perDay: m.amount * 24 + accelPerHour * ow,
+                });
+            });
+            const idlePerHour = a.salary.idle;
+            const salary = {
+                ow,
+                hours: 24 + ow,
+                // 24 小时全员结算 + 加班加速 N 小时（加班猪 / 猪特勤处不参与那一小时）
+                perDay: a.salary.net * 24 + (a.salary.accelNet + idlePerHour) * ow,
+                accelPart: (a.salary.accelNet + idlePerHour) * ow,
+            };
+            return { ow, hours: 24 + ow, materials, salary };
         }
 
         // ---------- 规划状态 ----------
@@ -7028,11 +7142,12 @@
             if (!villagePlan) villageLoad();
 
             const agg = villageAggregate();
-            const ow = Number(villagePlan.overwork) || 0;
-            const dayHours = 24 + ow;
+            const daily = villageDailyTotals(agg);
+            const ow = daily.ow;
+            const dayHours = daily.hours;
             const hint = document.getElementById('villageOverworkHint');
             if (hint) hint.textContent = ow > 0
-                ? `每日按 ${dayHours} 小时产出结算，灰烬消耗 ${fmtInt(ow * 100)}/日`
+                ? `每日按 ${dayHours} 小时结算：24 小时全员 + 加班加速 ${ow} 小时（加班猪 / 猪特勤处不参与），灰烬消耗 ${fmtInt(ow * 100)}/日`
                 : '未使用加班加速';
 
             const tiles = (villagePlan.buildings || []).map(villageLandTileHtml).join('');
@@ -7045,20 +7160,21 @@
                 ${agg.salary.idle > 0 ? `<div class="est-line"><span>待业薪资（猪才市场）</span><b>-${fmtInt(agg.salary.idle)}</b></div>` : ''}
                 <div class="est-line neg"><span>反向创收（黑客猪）</span><b>+${fmtInt(agg.salary.negative)}</b></div>
                 <div class="est-line net"><span>净支出</span><b>${fmtInt(agg.salary.net)} 金币/时</b></div>
-                <div class="est-line"><span>每日净支出（${dayHours} 小时）</span><b>${fmtInt(agg.salary.net * dayHours)} 金币</b></div>
+                <div class="est-line"><span>每日净支出（${dayHours} 小时）</span><b>${fmtInt(daily.salary.perDay)} 金币</b></div>
+                ${ow > 0 ? `<div class="est-line"><span>其中加班加速 ${ow} 小时（加班猪 / 猪特勤处不计）</span><b>${fmtInt(daily.salary.accelPart)} 金币</b></div>` : ''}
                 ${ow > 0 ? `<div class="est-line"><span>加班加速消耗</span><b>🔥 灰烬×${fmtInt(ow * 100)}/日</b></div>` : ''}`;
 
             const outHtml = `
                 <div class="panel-title">📦 材料产出效率
-                    <span class="hint">各材料每小时产出（与游戏内「每小时产出预览」同口径）；烧炭厂消耗的原料以负数计入；「/${dayHours}时」按每日小时数（24 + 加班加速）折算</span>
+                    <span class="hint">各材料每小时产出（与游戏内「每小时产出预览」同口径）；烧炭厂消耗的原料以负数计入；「/${dayHours}时」= 24 小时全员产出 + 加班加速 ${ow} 小时（加班猪 / 猪特勤处不参与，见游戏内「⏩ 加班加速」提示）</span>
                 </div>
-                ${agg.materials.length ? `<div class="village-scroll"><table class="village-table">
+                ${daily.materials.length ? `<div class="village-scroll"><table class="village-table">
                     <thead><tr><th>材料</th><th style="text-align:right">/时</th><th style="text-align:right">/${dayHours}时</th></tr></thead>
-                    <tbody>${agg.materials.map((m) => `
+                    <tbody>${daily.materials.map((m) => `
                         <tr>
                             <td><span class="mat-cell">${vEsc(m.emoji)} ${vEsc(m.name)}</span></td>
                             <td class="num" style="color:${m.amount < 0 ? 'var(--red)' : 'var(--amber)'}">${m.amount > 0 ? '+' : ''}${fmtNum(m.amount, 1)}</td>
-                            <td class="num" style="color:${m.amount < 0 ? 'var(--red)' : 'var(--ink-soft)'}">${m.amount > 0 ? '+' : ''}${fmtNum(m.amount * dayHours, 1)}</td>
+                            <td class="num" style="color:${m.perDay < 0 ? 'var(--red)' : 'var(--ink-soft)'}">${m.perDay > 0 ? '+' : ''}${fmtNum(m.perDay, 1)}</td>
                         </tr>`).join('')}</tbody>
                 </table></div>` : '<div class="raw-note">暂无产出：请先建厂并安排员工。</div>'}`;
 
@@ -7103,7 +7219,7 @@
 
             const detailHtml = `
                 <div class="panel-title">📊 员工效率统计
-                    <span class="hint">最终效率 = 基础效率 × 加薪倍率 × 羁绊加成（机器猪效率随同建筑机器数量另行计算）；产出 = 10 × 最终效率 × 等级倍率</span>
+                    <span class="hint">最终效率 = 基础效率 × 加薪倍率 × 羁绊加成（机器猪效率随同建筑机器数量另行计算）；「产出」= 10 × 最终效率 × 等级倍率，为每小时值；加班猪不参与「加班加速」那一小时，故 /日 列会低于 /时 × 小时数</span>
                 </div>
                 ${detailRows.length ? `<div class="village-scroll"><table class="village-table">
                     <thead><tr><th>建筑</th><th>员工</th><th style="text-align:right">基础</th><th style="text-align:right">加薪</th><th style="text-align:right">羁绊</th><th style="text-align:right">最终效率</th><th style="text-align:right">时薪</th><th style="text-align:right">产出</th></tr></thead>
