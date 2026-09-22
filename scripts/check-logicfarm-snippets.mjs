@@ -107,6 +107,12 @@ if (/nodes\s*:\s*[^,]*\.(map|filter|slice)\(/.test(applyTpl) || applyTpl.include
 }
 ok('应用段不做字段裁剪（逐字原样往返）');
 
+// 导入后必须自己把画布刷新出来：切走再切回编程农场（编辑器只在挂载时 loadCircuit 装载电路）
+if (!applyTpl.includes('logicFarmHost')) die('应用段没有检查编辑器画布（logicFarmHost）');
+if (!applyTpl.includes('.layer-btn')) die('应用段没有切换场景来重新装载电路（.layer-btn）');
+if (!applyTpl.includes('location.reload')) die('应用段缺少「自动刷新失败时刷新整页」的兜底');
+ok('应用段会自己刷新画布（切场景重挂 + 整页刷新兜底）');
+
 const exportCircuit = exportSnip.match(/const circuit = JSON\.parse\(JSON\.stringify\(\{([\s\S]*?)\}\)\);/);
 if (!exportCircuit) die('导出段找不到电路提取语句');
 for (const field of ['nodes', 'wires', 'panX', 'panY', 'zoom']) {
@@ -170,7 +176,10 @@ if (opt.useCdp) {
     window.__lfdry = { captured: null, actions: [] };
     window.__lforigFetch = window.fetch;
     window.__lforigConfirm = window.confirm;
-    window.confirm = () => true;
+    // 只放行第 1 次 confirm（导入确认）；应用段末尾「刷新整页？」的 confirm 必须被拒，
+    // 否则干跑会把玩家的游戏页面刷新掉
+    let __lfConfirms = 0;
+    window.confirm = () => (++__lfConfirms === 1);
     window.fetch = (url, opts) => {
       if (String(url).indexOf('/api/game/action') >= 0 && opts && typeof opts.body === 'string') {
         const body = JSON.parse(opts.body);

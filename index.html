@@ -2408,7 +2408,8 @@
                 <textarea class="lf-code" id="lfApplyText" readonly spellcheck="false"></textarea>
                 <div class="lf-foot">
                     生成的 JS 会先 <b>确认一次</b>（弹窗问你是否替换当前电路），再把电路存到服务器；
-                    关卡不同或电路正在运行时只给提示、不拦截。<b>导入后画布不会自己刷新</b> —— 切走再切回「编程农场」（或刷新页面）即可看到新电路。
+                    关卡不同或电路正在运行时只给提示、不拦截。保存成功后脚本会<b>自己把编辑器画布刷新</b>成新电路：
+                    先切到工厂再切回「编程农场」，让编辑器重新装载（秒级，不用整页刷新）；只有这一步失败时，才会问你要不要刷新整个页面。
                 </div>
             </div>
         </div>
@@ -6451,11 +6452,41 @@
     panY: circuit.panY,
     zoom: circuit.zoom
   });
-  if (res && res.ok) {
-    console.log('✅ 电路已保存到服务器');
-    console.log('ℹ️ 如果「编程农场」页面正开着，画布不会自己刷新：切走再切回来（或刷新页面）就能看到新电路');
-  } else {
+  if (!res || !res.ok) {
     console.error('❌ 导入失败：' + ((res && (res.message || res.error)) || '未知错误'));
+    console.log(res);
+    return res;
+  }
+  console.log('✅ 电路已保存到服务器');
+
+  // 4) 让编辑器画布立刻显示新电路：切走再切回「编程农场」会触发编辑器重新装载
+  //    （游戏只在编辑器挂载时用 loadCircuit 装载电路，普通状态刷新不会覆盖画布）
+  const refreshCanvas = async () => {
+    const host = document.getElementById('logicFarmHost');
+    if (!host) return 'no-editor';
+    const sig = (list) => list.map((n) => String(n.id) + ':' + (n.x | 0) + ':' + (n.y | 0)).sort().join('|');
+    const domSig = () => [...host.querySelectorAll('.node')]
+      .map((el) => el.dataset.id + ':' + (parseInt(el.style.left, 10) | 0) + ':' + (parseInt(el.style.top, 10) | 0))
+      .sort().join('|');
+    const want = sig(circuit.nodes);
+    if (domSig() === want) return 'already';
+    const btns = [...document.querySelectorAll('.layer-btn')];
+    const lfBtn = btns.find((b) => b.textContent.includes('编程农场'));
+    const otherBtn = btns.find((b) => b.textContent.includes('工厂')) || btns.find((b) => b.textContent.includes('农村'));
+    if (!lfBtn || !otherBtn) return 'no-buttons';
+    otherBtn.click();
+    await new Promise((r) => setTimeout(r, 1000));
+    lfBtn.click();
+    await new Promise((r) => setTimeout(r, 1800));
+    return domSig() === want ? 'ok' : 'mismatch';
+  };
+  const refreshed = await refreshCanvas();
+  if (refreshed === 'ok') console.log('✅ 编辑器画布已自动刷新为导入的电路');
+  else if (refreshed === 'already') console.log('ℹ️ 画布上已经是这份电路，无需刷新');
+  else if (refreshed === 'no-editor') console.log('ℹ️ 你还没打开过「编程农场」：进入时会自动装载这份电路');
+  else {
+    console.warn('⚠️ 画布没能自动刷新（' + refreshed + '）：切走再切回「编程农场」，或刷新页面');
+    if (confirm('画布没能自动刷新，现在刷新整个页面？')) { location.reload(); return res; }
   }
   console.log(res);
   return res;
