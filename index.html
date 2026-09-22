@@ -1971,6 +1971,85 @@
             font-size: 12px;
         }
 
+        /* ===== 页签八：编程农场分享 ===== */
+        .lf-section {
+            border: 1px solid var(--line-strong);
+            border-radius: var(--radius);
+            background: var(--paper-raised);
+            padding: 14px 16px 16px;
+            margin-bottom: 16px;
+        }
+
+        .lf-section-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .lf-step {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 13px;
+            line-height: 24px;
+            text-align: center;
+        }
+
+        .lf-section-title {
+            flex: 1;
+            min-width: 200px;
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .lf-section-title em {
+            display: block;
+            margin-top: 2px;
+            font-style: normal;
+            font-family: 'Noto Sans SC', sans-serif;
+            font-weight: 400;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--ink-faint);
+        }
+
+        .lf-copy { padding: 5px 12px; font-size: 12px; }
+
+        .lf-code, .lf-input {
+            display: block;
+            width: 100%;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Courier New', monospace;
+            font-size: 11.5px;
+            line-height: 1.55;
+            color: var(--ink);
+            background: #f7f5f0;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            resize: vertical;
+        }
+
+        .lf-code { height: 300px; white-space: pre; overflow: auto; }
+        .lf-input { height: 110px; margin-bottom: 10px; white-space: pre-wrap; word-break: break-all; }
+        .lf-code:focus, .lf-input:focus { outline: none; border-color: var(--accent-line); }
+
+        .lf-input.empty { border-style: dashed; }
+
+        .lf-foot {
+            margin-top: 10px;
+            font-size: 12px;
+            line-height: 1.7;
+            color: var(--ink-soft);
+        }
+
+        .lf-foot b { color: var(--amber); }
+
         @media (max-width: 640px) {
             body { padding: 28px 14px 60px; }
             h1 { font-size: 21px; }
@@ -1983,7 +2062,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>开拓生存 · 材料计算器<span class="sub">材料合成 · 挂机时长 · 属性面板 · 开拓农村 · 开拓工厂</span></h1>
+            <h1>开拓生存 · 材料计算器<span class="sub">材料合成 · 挂机时长 · 属性面板 · 开拓农村 · 开拓工厂 · 编程农场分享</span></h1>
             <span class="data-status" id="dataStatusWrap">
                 <span id="dataStatus">正在从 kt.ikui.vip 拉取数据…</span>
                 <button class="refresh-btn" id="refreshBtn" type="button">刷新数据</button>
@@ -1998,6 +2077,7 @@
             <button class="tab-btn" data-tab="profit" type="button">刷怪收益排行</button>
             <button class="tab-btn" data-tab="village" type="button">开拓农村</button>
             <button class="tab-btn" data-tab="factory" type="button">开拓工厂</button>
+            <button class="tab-btn" data-tab="logicfarm" type="button">编程农场分享</button>
         </div>
 
         <!-- ==================== 页签一：材料合成计算 ==================== -->
@@ -2277,6 +2357,60 @@
             </div>
 
             <div id="factoryRoutes"></div>
+        </div>
+
+        <!-- ==================== 页签八：编程农场分享 ==================== -->
+        <div class="tab-page" id="tab-logicfarm">
+            <div class="controls">
+                <div class="control-row">
+                    <span class="hint-inline">
+                        「编程农场」里的电路（节点 + 连线 + 画布视角）可以互相分享：
+                        <b>导出方</b>在游戏页面按 F12 打开控制台，整段粘贴 ① 的 JS 执行 → 得到一份电路 JSON（自动复制到剪贴板）；
+                        <b>使用方</b>把 JSON 粘进 ② 的输入框 → 复制生成好的 JS → 在自己的游戏页面控制台执行即可导入。
+                    </span>
+                </div>
+                <div class="control-row">
+                    <span class="hint-inline">
+                        两段 JS 都只用页面自己的登录态：读一次 <code>/api/game/state</code>、提交游戏自带的
+                        <code>logicFarmSave</code>（就是游戏编辑器自动保存电路用的那条接口，载荷也是
+                        <code>{ nodes, wires, panX, panY, zoom }</code>，逐字原样，不做任何字段裁剪）。
+                        导入会<b>替换当前电路画布</b>（不影响仓库、种子与进度）；不认识来源的 JS 不要往控制台里粘。
+                    </span>
+                </div>
+            </div>
+
+            <div class="lf-section">
+                <div class="lf-section-head">
+                    <span class="lf-step">①</span>
+                    <div class="lf-section-title">提取当前电路
+                        <em>在游戏页面 kt.ikui.vip 的 F12 控制台整段粘贴执行；只读，不会改动电路</em>
+                    </div>
+                    <button class="btn ghost lf-copy" type="button" onclick="copyLogicFarmSnip('lfExportText', this)">复制这段 JS</button>
+                </div>
+                <textarea class="lf-code" id="lfExportText" readonly spellcheck="false"></textarea>
+                <div class="lf-foot">
+                    执行后会打印 <b>节点数 / 连线数 / 关卡</b>，并把电路 JSON 复制到剪贴板（浏览器拦截剪贴板时，在结果里右键
+                    <code>plan</code> → Copy object 也一样）。JSON 里的 <code>circuit</code> 就是游戏编辑器的保存载荷，
+                    所以别人拿到的电路和你画布上的逐字一致。
+                </div>
+            </div>
+
+            <div class="lf-section">
+                <div class="lf-section-head">
+                    <span class="lf-step">②</span>
+                    <div class="lf-section-title">应用别人的电路
+                        <em>把 ① 得到的 JSON 粘到下面，再复制生成好的 JS 去自己游戏的控制台执行</em>
+                    </div>
+                    <button class="btn ghost lf-copy" type="button" onclick="copyLogicFarmSnip('lfApplyText', this)">复制这段 JS</button>
+                </div>
+                <textarea class="lf-input" id="lfPlanInput" spellcheck="false"
+                    placeholder="把导出方发来的电路 JSON 整段粘到这里"></textarea>
+                <textarea class="lf-code" id="lfApplyText" readonly spellcheck="false"></textarea>
+                <div class="lf-foot">
+                    生成的 JS 会先 <b>确认一次</b>（弹窗问你是否替换当前电路），再把电路存到服务器；
+                    关卡不同或电路正在运行时只给提示、不拦截。<b>导入后画布不会自己刷新</b> —— 切走再切回「编程农场」（或刷新页面）即可看到新电路。
+                </div>
+            </div>
         </div>
     </div>
 
@@ -6213,6 +6347,172 @@
             if (tab === 'ring') renderRingRoute();
             if (tab === 'village') renderVillage();
             if (tab === 'factory') renderFactory();
+            if (tab === 'logicfarm') initLogicFarmTab();
+        }
+
+        // ==================================================================
+        // 页签八：编程农场分享（电路导出 / 导入的控制台 JS）
+        //   游戏「编程农场」(logicFarm) 的电路 = nodes(节点) + wires(连线) + 画布视角；
+        //   游戏编辑器自动保存电路走 logicFarmSave{nodes,wires,panX,panY,zoom}（客户端 pN/mN），
+        //   游戏本身没有分享功能，这里就用同一份载荷做玩家之间的复制粘贴：
+        //     导出：GET /api/game/state → state.logicFarm → 原样取出 nodes / wires / pan / zoom
+        //     应用：POST /api/game/action { action:'logicFarmSave', params:{nodes,wires,panX,panY,zoom} }
+        //   与「车间蓝图」不同：这里**不做任何字段裁剪**，逐字原样往返，画布上是什么就分享什么。
+        //   ⚠ 这两段文案必须保持可执行：改完跑 scripts/check-logicfarm-snippets.mjs
+        //     （语法 / 接口白名单 / --cdp 端到端干跑：导出→应用→核对载荷逐字一致）。
+        // ==================================================================
+        const LF_EXPORT_SNIPPET = String.raw`/* ===== 开拓生存 · 提取编程农场电路（在游戏页面 kt.ikui.vip 的 F12 控制台整段粘贴执行） ===== */
+(async () => {
+  const TOKEN = sessionStorage.getItem('game_token') || '';
+  const data = await (await fetch('/api/game/state', { headers: { Authorization: 'Bearer ' + TOKEN } })).json();
+  const lf = data && data.state && data.state.logicFarm;
+  if (!lf) { console.error('❌ 没拿到编程农场数据：请确认已解锁「编程农场」，且当前页面仍是登录状态'); return; }
+
+  // 与游戏客户端 pN()/mN() 的保存载荷逐字一致：nodes + wires + 画布视角
+  const circuit = JSON.parse(JSON.stringify({
+    nodes: lf.nodes || [],
+    wires: lf.wires || [],
+    panX: lf.panX,
+    panY: lf.panY,
+    zoom: lf.zoom
+  }));
+  const plan = {
+    v: 1,
+    kind: 'kt-logic-farm-circuit',
+    from: (data.state && data.state.chatPlayerName) || '',
+    exportedAt: new Date().toISOString(),
+    stage: lf.stage,
+    cropId: lf.cropId,
+    cropName: lf.cropName,
+    counts: { nodes: circuit.nodes.length, wires: circuit.wires.length },
+    circuit: circuit
+  };
+  const json = JSON.stringify(plan);
+  console.log('✅ 编程农场电路已提取：节点 ' + circuit.nodes.length + ' 个 / 连线 ' + circuit.wires.length + ' 条（' + json.length + ' 字符）');
+  console.log(plan);
+  try {
+    await navigator.clipboard.writeText(json);
+    console.log('📋 已复制到剪贴板，直接发给别人即可');
+  } catch (err) {
+    console.log('⚠️ 浏览器拦截了剪贴板：请在结果里右键 plan → Copy object，或执行 copy(JSON.stringify(plan))');
+  }
+  return plan;
+})()
+`;
+
+        const LF_APPLY_TEMPLATE = String.raw`/* ===== 开拓生存 · 应用编程农场电路（在游戏页面 kt.ikui.vip 的 F12 控制台整段粘贴执行） ===== */
+(async () => {
+  const PLAN_TEXT = __PLAN__;
+  const TOKEN = sessionStorage.getItem('game_token') || '';
+  const CAPS = ['compactFactoryActionV1', 'statePatchV1'];
+  let seq = 0;
+  const act = async (action, params) => {
+    seq += 1;
+    const sid = crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : String(Date.now());
+    const resp = await fetch('/api/game/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + TOKEN },
+      body: JSON.stringify({ action: action, params: params, capabilities: CAPS, requestId: sid + ':' + seq.toString(36) })
+    });
+    return resp.json();
+  };
+
+  // 1) 方案 = 导出得到的 JSON（节点 + 连线 + 画布视角）
+  const text = String(PLAN_TEXT == null ? '' : PLAN_TEXT).trim();
+  if (!text || text === 'PASTE_HERE') { console.error('❌ 还没填入方案：把导出的 JSON 整段粘到 PLAN_TEXT 里再执行'); return; }
+  let plan = null;
+  try { plan = JSON.parse(text); } catch (e) { console.error('❌ 方案 JSON 解析失败：' + e.message); return; }
+  const circuit = plan && plan.circuit ? plan.circuit : plan;
+  if (!circuit || !Array.isArray(circuit.nodes) || !Array.isArray(circuit.wires)) {
+    console.error('❌ 这份 JSON 里找不到 circuit.nodes / circuit.wires');
+    return;
+  }
+
+  // 2) 看一眼当前进度，关卡不同只提醒不拦截（电路里的节点是否已解锁由服务器判定）
+  const st = await (await fetch('/api/game/state', { headers: { Authorization: 'Bearer ' + TOKEN } })).json();
+  const mine = st && st.state && st.state.logicFarm;
+  if (!mine) { console.error('❌ 没拿到编程农场数据：请确认已解锁「编程农场」'); return; }
+  if (plan && plan.stage != null && plan.stage !== mine.stage) {
+    console.warn('⚠️ 这份方案来自第 ' + plan.stage + ' 关，你当前在第 ' + mine.stage + ' 关：若方案用到你还没解锁的节点，导入后可能跑不起来');
+  }
+  if (mine.playing) console.warn('⚠️ 电路正在运行：导入后建议先「暂停」再继续，避免旧任务和新电路混在一起');
+  if (mine.catchUpSeconds > 0) console.warn('⚠️ 编程农场正在结算离线生产（剩余 ' + Math.ceil(mine.catchUpSeconds) + ' 秒）：游戏这时不允许改电路，服务器可能拒绝保存，等结算完再试');
+
+  if (!confirm('导入会用这份方案替换当前电路画布（节点 ' + circuit.nodes.length + ' 个 / 连线 ' + circuit.wires.length + ' 条），继续？')) {
+    console.log('已取消，电路未改动');
+    return;
+  }
+
+  // 3) 与游戏编辑器自动保存（saveCircuit → logicFarmSave）完全同一条链路
+  const res = await act('logicFarmSave', {
+    nodes: circuit.nodes,
+    wires: circuit.wires,
+    panX: circuit.panX,
+    panY: circuit.panY,
+    zoom: circuit.zoom
+  });
+  if (res && res.ok) {
+    console.log('✅ 电路已保存到服务器');
+    console.log('ℹ️ 如果「编程农场」页面正开着，画布不会自己刷新：切走再切回来（或刷新页面）就能看到新电路');
+  } else {
+    console.error('❌ 导入失败：' + ((res && (res.message || res.error)) || '未知错误'));
+  }
+  console.log(res);
+  return res;
+})()
+`;
+
+        let lfTabReady = false;
+
+        function initLogicFarmTab() {
+            if (lfTabReady) return;
+            lfTabReady = true;
+            const exp = document.getElementById('lfExportText');
+            if (exp) exp.value = LF_EXPORT_SNIPPET;
+            const input = document.getElementById('lfPlanInput');
+            if (input) input.addEventListener('input', refreshLogicFarmApply);
+            refreshLogicFarmApply();
+        }
+
+        // 用输入框里的电路生成「应用」JS：整段 JSON 以 JS 字符串字面量嵌入，避免模板串被 ${} 干扰
+        function refreshLogicFarmApply() {
+            const out = document.getElementById('lfApplyText');
+            const input = document.getElementById('lfPlanInput');
+            if (!out) return;
+            const text = ((input && input.value) || '').trim();
+            if (input) input.classList.toggle('empty', !text);
+            const embedded = JSON.stringify(text || 'PASTE_HERE');
+            out.value = LF_APPLY_TEMPLATE.replace('__PLAN__', () => embedded);
+        }
+
+        function copyLogicFarmSnip(id, btn) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const text = el.value || '';
+            const flash = (ok) => {
+                const old = btn.textContent;
+                btn.textContent = ok ? '已复制 ✓' : '复制失败，请手动全选';
+                setTimeout(() => { btn.textContent = old; }, 1600);
+            };
+            // 剪贴板 API 需要页面聚焦/授权，控制台场景下经常被拒；退回到「选中 + execCommand」
+            const fallback = () => {
+                let done = false;
+                try {
+                    const ro = el.hasAttribute('readonly');
+                    if (ro) el.removeAttribute('readonly');
+                    el.focus();
+                    el.select();
+                    done = document.execCommand('copy');
+                    if (ro) el.setAttribute('readonly', '');
+                    window.getSelection().removeAllRanges();
+                } catch (e) { done = false; }
+                flash(done);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => flash(true), fallback);
+            } else {
+                fallback();
+            }
         }
 
         // ------------------------------------------------------------------
